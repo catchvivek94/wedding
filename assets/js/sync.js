@@ -59,7 +59,17 @@ const Sync = (() => {
   }
 
   /* ------------------------------------------------------------------ auth */
-  async function signIn(email) {
+  /* Password rather than magic link: Supabase's built-in mailer is capped at a
+     couple of emails an hour, which makes link-based sign-in unusable. With two
+     known users whose passwords are set in the dashboard, email adds nothing. */
+  async function signIn(email, password) {
+    if (!sb) throw new Error("Cloud sync is not configured");
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }
+
+  /* Kept as a fallback if you ever wire up real SMTP. */
+  async function signInWithLink(email) {
     if (!sb) throw new Error("Cloud sync is not configured");
     const { error } = await sb.auth.signInWithOtp({
       email, options: { emailRedirectTo: location.href }
@@ -142,7 +152,7 @@ const Sync = (() => {
   window.addEventListener("offline", () => setStatus("offline"));
 
   return {
-    init, signIn, signOut, pull, push, schedulePush,
+    init, signIn, signInWithLink, signOut, pull, push, schedulePush,
     onChange: f => { listeners.push(f); f(status, lastError); },
     get status() { return status; },
     get user() { return user; },
@@ -192,14 +202,19 @@ function openSignIn() {
   bg.innerHTML = `<form class="modal" style="max-width:440px">
     <h2>Sync across devices</h2>
     <p class="small muted" style="margin:0 0 16px">
-      Enter your email and we'll send a sign-in link — no password to remember.
-      Once you're signed in, everything you've saved here syncs to your other
-      devices, and Vidhi can sign in on hers too.</p>
+      Sign in and everything saved in this browser syncs to your other devices —
+      and Vidhi sees the same thing on hers.</p>
     <div class="field"><label>Email</label>
-      <input type="email" name="email" required placeholder="you@example.com" autocomplete="email"></div>
+      <input type="email" name="email" required placeholder="you@example.com"
+             autocomplete="username" value="${esc(localStorage.getItem("sync.email") || "")}"></div>
+    <div class="field"><label>Password</label>
+      <input type="password" name="password" required autocomplete="current-password"></div>
+    <p class="small muted" style="margin:-4px 0 0">
+      Set in Supabase → Authentication → Users. Save it in your password manager,
+      not here.</p>
     <div class="modal-foot">
       <button type="button" class="btn" data-cancel>Cancel</button>
-      <button type="submit" class="btn primary">Send link</button>
+      <button type="submit" class="btn primary">Sign in</button>
     </div>
   </form>`;
 
@@ -209,19 +224,21 @@ function openSignIn() {
   bg.querySelector("form").onsubmit = async e => {
     e.preventDefault();
     const btn = e.target.querySelector("[type=submit]");
-    btn.disabled = true; btn.textContent = "Sending…";
+    const f = new FormData(e.target);
+    btn.disabled = true; btn.textContent = "Signing in…";
     try {
-      await Sync.signIn(new FormData(e.target).get("email"));
-      bg.querySelector(".modal").innerHTML =
-        `<h2>Check your email</h2>
-         <p class="small muted">We've sent you a sign-in link. Open it on this device
-         and you'll be synced.</p>
-         <div class="modal-foot"><button type="button" class="btn primary" data-ok>Done</button></div>`;
-      bg.querySelector("[data-ok]").onclick = close;
+      await Sync.signIn(f.get("email"), f.get("password"));
+      localStorage.setItem("sync.email", f.get("email"));  // convenience only
+      close();
+      toast("Signed in — syncing your data");
     } catch (err) {
-      btn.disabled = false; btn.textContent = "Send link";
-      alert("Could not send the link:\n\n" + err.message);
+      btn.disabled = false; btn.textContent = "Sign in";
+      const m = /invalid login/i.test(err.message)
+        ? "That email and password combination wasn't recognised.\n\nCheck the user exists under Authentication → Users in Supabase, and that you set a password for them."
+        : err.message;
+      alert("Could not sign in:\n\n" + m);
     }
   };
   document.body.appendChild(bg);
+  bg.querySelector('input[name="' + (localStorage.getItem("sync.email") ? "password" : "email") + '"]').focus();
 }

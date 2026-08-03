@@ -27,13 +27,20 @@ Takes about five minutes.
 
 You should see "Success. No rows returned."
 
-## 3. Lock sign-in to just the two of you
+## 3. Create your two accounts, and lock out everyone else
 
-This stops strangers creating accounts on your database.
+Sign-in uses a **password**, not an email link. Supabase's built-in mailer is
+capped at about two emails an hour — fine for testing, useless in practice —
+so with only two known users, email is skipped entirely.
 
 1. **Authentication → Providers → Email** — turn **off** "Enable email signups", Save
-2. **Authentication → Users → Add user** — add your email, and Vidhi's
-   - tick "Auto Confirm User" so they don't need to verify
+   *(stops strangers creating accounts on your database)*
+2. **Authentication → Users → Add user → Create new user**
+   - your email, and a password you generate in your password manager
+   - tick **Auto Confirm User**
+3. Repeat for Vidhi's email
+
+Store those passwords in your password manager. Not in this repo, not in a chat.
 
 ## 4. Point the site at it
 
@@ -57,8 +64,8 @@ cd ~/Projects/wedding
 
 ## 5. Sign in
 
-Open the site. Top right of the nav shows **"Sign in to sync"** — click it,
-enter your email, and open the link that arrives. Everything already in your
+Open the site. Top right of the nav shows **"Sign in to sync"** — click it and
+enter the email and password you set in step 3. Everything already in your
 browser gets pushed up on first sign-in.
 
 Then do the same on your phone and on Vidhi's devices.
@@ -100,6 +107,10 @@ project and should never be.
 
 ## Two caveats
 
+- **Sign-in is by password, not email link.** If you'd rather have magic links,
+  you'd need to connect a real SMTP provider (Resend and Brevo both have free
+  tiers) under Project Settings → Auth → SMTP. `Sync.signInWithLink()` is already
+  in the code for that day.
 - **Free projects pause after 7 days of no activity.** One click in the Supabase
   dashboard wakes it. If you go quiet for a fortnight, expect to do that.
 - **Simultaneous edits to the same section** are last-write-wins. Different
