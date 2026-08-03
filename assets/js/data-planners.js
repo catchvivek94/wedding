@@ -507,6 +507,45 @@ const PLANNERS = [
     reels: ["C6ZDv1sN1XH"],
     via: "Credited by @bluswanweddings (Radisson Alibaug)",
     note: "⚠ Profile is dead. Search the name manually or skip."
+  },
+  {
+    handle: "unknown-apoetryofearth-post",
+    name: "Not identified yet",
+    role: "Planner",
+    city: "",
+    tier: "—",
+    followers: "—",
+    bio: "Couple post by @apoetryofearth (25 Feb 2025) with no vendors credited. DM them to ask who planned it, then fill in the details below.",
+    contact: [],
+    reels: ["DHClDySppNa"],
+    via: "Your saved link — no vendor credited in the caption",
+    note: "⚠ Needs research."
+  },
+  {
+    handle: "unknown-theartofweddingplanning",
+    name: "The Art of Wedding Planning (removed)",
+    role: "Planner",
+    city: "",
+    tier: "—",
+    followers: "—",
+    bio: "The reel redirected to @theartofweddingplanning, whose profile no longer exists. Search the name manually or drop it.",
+    contact: [],
+    reels: [],
+    via: "Your saved link — profile removed from Instagram",
+    note: "⚠ Needs research."
+  },
+  {
+    handle: "unknown-age-restricted-post",
+    name: "Not identified yet",
+    role: "Planner",
+    city: "",
+    tier: "—",
+    followers: "—",
+    bio: "Saved post on an age-restricted or private account, so it could not be read. Open it while logged in and fill in the details below.",
+    contact: [],
+    reels: [],
+    via: "Your saved link — age-restricted / private",
+    note: "⚠ Needs research."
   }
 ];
 

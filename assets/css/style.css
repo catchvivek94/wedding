@@ -258,6 +258,19 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
 .pcard .contact{font-size:12.5px;display:flex;flex-direction:column;gap:3px;
   border-top:1px dashed var(--line);padding-top:9px}
 .pcard select{font-size:12.5px;padding:6px 9px}
+.pcard details.edit{border-top:1px dashed var(--line);padding-top:9px}
+.pcard details.edit summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.05em;list-style:none;user-select:none}
+.pcard details.edit summary::-webkit-details-marker{display:none}
+.pcard details.edit summary:before{content:"+ ";color:var(--gold)}
+.pcard details.edit[open] summary:before{content:"− "}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.edit-grid .ef{display:flex;flex-direction:column;gap:3px}
+.edit-grid .ef:first-child{grid-column:1/-1}
+.edit-grid .ef span{font-size:10.5px;font-weight:700;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.05em}
+.edit-grid input{font-size:12.5px;padding:6px 9px}
+@media(max-width:560px){.edit-grid{grid-template-columns:1fr}}
 
 /* ---- Modal ---- */
 .modal-bg{position:fixed;inset:0;background:rgba(43,33,24,.42);backdrop-filter:blur(2px);

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Decor, Games & Ideas · Vivek &amp; Vidhi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="page-head"><div>
+    <h1>🎪 Decor, Games & Ideas</h1>
+    <p class="sub">The inspiration pile — decor, guest experiences, favours and games. Hand the ones you love to your planner rather than sourcing them yourself. <b>26 saved posts</b> from the <i>Decor games inspo</i> tab of your sheet.</p>
+  </div></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search name, notes, phone…">
+    <select id="status"></select>
+    <label style="display:flex;align-items:center;gap:6px;text-transform:none;font-size:13.5px;font-weight:500;margin:0">
+      <input type="checkbox" id="onlyActive" style="width:auto"> In play only
+    </label>
+    <span class="spacer"></span>
+    <button class="btn" id="view">☰ Compact view</button>
+    <button class="btn" id="csv">Export CSV</button>
+  </div>
+
+  <div class="pgrid" id="cards"></div>
+
+  <p class="small muted" style="margin-top:16px">Open <b>Your details</b> on any card to record the
+  vendor's name and contact info after you speak to them. Everything saves in this browser — back it
+  up from the dashboard.</p>
+</main>
+<footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
+
+<script src="assets/js/app.js"></script>
+<script src="assets/js/photos.js"></script>
+<script src="assets/js/data-categories.js"></script>
+<script src="assets/js/data-scraped.js"></script>
+<script src="assets/js/category.js"></script>
+<script>
+boot("decor.html");
+document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("decor.html"));
+renderCategory("decor");
+</script>
+</body>
+</html>

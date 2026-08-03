@@ -95,13 +95,21 @@ function toast(msg) {
 /* ------------------------------------------------------------------- Nav */
 const NAV = [
   ["index.html", "Dashboard"],
-  ["planners.html", "Planners"],
   ["checklist.html", "Checklist"],
   ["venues.html", "Venue"],
+  ["planners.html", "Planners"],
+  ["photographers.html", "Photo & Film"],
+  ["mua.html", "MUA & Hair"],
+  ["choreographers.html", "Choreo"],
+  ["music.html", "Music & DJ"],
+  ["decor.html", "Decor & Ideas"],
+  ["mandi.html", "Mandi"],
+  ["clothes.html", "Clothes"],
+  ["jewellery.html", "Jewellery"],
   ["attire.html", "Attire"],
   ["invites.html", "Invites"],
-  ["guests.html", "Guests & RSVP"],
-  ["catering.html", "Food & Drink"],
+  ["guests.html", "Guests"],
+  ["catering.html", "Food"],
   ["budget.html", "Budget"]
 ];
 

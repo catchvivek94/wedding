@@ -63,6 +63,8 @@
 
 <script src="assets/js/app.js"></script>
 <script src="assets/js/photos.js"></script>
+<script src="assets/js/data-planners.js"></script>
+<script src="assets/js/data-categories.js"></script>
 <script>
 boot("index.html");
 
@@ -93,8 +95,8 @@ function stats() {
     <div class="stat"><div class="k">Checklist</div><div class="v">${pct}%</div>
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="small muted" style="margin-top:5px">${done} of ${cl.length} done</div></div>
-    <div class="stat"><div class="k">Planners shortlisted</div><div class="v">${short}</div>
-      <div class="small muted" style="margin-top:5px">${booked} booked · 39 in directory</div></div>
+    <div class="stat"><div class="k">Vendors in play</div><div class="v">${short}</div>
+      <div class="small muted" style="margin-top:5px">${booked} booked · ${PLANNERS.length + Object.values(CATEGORIES).reduce((a,c)=>a+c.links.length,0)} in directory</div></div>
     <div class="stat"><div class="k">Budget estimated</div><div class="v sm">${inr(est)}</div>
       <div class="small muted" style="margin-top:5px">${inr(act)} committed so far</div></div>
     <div class="stat"><div class="k">Guests confirmed</div><div class="v">${yes}</div>
@@ -103,19 +105,30 @@ function stats() {
 
 /* tiles */
 const TILES = [
-  ["planners.html","💐","Planners","39 vendors scraped from your saved reels, with contact info and your own status + notes.","planners"],
-  ["checklist.html","✅","Checklist","30 pre-loaded tasks dated back from the wedding. The spine of the whole thing.","checklist"],
-  ["venues.html","🏛","Venue","Ikshana Resort &amp; Spa, Khandala — photos, rooms, and what to ask them.","venues"],
-  ["attire.html","👗","Attire","Outfits per function, per person, with fitting dates.","attire"],
+  ["checklist.html","✅","Checklist","Every task, dated back from the wedding. The spine of all this.","checklist"],
+  ["venues.html","🏛","Venue","Ikshana Resort &amp; Spa, Khandala — photos and what to ask them.","venues"],
+  ["planners.html","💐","Planners","42 saved posts, 42 vendors identified, with contact info and your notes.","cat:planners"],
+  ["photographers.html","📷","Photo &amp; Film","Photographers and videographers.","cat:photographers"],
+  ["mua.html","💄","MUA &amp; Hair","Makeup artists and hair stylists.","cat:mua"],
+  ["choreographers.html","💃","Choreographers","Sangeet choreography.","cat:choreographers"],
+  ["music.html","🎤","Music, DJ &amp; Anchors","Live singers, DJs and anchors.","cat:music"],
+  ["decor.html","🎪","Decor &amp; Ideas","Decor, favours, games and guest experiences.","cat:decor"],
+  ["mandi.html","🌿","Mandi","Mandi and mehendi setups.","cat:mandi"],
+  ["clothes.html","👗","Clothes","Outfit and couture inspiration.","cat:clothes"],
+  ["jewellery.html","💍","Jewellery","Jewellery and pairings.","cat:jewellery"],
+  ["attire.html","🧵","Attire","Your actual outfit commissions, per function.","attire"],
   ["invites.html","✉️","Invites","Save-the-dates through welcome cards.","invites"],
-  ["guests.html","🎟","Guests & RSVP","The guest list, RSVPs, dietary needs and table plan.","guests"],
-  ["catering.html","🍽","Food & Drink","Menu per function, per-plate costs, tastings.","catering"],
+  ["guests.html","🎟","Guests &amp; RSVP","Guest list, RSVPs, dietary needs, tables.","guests"],
+  ["catering.html","🍽","Food &amp; Drink","Menus per function and per-plate costs.","catering"],
   ["budget.html","💰","Budget","Estimated vs actual, by category.","budget"]
 ];
-$("#tiles").innerHTML = TILES.map(([h,i,t,d,key]) => {
-  const n = key === "planners" ? 39 : Store.list(key).length;
-  return `<a class="tile" href="${h}"><div class="ico">${i}</div>
-    <h3>${t}</h3><p>${d}</p><div class="meta">${n} item${n===1?"":"s"} →</div></a>`;
+$("#tiles").innerHTML = TILES.map(([h,ic,t,d,key]) => {
+  let n, unit = "item";
+  if (key === "cat:planners") { n = PLANNERS.length; unit = "vendor"; }
+  else if (key.startsWith("cat:")) { n = CATEGORIES[key.slice(4)].links.length; unit = "saved post"; }
+  else n = Store.list(key).length;
+  return `<a class="tile" href="${h}"><div class="ico">${ic}</div>
+    <h3>${t}</h3><p>${d}</p><div class="meta">${n} ${unit}${n===1?"":"s"} →</div></a>`;
 }).join("");
 
 /* next up */
