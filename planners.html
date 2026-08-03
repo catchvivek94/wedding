@@ -6,7 +6,7 @@
 <title>Wedding Planners  · Vivek &amp; Vidhi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=4e986b11">
 </head>
 <body>
 <main class="wrap wide">
@@ -64,9 +64,9 @@
 
 <footer>Vivek &amp; Vidhi · vendor list scraped 2 Aug 2026 · your notes save automatically in this browser</footer>
 
-<script src="assets/js/data-planners.js"></script>
-<script src="assets/js/app.js"></script>
-<script src="assets/js/photos.js"></script>
+<script src="assets/js/data-planners.js?v=4e986b11"></script>
+<script src="assets/js/app.js?v=4e986b11"></script>
+<script src="assets/js/photos.js?v=4e986b11"></script>
 <script>
 boot("planners.html");
 document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("planners.html"));
@@ -125,7 +125,7 @@ function render() {
     const saved = Store.vendor(p.handle);
     const cur = saved.status || "Not reviewed";
     const isShort = ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(cur);
-    return `<div class="pcard${isShort ? " is-short" : ""}">
+    return `<div class="pcard clickable${isShort ? " is-short" : ""}" data-open="${esc(p.handle)}" role="button" tabindex="0">
       ${(showReels && p.reels.length) ? `<div class="embed">
           <div class="ph">Loading reel…<br><a href="https://www.instagram.com/reel/${esc(p.reels[0])}/" target="_blank" rel="noopener">open on Instagram ↗</a></div>
           <iframe src="https://www.instagram.com/reel/${esc(p.reels[0])}/embed/"
@@ -152,10 +152,10 @@ function render() {
             `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")}</div>`
         : (saved.phone ? `<div class="contact"><span><b>Phone:</b> <a href="tel:${esc(saved.phone)}">${esc(saved.phone)}</a></span></div>` : "")}
       <div class="card-foot">
-        <select data-h="${esc(p.handle)}" data-f="status">
+        <select data-h="${esc(p.handle)}" data-f="status" data-stop>
           ${STATUSES.map(s => `<option${s === cur ? " selected" : ""}>${s}</option>`).join("")}
         </select>
-        <button class="btn sm" data-info="${esc(p.handle)}">Info</button>
+        <span class="card-open">Open ↗</span>
       </div>
     </div>`;
   }).join("") || `<div class="empty">No vendors match those filters.</div>`;
@@ -217,12 +217,12 @@ $("#csv").onclick = () => {
   a.href = URL.createObjectURL(blob); a.download = "wedding-planners.csv"; a.click();
 };
 
-$$("[data-info]", cards).forEach(b => b.onclick = () => {
+const openPlanner = handle => {
   const custom = Store.list("custom:planners").map(c => ({
     handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
     tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
     via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
-  const p = custom.concat(PLANNERS).find(x => x.handle === b.dataset.info);
+  const p = custom.concat(PLANNERS).find(x => x.handle === handle);
   if (!p) return;
   const saved = Store.vendor(p.handle);
   openDetail({
@@ -248,9 +248,21 @@ $$("[data-info]", cards).forEach(b => b.onclick = () => {
     statuses: STATUSES,
     onChange: () => { render(); stats(); }
   });
+};
+
+$$("[data-stop]", cards).forEach(el => el.addEventListener("click", e => e.stopPropagation()));
+$$("[data-open]", cards).forEach(el => {
+  el.addEventListener("click", e => {
+    if (e.target.closest("a,select,button,input,textarea,details")) return;
+    openPlanner(el.dataset.open);
+  });
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPlanner(el.dataset.open); }
+  });
 });
 
-$$("[data-del]", cards).forEach(b => b.onclick = () => {
+$$("[data-del]", cards).forEach(b => b.onclick = e => {
+  e.stopPropagation();
   if (confirm("Delete this card? Your notes on it go too.")) {
     Store.remove("custom:planners", b.dataset.del); render(); stats(); toast("Deleted");
   }

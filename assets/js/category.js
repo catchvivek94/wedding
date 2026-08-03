@@ -63,7 +63,8 @@ function renderCategory(catKey, opts = {}) {
     const title = mine.name || man?.name || info.name || (info.handle ? "@" + info.handle : "Not identified yet");
     const embed = man ? null : igEmbed(l);
 
-    return `<div class="pcard${active ? " is-short" : ""}${man ? " is-manual" : ""}">
+    return `<div class="pcard clickable${active ? " is-short" : ""}${man ? " is-manual" : ""}"
+                 data-open="${esc(l.c)}" role="button" tabindex="0">
       ${(showReels && embed) ? `<div class="embed">
         <div class="ph">Loading…<br><a href="${igUrl(l)}" target="_blank" rel="noopener">open on Instagram ↗</a></div>
         <iframe src="${embed}" loading="lazy" scrolling="no" title="Saved post"></iframe>
@@ -105,10 +106,10 @@ function renderCategory(catKey, opts = {}) {
       </div>` : ""}
 
       <div class="card-foot">
-        <select data-k="${key}" data-f="status">
+        <select data-k="${key}" data-f="status" data-stop>
           ${VENDOR_STATUSES.map(s => `<option${s === cur ? " selected" : ""}>${s}</option>`).join("")}
         </select>
-        <button class="btn sm" data-info="${esc(l.c)}">Info</button>
+        <span class="card-open">Open ↗</span>
       </div>
     </div>`;
   }
@@ -169,8 +170,11 @@ function renderCategory(catKey, opts = {}) {
         if (el.dataset.f === "status") render();
       });
     });
-    $$("[data-info]", mount).forEach(b => b.onclick = () => {
-      const l = allLinks().find(x => String(x.c) === b.dataset.info);
+    /* Controls inside a card must not open the modal. */
+    $$("[data-stop]", mount).forEach(el => el.addEventListener("click", e => e.stopPropagation()));
+
+    const openFor = code => {
+      const l = allLinks().find(x => String(x.c) === code);
       if (!l) return;
       const man = l._manual;
       const info = man ? {} : (scraped[l.c] || {});
@@ -198,9 +202,20 @@ function renderCategory(catKey, opts = {}) {
         statuses: VENDOR_STATUSES,
         onChange: render
       });
+    };
+
+    $$("[data-open]", mount).forEach(cardEl => {
+      cardEl.addEventListener("click", e => {
+        if (e.target.closest("a,select,button,input,textarea,details")) return;
+        openFor(cardEl.dataset.open);
+      });
+      cardEl.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFor(cardEl.dataset.open); }
+      });
     });
 
-    $$("[data-del]", mount).forEach(b => b.onclick = () => {
+    $$("[data-del]", mount).forEach(b => b.onclick = e => {
+      e.stopPropagation();
       if (confirm("Delete this card? Your notes on it go too.")) {
         Store.remove("custom:" + catKey, b.dataset.del);
         render(); toast("Deleted");

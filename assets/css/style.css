@@ -388,3 +388,11 @@ hr{border:none;border-top:1px solid var(--line);margin:26px 0}
 footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 20px 40px}
 
 .pcard.is-manual{border-left:3px solid var(--gold)}
+
+/* Whole card is the click target — the Info button was too easy to miss. */
+.pcard.clickable{cursor:pointer;transition:.15s}
+.pcard.clickable:hover{border-color:var(--gold);box-shadow:0 6px 22px rgba(43,33,24,.12);
+  transform:translateY(-2px)}
+.pcard.clickable:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.card-open{font-size:12px;font-weight:600;color:var(--gold);white-space:nowrap;padding:0 4px}
+.pcard.clickable:hover .card-open{color:var(--maroon)}
