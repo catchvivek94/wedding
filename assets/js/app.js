@@ -486,10 +486,19 @@ function seedOnce() {
     { id: "b12", item: "Contingency buffer (10%)", category: "Buffer", estimated: 640000, actual: "", status: "Not paid", notes: "Do not skip this line" }
   ];
 
+  /* Venue is booked (Ikshana, Khandala) — these are the operational
+     answers still outstanding, not a shortlist. */
   d.venues = [
-    { id: "v1", name: "Zorba (Delhi farmhouse)", city: "New Delhi", type: "Farmhouse", capacity: "", cost: "",
-      status: "Researching", contact: "", link: "https://www.instagram.com/zorbaofficial/",
-      notes: "Came from your saved reels — @zorbaofficial" }
+    { id: "v1", name: "Confirm noise curfew and hard stop for the sangeet", type: "Function space", status: "To do", notes: "Khandala is a hill station — assume there is one until told otherwise" },
+    { id: "v2", name: "Allocate spaces: mandap, sangeet, reception + seated capacity of each", type: "Function space", status: "To do", notes: "" },
+    { id: "v3", name: "Agree room block size and the release date for unsold rooms", type: "Room block", status: "To do", notes: "" },
+    { id: "v4", name: "Confirm decor load-in the day before, and any preferred-vendor list", type: "Logistics", status: "To do", notes: "" },
+    { id: "v5", name: "Settle catering: in-house vs outside, corkage and liquor licence", type: "Catering", status: "To do", notes: "" },
+    { id: "v6", name: "Get the wet-weather plan in writing for every outdoor function", type: "Logistics", status: "To do", notes: "Who makes the call, and by when on the day" },
+    { id: "v7", name: "Check backup power covers the sound and lighting rig", type: "Logistics", status: "To do", notes: "" },
+    { id: "v8", name: "Payment schedule — instalment dates and triggers", type: "Contract", status: "To do", notes: "" },
+    { id: "v9", name: "Get name + mobile of the on-site coordinator for 26–27 Jan", type: "Contract", status: "To do", notes: "" },
+    { id: "v10", name: "Site visit with the planner once one is booked", type: "Site visit", status: "To do", visit: "", notes: "" }
   ];
 
   d.attire = [
@@ -524,8 +533,43 @@ function seedOnce() {
   Store.set("_seeded", true);
 }
 
+/* ------------------------------------------------------------ Migrations */
+/* seedOnce only runs on a first visit, so anyone who already has data needs
+   these applied separately. Each step is idempotent and never touches rows
+   the user has edited. */
+function migrate() {
+  const d = Store.all();
+  const done = d._migrations || (d._migrations = {});
+
+  // Venue is booked — drop the leftover shortlist row and load the real to-dos.
+  if (!done.venueBooked) {
+    const rows = Store.list("venues");
+    const untouched = r => r.id === "v1" && /Zorba/i.test(r.name || "") &&
+                           !r.cost && !r.contact && !r.visit;
+    const i = rows.findIndex(untouched);
+    if (i > -1) rows.splice(i, 1);
+    if (rows.length === 0) {
+      [["Confirm noise curfew and hard stop for the sangeet","Function space","Khandala is a hill station — assume there is one until told otherwise"],
+       ["Allocate spaces: mandap, sangeet, reception + seated capacity of each","Function space",""],
+       ["Agree room block size and the release date for unsold rooms","Room block",""],
+       ["Confirm decor load-in the day before, and any preferred-vendor list","Logistics",""],
+       ["Settle catering: in-house vs outside, corkage and liquor licence","Catering",""],
+       ["Get the wet-weather plan in writing for every outdoor function","Logistics","Who makes the call, and by when on the day"],
+       ["Check backup power covers the sound and lighting rig","Logistics",""],
+       ["Payment schedule — instalment dates and triggers","Contract",""],
+       ["Get name + mobile of the on-site coordinator for 26–27 Jan","Contract",""],
+       ["Site visit with the planner once one is booked","Site visit",""]
+      ].forEach(([name, type, notes]) =>
+        rows.push({ id: "vm" + rows.length, name, type, status: "To do", notes }));
+    }
+    done.venueBooked = true;
+    Store.set("_migrations", done);
+  }
+}
+
 /* ------------------------------------------------------------------ Boot */
 function boot(activePage) {
   seedOnce();
+  migrate();
   renderNav(activePage);
 }
