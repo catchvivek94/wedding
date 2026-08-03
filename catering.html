@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Food & Drink — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Food &amp; Drink</h1>
+  <p class="sub">One row per meal service. Cost is calculated as per-plate × pax, so you can see the
+  real number move as your guest list firms up — catering is usually the single largest variable line.</p>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("catering.html");
+Board({
+  mount:"#board", key:"catering", addLabel:"service", statusField:"status",
+  fields:[
+    { k:"item", label:"Service", required:true },
+    { k:"function", label:"Function", type:"select",
+      options:["Engagement","Haldi","Mehendi","Sangeet","Wedding","Reception","All","Other"] },
+    { k:"cuisine", label:"Cuisine" },
+    { k:"vendor", label:"Caterer" },
+    { k:"perPlate", label:"Per plate", type:"number", money:true },
+    { k:"pax", label:"Pax", type:"number" },
+    { k:"status", label:"Status", type:"select",
+      options:["Not planned","Enquiring","Tasting booked","Tasted","Menu locked","Booked"] },
+    { k:"tasting", label:"Tasting date", type:"date" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const total = items.reduce((a,b)=>a+((+b.perPlate||0)*(+b.pax||0)),0);
+    const booked = items.filter(i=>i.status==="Booked").length;
+    const guests = Store.list("guests").filter(g=>g.rsvp==="Attending").reduce((a,b)=>a+(+b.pax||1),0);
+    return `<div class="stats">
+      <div class="stat"><div class="k">Services</div><div class="v">${items.length}</div></div>
+      <div class="stat"><div class="k">Booked</div><div class="v">${booked}</div></div>
+      <div class="stat"><div class="k">Confirmed guests</div><div class="v">${guests}</div>
+        <div class="small muted" style="margin-top:5px">from your RSVP list</div></div>
+      <div class="stat"><div class="k">Projected food cost</div><div class="v sm">${inr(total)}</div>
+        <div class="small muted" style="margin-top:5px">per-plate × pax</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

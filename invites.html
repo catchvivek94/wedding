@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invites — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Invitations &amp; Stationery</h1>
+  <p class="sub">Save-the-dates should go out around late October, formal invites by late November.
+  Print runs need a two to three week buffer — build that into the send-by dates.</p>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("invites.html");
+Board({
+  mount:"#board", key:"invites", addLabel:"item", statusField:"status",
+  fields:[
+    { k:"item", label:"Item", required:true },
+    { k:"format", label:"Format", type:"select", options:["Print","Digital","Video","Both"] },
+    { k:"vendor", label:"Vendor / designer" },
+    { k:"qty", label:"Quantity", type:"number" },
+    { k:"cost", label:"Cost", type:"number", money:true },
+    { k:"status", label:"Status", type:"select",
+      options:["Not started","Designing","Proof review","Approved","At printer","Delivered","Sent"] },
+    { k:"sendBy", label:"Send by", type:"date" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const sent = items.filter(i=>i.status==="Sent").length;
+    const spend = items.reduce((a,b)=>a+(+b.cost||0),0);
+    const overdue = items.filter(i=>i.status!=="Sent"&&i.sendBy&&new Date(i.sendBy)<new Date()).length;
+    return `<div class="stats">
+      <div class="stat"><div class="k">Items</div><div class="v">${items.length}</div></div>
+      <div class="stat"><div class="k">Sent</div><div class="v">${sent}</div></div>
+      <div class="stat"><div class="k">Past send-by</div><div class="v" style="color:${overdue?'var(--red)':'inherit'}">${overdue}</div></div>
+      <div class="stat"><div class="k">Spend</div><div class="v sm">${inr(spend)}</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

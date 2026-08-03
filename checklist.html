@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Checklist — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Master Checklist</h1>
+  <p class="sub">Pre-loaded with 30 tasks working backwards from 27 January 2027. Edit freely —
+  the dates are a sensible default for an Indian wedding at this scale, not gospel.</p>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("checklist.html");
+Board({
+  mount: "#board", key: "checklist", addLabel: "task", statusField: "status",
+  fields: [
+    { k:"task", label:"Task", required:true },
+    { k:"category", label:"Category", type:"select",
+      options:["Planning","Vendors","Venue","Food","Invites","Attire","Guests","Entertainment","Logistics","Ceremony","Budget","Other"] },
+    { k:"due", label:"Due", type:"date" },
+    { k:"priority", label:"Priority", type:"select", options:["High","Medium","Low"] },
+    { k:"owner", label:"Owner" },
+    { k:"status", label:"Status", type:"select", options:["Not started","In progress","Blocked","Done"] },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items) {
+    const done = items.filter(i => i.status === "Done").length;
+    const pct = items.length ? Math.round(done/items.length*100) : 0;
+    const overdue = items.filter(i => i.status !== "Done" && i.due && new Date(i.due) < new Date()).length;
+    const soon = items.filter(i => i.status !== "Done" && i.due &&
+      new Date(i.due) - new Date() < 30*864e5 && new Date(i.due) >= new Date()).length;
+    return `<div class="stats">
+      <div class="stat"><div class="k">Complete</div><div class="v">${pct}%</div>
+        <div class="bar"><i style="width:${pct}%"></i></div></div>
+      <div class="stat"><div class="k">Done</div><div class="v">${done}<span style="font-size:18px;color:var(--ink-soft)">/${items.length}</span></div></div>
+      <div class="stat"><div class="k">Due in 30 days</div><div class="v">${soon}</div></div>
+      <div class="stat"><div class="k">Overdue</div><div class="v" style="color:${overdue?'var(--red)':'inherit'}">${overdue}</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

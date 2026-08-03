@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Venues — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Venues</h1>
+  <p class="sub">Track shortlists, site visits and quotes. Venues that appeared in your saved reels —
+  Aamby Valley, Devrai Lawns, Mukesh Mills, Grand Hyatt Goa, Raffles &amp; Trident Udaipur, Fairmont Jaipur,
+  Alila Fort Bishangarh, ITC Gardenia, The Westin Pushkar — are worth adding as rows.</p>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("venues.html");
+Board({
+  mount:"#board", key:"venues", addLabel:"venue", statusField:"status",
+  fields:[
+    { k:"name", label:"Venue", required:true },
+    { k:"city", label:"City" },
+    { k:"type", label:"Type", type:"select", options:["Hotel","Palace","Resort","Farmhouse","Banquet","Beach","Fort","Lawn","Other"] },
+    { k:"capacity", label:"Capacity", type:"number" },
+    { k:"cost", label:"Est. cost", type:"number", money:true },
+    { k:"status", label:"Status", type:"select",
+      options:["Researching","Enquiry sent","Quote received","Visit booked","Visited","Shortlisted","Booked","Rejected"] },
+    { k:"visit", label:"Visit date", type:"date" },
+    { k:"contact", label:"Contact" },
+    { k:"link", label:"Link", type:"url" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const shortlisted = items.filter(i=>["Shortlisted","Booked"].includes(i.status)).length;
+    const visited = items.filter(i=>i.status==="Visited"||i.status==="Shortlisted"||i.status==="Booked").length;
+    const cheapest = items.filter(i=>+i.cost).sort((a,b)=>a.cost-b.cost)[0];
+    return `<div class="stats">
+      <div class="stat"><div class="k">On the list</div><div class="v">${items.length}</div></div>
+      <div class="stat"><div class="k">Visited</div><div class="v">${visited}</div></div>
+      <div class="stat"><div class="k">Shortlisted</div><div class="v">${shortlisted}</div></div>
+      <div class="stat"><div class="k">Lowest quote</div><div class="v sm">${cheapest?inr(cheapest.cost):"—"}</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

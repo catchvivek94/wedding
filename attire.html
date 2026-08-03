@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attire — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Clothes &amp; Jewellery</h1>
+  <p class="sub">Outfits have the longest lead time of anything on this site — a commissioned lehenga
+  routinely takes four to six months. Eight rows are pre-loaded; add one per person per function.</p>
+  <div class="note">Designers seen in your saved posts: Varun Bahl, Neeta Lulla, ITRH, Jigar Mali,
+  Falguni Shane Peacock, Shantnu &amp; Nikhil, Mishru, Rahul Mishra, Jigar &amp; Nikita.</div>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("attire.html");
+Board({
+  mount:"#board", key:"attire", addLabel:"outfit", statusField:"status",
+  fields:[
+    { k:"item", label:"Item", required:true },
+    { k:"who", label:"Who", type:"select", options:["Bride","Groom","Both","Family","Bridesmaids","Groomsmen","Other"] },
+    { k:"function", label:"Function", type:"select",
+      options:["Engagement","Haldi","Mehendi","Sangeet","Wedding","Reception","Other"] },
+    { k:"designer", label:"Designer / store" },
+    { k:"cost", label:"Cost", type:"number", money:true },
+    { k:"status", label:"Status", type:"select",
+      options:["Not started","Browsing","Ordered","In production","Fitting 1","Fitting 2","Ready","Collected"] },
+    { k:"fitting", label:"Next fitting", type:"date" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const spend = items.reduce((a,b)=>a+(+b.cost||0),0);
+    const ready = items.filter(i=>["Ready","Collected"].includes(i.status)).length;
+    const notStarted = items.filter(i=>i.status==="Not started").length;
+    return `<div class="stats">
+      <div class="stat"><div class="k">Outfits tracked</div><div class="v">${items.length}</div></div>
+      <div class="stat"><div class="k">Ready</div><div class="v">${ready}</div></div>
+      <div class="stat"><div class="k">Not started</div><div class="v" style="color:${notStarted>4?'var(--red)':'inherit'}">${notStarted}</div></div>
+      <div class="stat"><div class="k">Spend</div><div class="v sm">${inr(spend)}</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guests & RSVP — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Guests &amp; RSVP</h1>
+  <p class="sub">One row per invitation (a family of four is one row with pax = 4). Headcount here
+  drives your catering, seating and transport numbers, so keep it honest.</p>
+  <div class="note"><b>Heads up:</b> guests can't fill this in themselves yet — a static GitHub Pages site
+  has no backend. Once we wire up Supabase, this same table becomes a public RSVP form that writes
+  straight into it. Until then, you're entering responses as they come in.</div>
+  <div id="board"></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("guests.html");
+Board({
+  mount:"#board", key:"guests", addLabel:"guest", statusField:"rsvp",
+  fields:[
+    { k:"name", label:"Name / family", required:true },
+    { k:"side", label:"Side", type:"select", options:["Bride","Groom","Both","Vendor"] },
+    { k:"relation", label:"Relation", type:"select",
+      options:["Immediate family","Extended family","Friend","Colleague","Family friend","Plus one","Other"] },
+    { k:"pax", label:"Pax", type:"number", default:1 },
+    { k:"rsvp", label:"RSVP", type:"select", options:["Not invited yet","Invited","Attending","Declined","Maybe"] },
+    { k:"phone", label:"Phone" },
+    { k:"email", label:"Email", type:"email" },
+    { k:"city", label:"Travelling from" },
+    { k:"stay", label:"Needs room", type:"select", options:["No","Yes","Maybe"] },
+    { k:"diet", label:"Dietary", type:"select", options:["None","Veg","Jain","Vegan","No beef","No pork","Allergy — see notes"] },
+    { k:"table", label:"Table" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const sum = f => items.filter(f).reduce((a,b)=>a+(+b.pax||1),0);
+    const yes = sum(i=>i.rsvp==="Attending");
+    const inv = sum(i=>i.rsvp!=="Not invited yet");
+    const no = sum(i=>i.rsvp==="Declined");
+    const rooms = sum(i=>i.stay==="Yes");
+    const special = items.filter(i=>i.diet&&i.diet!=="None").reduce((a,b)=>a+(+b.pax||1),0);
+    return `<div class="stats">
+      <div class="stat"><div class="k">Confirmed heads</div><div class="v">${yes}</div>
+        <div class="small muted" style="margin-top:5px">${items.length} invitations</div></div>
+      <div class="stat"><div class="k">Invited</div><div class="v">${inv}</div></div>
+      <div class="stat"><div class="k">Declined</div><div class="v">${no}</div></div>
+      <div class="stat"><div class="k">Need rooms</div><div class="v">${rooms}</div></div>
+      <div class="stat"><div class="k">Special diets</div><div class="v">${special}</div></div>
+    </div>`;
+  }
+});
+</script>
+</body>
+</html>

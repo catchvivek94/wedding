@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget — ShaadiDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Budget</h1>
+  <p class="sub">Pre-loaded with twelve typical line items and placeholder estimates totalling roughly ₹70 lakh —
+  overwrite every one of them with your own numbers. They exist to give you a shape to react to, nothing more.</p>
+  <div class="note">The only benchmark from your actual research: <b>WeCurate Events</b> publishes a
+  planner fee starting at <b>₹5 lakh</b>. Most planners here quote privately, and full-service fees
+  commonly run 10–15% of total wedding spend. Treat these placeholders as arithmetic, not advice.</div>
+  <div id="board"></div>
+  <div class="sec"><h2>By category</h2><div class="tbl-wrap" id="cat"></div></div>
+</main>
+<footer>ShaadiDesk</footer>
+<script src="assets/js/app.js"></script>
+<script>
+boot("budget.html");
+
+const b = Board({
+  mount:"#board", key:"budget", addLabel:"line item", statusField:"status",
+  fields:[
+    { k:"item", label:"Line item", required:true },
+    { k:"category", label:"Category", type:"select",
+      options:["Planning","Venue","Food","Decor","Media","Attire","Entertainment","Invites","Beauty","Logistics","Gifts","Buffer","Other"] },
+    { k:"estimated", label:"Estimated", type:"number", money:true },
+    { k:"actual", label:"Actual", type:"number", money:true },
+    { k:"status", label:"Status", type:"select", options:["Not paid","Deposit paid","Part paid","Paid in full"] },
+    { k:"due", label:"Payment due", type:"date" },
+    { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
+  ],
+  summary(items){
+    const est = items.reduce((a,x)=>a+(+x.estimated||0),0);
+    const act = items.reduce((a,x)=>a+(+x.actual||0),0);
+    const paid = items.filter(x=>x.status==="Paid in full").reduce((a,x)=>a+(+x.actual||+x.estimated||0),0);
+    const delta = act - est;
+    return `<div class="stats">
+      <div class="stat"><div class="k">Estimated total</div><div class="v sm">${inr(est)}</div></div>
+      <div class="stat"><div class="k">Actual committed</div><div class="v sm">${inr(act)}</div></div>
+      <div class="stat"><div class="k">Settled</div><div class="v sm">${inr(paid)}</div></div>
+      <div class="stat"><div class="k">Variance</div>
+        <div class="v sm" style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?"+":""}${inr(Math.abs(delta))}</div>
+        <div class="small muted" style="margin-top:5px">${delta>0?"over estimate":"under estimate"}</div></div>
+    </div>`;
+  }
+});
+
+function cats() {
+  const items = Store.list("budget");
+  const m = {};
+  items.forEach(i => {
+    const c = i.category || "Other";
+    m[c] = m[c] || { est:0, act:0 };
+    m[c].est += +i.estimated||0; m[c].act += +i.actual||0;
+  });
+  const total = Object.values(m).reduce((a,x)=>a+x.est,0) || 1;
+  const rows = Object.entries(m).sort((a,b)=>b[1].est-a[1].est);
+  $("#cat").innerHTML = `<table>
+    <thead><tr><th>Category</th><th class="num">Estimated</th><th class="num">Actual</th><th class="num">Share</th><th style="width:180px"></th></tr></thead>
+    <tbody>${rows.map(([c,v])=>{
+      const pct = Math.round(v.est/total*100);
+      return `<tr><td>${esc(c)}</td><td class="num">${inr(v.est)}</td><td class="num">${inr(v.act)}</td>
+      <td class="num">${pct}%</td><td><div class="bar"><i style="width:${pct}%"></i></div></td></tr>`;
+    }).join("")}</tbody></table>`;
+}
+cats();
+document.addEventListener("store:changed", cats);
+</script>
+</body>
+</html>

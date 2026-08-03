@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShaadiDesk — Wedding Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main class="wrap">
+
+  <div class="hero">
+    <h1>The wedding, in one place</h1>
+    <p id="heroSub">27 January 2027 · everything you need to decide, book and track</p>
+    <div class="hero-cd" id="cd"></div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="sec">
+    <h2>Modules</h2>
+    <p class="sub">Each one is a working board — add rows, set status, filter, export.</p>
+    <div class="grid g3" id="tiles"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Next up</h2>
+    <p class="sub">The eight nearest deadlines that aren't done yet.</p>
+    <div class="tbl-wrap" id="next"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Housekeeping</h2>
+    <div class="grid g2">
+      <div id="backup"></div>
+      <div class="card">
+        <h3>Wedding details</h3>
+        <p class="small muted">Used across the site for the countdown and headers.</p>
+        <div class="field" style="margin-top:12px"><label>Couple</label><input id="sCouple"></div>
+        <div class="field"><label>City</label><input id="sCity" placeholder="e.g. Udaipur"></div>
+        <div class="field"><label>Venue</label><input id="sVenue" placeholder="Once you've booked it"></div>
+        <button class="btn primary" id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>ShaadiDesk · a static site — your data never leaves this browser</footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+boot("index.html");
+
+/* countdown */
+function cd() {
+  const ms = new Date(WEDDING.date) - new Date();
+  const d = Math.floor(ms/864e5), h = Math.floor(ms/36e5)%24, m = Math.floor(ms/6e4)%60;
+  const w = Math.floor(d/7);
+  $("#cd").innerHTML = `
+    <div><div class="n">${d}</div><div class="l">Days</div></div>
+    <div><div class="n">${w}</div><div class="l">Weeks</div></div>
+    <div><div class="n">${h}</div><div class="l">Hours</div></div>
+    <div><div class="n">${m}</div><div class="l">Minutes</div></div>`;
+}
+cd(); setInterval(cd, 30000);
+
+const s = Store.get("settings");
+$("#heroSub").textContent =
+  `${s.couple || "Your wedding"} · 27 January 2027${s.venue ? " · " + s.venue : ""}${s.city ? ", " + s.city : ""}`;
+
+/* stats */
+function stats() {
+  const cl = Store.list("checklist");
+  const done = cl.filter(t => t.status === "Done").length;
+  const pct = cl.length ? Math.round(done/cl.length*100) : 0;
+
+  const vend = Store.all().vendors;
+  const short = Object.values(vend).filter(v =>
+    ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(v.status)).length;
+  const booked = Object.values(vend).filter(v => v.status === "Booked").length;
+
+  const budget = Store.list("budget");
+  const est = budget.reduce((a,b) => a + (+b.estimated||0), 0);
+  const act = budget.reduce((a,b) => a + (+b.actual||0), 0);
+
+  const g = Store.list("guests");
+  const yes = g.filter(x => x.rsvp === "Attending").reduce((a,b) => a + (+b.pax||1), 0);
+
+  $("#stats").innerHTML = `
+    <div class="stat"><div class="k">Checklist</div><div class="v">${pct}%</div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="small muted" style="margin-top:5px">${done} of ${cl.length} done</div></div>
+    <div class="stat"><div class="k">Planners shortlisted</div><div class="v">${short}</div>
+      <div class="small muted" style="margin-top:5px">${booked} booked · 39 in directory</div></div>
+    <div class="stat"><div class="k">Budget estimated</div><div class="v sm">${inr(est)}</div>
+      <div class="small muted" style="margin-top:5px">${inr(act)} committed so far</div></div>
+    <div class="stat"><div class="k">Guests confirmed</div><div class="v">${yes}</div>
+      <div class="small muted" style="margin-top:5px">${g.length} on the list</div></div>`;
+}
+
+/* tiles */
+const TILES = [
+  ["planners.html","💐","Planners","39 vendors scraped from your saved reels, with contact info and your own status + notes.","planners"],
+  ["checklist.html","✅","Checklist","30 pre-loaded tasks dated back from 27 Jan 2027. The spine of the whole thing.","checklist"],
+  ["venues.html","🏛","Venues","Compare capacity, cost and site visits.","venues"],
+  ["attire.html","👗","Attire","Outfits per function, per person, with fitting dates.","attire"],
+  ["invites.html","✉️","Invites","Save-the-dates through welcome cards.","invites"],
+  ["guests.html","🎟","Guests & RSVP","The guest list, RSVPs, dietary needs and table plan.","guests"],
+  ["catering.html","🍽","Food & Drink","Menu per function, per-plate costs, tastings.","catering"],
+  ["budget.html","💰","Budget","Estimated vs actual, by category.","budget"]
+];
+$("#tiles").innerHTML = TILES.map(([h,i,t,d,key]) => {
+  const n = key === "planners" ? 39 : Store.list(key).length;
+  return `<a class="tile" href="${h}"><div class="ico">${i}</div>
+    <h3>${t}</h3><p>${d}</p><div class="meta">${n} item${n===1?"":"s"} →</div></a>`;
+}).join("");
+
+/* next up */
+function next() {
+  const items = Store.list("checklist")
+    .filter(t => t.status !== "Done")
+    .sort((a,b) => (a.due||"9").localeCompare(b.due||"9"))
+    .slice(0,8);
+  $("#next").innerHTML = items.length ? `<table>
+    <thead><tr><th>Task</th><th>Category</th><th>Due</th><th>Priority</th></tr></thead>
+    <tbody>${items.map(t => {
+      const overdue = t.due && new Date(t.due) < new Date();
+      return `<tr><td>${esc(t.task)}</td><td><span class="pill">${esc(t.category)}</span></td>
+      <td>${overdue ? `<span class="pill hot">${fmtDate(t.due)}</span>` : fmtDate(t.due)}</td>
+      <td><span class="pill ${t.priority==="High"?"warn":""}">${esc(t.priority)}</span></td></tr>`;
+    }).join("")}</tbody></table>`
+    : `<div class="empty">Nothing pending. Suspicious.</div>`;
+}
+
+/* settings */
+$("#sCouple").value = s.couple || "";
+$("#sCity").value = s.city || "";
+$("#sVenue").value = s.venue || "";
+$("#saveSettings").onclick = () => {
+  Store.set("settings", { ...s, couple: $("#sCouple").value, city: $("#sCity").value, venue: $("#sVenue").value });
+  toast("Saved"); location.reload();
+};
+
+backupBar("#backup");
+stats(); next();
+</script>
+</body>
+</html>
