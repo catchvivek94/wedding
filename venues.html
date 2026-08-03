@@ -17,8 +17,10 @@
 </main>
 <footer>ShaadiDesk</footer>
 <script src="assets/js/app.js"></script>
+<script src="assets/js/photos.js"></script>
 <script>
 boot("venues.html");
+document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("venues.html"));
 Board({
   mount:"#board", key:"venues", addLabel:"venue", statusField:"status",
   fields:[

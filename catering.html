@@ -16,8 +16,10 @@
 </main>
 <footer>ShaadiDesk</footer>
 <script src="assets/js/app.js"></script>
+<script src="assets/js/photos.js"></script>
 <script>
 boot("catering.html");
+document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("catering.html"));
 Board({
   mount:"#board", key:"catering", addLabel:"service", statusField:"status",
   fields:[

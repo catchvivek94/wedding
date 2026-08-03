@@ -20,8 +20,10 @@
 </main>
 <footer>ShaadiDesk</footer>
 <script src="assets/js/app.js"></script>
+<script src="assets/js/photos.js"></script>
 <script>
 boot("budget.html");
+document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("budget.html"));
 
 const b = Board({
   mount:"#board", key:"budget", addLabel:"line item", statusField:"status",

@@ -12,7 +12,9 @@
 <main class="wrap">
 
   <div class="hero">
-    <h1>The wedding, in one place</h1>
+    <div class="hero-photos" id="heroPhotos"></div>
+    <div class="hero-veil"></div>
+    <h1>Vivek &amp; Vidhi</h1>
     <p id="heroSub">27 January 2027 · everything you need to decide, book and track</p>
     <div class="hero-cd" id="cd"></div>
   </div>
@@ -29,6 +31,12 @@
     <h2>Next up</h2>
     <p class="sub">The eight nearest deadlines that aren't done yet.</p>
     <div class="tbl-wrap" id="next"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Us</h2>
+    <p class="sub">Everything that got us to 27 January. Click any photo to open it full size.</p>
+    <div id="gallery"></div>
   </div>
 
   <div class="sec">
@@ -51,8 +59,13 @@
 <footer>ShaadiDesk · a static site — your data never leaves this browser</footer>
 
 <script src="assets/js/app.js"></script>
+<script src="assets/js/photos.js"></script>
 <script>
 boot("index.html");
+
+$("#heroPhotos").innerHTML = HERO_PHOTOS
+  .map(f => `<img src="assets/img/${f}" alt="">`).join("");
+photoGallery("#gallery");
 
 /* countdown */
 function cd() {
@@ -69,7 +82,7 @@ cd(); setInterval(cd, 30000);
 
 const s = Store.get("settings");
 $("#heroSub").textContent =
-  `${s.couple || "Your wedding"} · 27 January 2027${s.venue ? " · " + s.venue : ""}${s.city ? ", " + s.city : ""}`;
+  `27 January 2027${s.venue ? " · " + s.venue : ""}${s.city ? ", " + s.city : ""}`;
 
 /* stats */
 function stats() {

@@ -6,7 +6,7 @@
 
 const WEDDING = {
   date: "2027-01-27T00:00:00",
-  couple: "Vivek & Partner",
+  couple: "Vivek & Vidhi",
   hashtag: "#OurForever"
 };
 
