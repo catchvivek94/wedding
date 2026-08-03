@@ -93,6 +93,39 @@ function tierPill(t) {
   return map[t] ?? "";
 }
 
+const openPlanner = handle => {
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
+    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
+    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
+  const p = custom.concat(PLANNERS).find(x => x.handle === handle);
+  if (!p) return;
+  const saved = Store.vendor(p.handle);
+  openDetail({
+    title: saved.vname || p.name,
+    handle: p._manual ? p._manual.handle : p.handle,
+    followers: p.followers,
+    tags: [ p.role && { label: p.role, cls: "hot" },
+            p.city && { label: p.city },
+            p.tier && p.tier !== "—" && { label: p.tier, cls: tierPill(p.tier) },
+            p._manual && { label: "Added by you", cls: "gold" } ].filter(Boolean),
+    bio: p.bio, note: p.note, via: p.via,
+    contact: p.contact,
+    embedUrl: p.reels.length ? `https://www.instagram.com/reel/${p.reels[0]}/embed/` : null,
+    postUrls: p.reels.map(r => `https://www.instagram.com/reel/${r}/`),
+    storeKey: p.handle,
+    editable: [
+      { k:"vname", label:"Vendor name", ph:"Confirm or correct" },
+      { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
+      { k:"email", label:"Email", type:"email", ph:"name@…" },
+      { k:"website", label:"Website", ph:"https://…" },
+      { k:"quote", label:"Quote", ph:"₹" }
+    ],
+    statuses: STATUSES,
+    onChange: () => { render(); stats(); }
+  });
+};
+
 function render() {
   const q = $("#q").value.toLowerCase();
   const role = $("#role").value;
@@ -168,6 +201,24 @@ function render() {
       else stats();
     });
   });
+
+  /* Listeners must be re-attached on every render — innerHTML wipes them. */
+  $$("[data-stop]", cards).forEach(el => el.addEventListener("click", e => e.stopPropagation()));
+  $$("[data-open]", cards).forEach(el => {
+    el.addEventListener("click", e => {
+      if (e.target.closest("a,select,button,input,textarea,details")) return;
+      openPlanner(el.dataset.open);
+    });
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPlanner(el.dataset.open); }
+    });
+  });
+  $$("[data-del]", cards).forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    if (confirm("Delete this card? Your notes on it go too.")) {
+      Store.remove("custom:planners", b.dataset.del); render(); stats(); toast("Deleted");
+    }
+  });
 }
 
 function stats() {
@@ -217,56 +268,7 @@ $("#csv").onclick = () => {
   a.href = URL.createObjectURL(blob); a.download = "wedding-planners.csv"; a.click();
 };
 
-const openPlanner = handle => {
-  const custom = Store.list("custom:planners").map(c => ({
-    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
-    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
-    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
-  const p = custom.concat(PLANNERS).find(x => x.handle === handle);
-  if (!p) return;
-  const saved = Store.vendor(p.handle);
-  openDetail({
-    title: saved.vname || p.name,
-    handle: p._manual ? p._manual.handle : p.handle,
-    followers: p.followers,
-    tags: [ p.role && { label: p.role, cls: "hot" },
-            p.city && { label: p.city },
-            p.tier && p.tier !== "—" && { label: p.tier, cls: tierPill(p.tier) },
-            p._manual && { label: "Added by you", cls: "gold" } ].filter(Boolean),
-    bio: p.bio, note: p.note, via: p.via,
-    contact: p.contact,
-    embedUrl: p.reels.length ? `https://www.instagram.com/reel/${p.reels[0]}/embed/` : null,
-    postUrls: p.reels.map(r => `https://www.instagram.com/reel/${r}/`),
-    storeKey: p.handle,
-    editable: [
-      { k:"vname", label:"Vendor name", ph:"Confirm or correct" },
-      { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
-      { k:"email", label:"Email", type:"email", ph:"name@…" },
-      { k:"website", label:"Website", ph:"https://…" },
-      { k:"quote", label:"Quote", ph:"₹" }
-    ],
-    statuses: STATUSES,
-    onChange: () => { render(); stats(); }
-  });
-};
 
-$$("[data-stop]", cards).forEach(el => el.addEventListener("click", e => e.stopPropagation()));
-$$("[data-open]", cards).forEach(el => {
-  el.addEventListener("click", e => {
-    if (e.target.closest("a,select,button,input,textarea,details")) return;
-    openPlanner(el.dataset.open);
-  });
-  el.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPlanner(el.dataset.open); }
-  });
-});
-
-$$("[data-del]", cards).forEach(b => b.onclick = e => {
-  e.stopPropagation();
-  if (confirm("Delete this card? Your notes on it go too.")) {
-    Store.remove("custom:planners", b.dataset.del); render(); stats(); toast("Deleted");
-  }
-});
 
 $("#addCard").onclick = () => openForm({
   title: "Add a planner",
