@@ -3,50 +3,186 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Venues — ShaadiDesk</title>
+<title>Venue — Ikshana Resort &amp; Spa</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 <main class="wrap">
-  <h1>Venues</h1>
-  <p class="sub">Track shortlists, site visits and quotes. Venues that appeared in your saved reels —
-  Aamby Valley, Devrai Lawns, Mukesh Mills, Grand Hyatt Goa, Raffles &amp; Trident Udaipur, Fairmont Jaipur,
-  Alila Fort Bishangarh, ITC Gardenia, The Westin Pushkar — are worth adding as rows.</p>
-  <div id="board"></div>
+
+  <div class="hero">
+    <div class="hero-bg" style="background-image:url('https://ikshanaresorts.com/wp-content/uploads/2025/07/DJI_20250625124952_0105_D_PRAVI-copy2-scaled.jpg')"></div>
+    <div class="hero-veil"></div>
+    <div class="hero-inner">
+      <h1>Ikshana Resort &amp; Spa</h1>
+      <div class="date">Khandala · 26 &amp; 27 January 2027</div>
+      <div class="venue">A hilltop property in the Sahyadris, roughly 90 minutes from both Mumbai and Pune ·
+        <a href="https://ikshanaresorts.com/" target="_blank" rel="noopener">ikshanaresorts.com</a></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">Wedding dates</div><div class="v sm">26–27 Jan</div>
+      <div class="small muted" style="margin-top:5px">Two days of functions</div></div>
+    <div class="stat"><div class="k">Check in / out</div><div class="v sm">2 PM / 10 AM</div>
+      <div class="small muted" style="margin-top:5px">Worth negotiating late checkout</div></div>
+    <div class="stat"><div class="k">Room categories</div><div class="v">8</div>
+      <div class="small muted" style="margin-top:5px">360 – 900 sq ft</div></div>
+    <div class="stat"><div class="k">Drive time</div><div class="v sm">~90 min</div>
+      <div class="small muted" style="margin-top:5px">From Mumbai or Pune</div></div>
+  </div>
+
+  <div class="sec">
+    <h2>The property</h2>
+    <p class="sub">Photographs from the resort's own site. Click any one to enlarge.</p>
+    <div id="venueGallery"></div>
+  </div>
+
+  <div class="grid g2 sec">
+    <div class="card">
+      <h3>Getting there &amp; contact</h3>
+      <table class="kv">
+        <tr><td>Address</td><td>Sub Division A, Old Mumbai–Pune Highway,<br>Khandala, Kune N.m., Pune, Maharashtra 410301</td></tr>
+        <tr><td>Reservations</td><td><a href="tel:+917429500500">+91 74295 00500</a></td></tr>
+        <tr><td>Email</td><td><a href="mailto:reservations@ikshanaresorts.com">reservations@ikshanaresorts.com</a></td></tr>
+        <tr><td>Weddings</td><td><a href="https://ikshanaresorts.com/weddings/" target="_blank" rel="noopener">ikshanaresorts.com/weddings</a></td></tr>
+        <tr><td>Map</td><td><a href="https://maps.google.com/maps?q=Ikshana+Resort+and+Spa+Khandala" target="_blank" rel="noopener">Open in Google Maps ↗</a></td></tr>
+      </table>
+      <div class="note" style="margin:16px 0 0">The resort publicly warns about copycat sites — the
+      only official domain is <b>ikshanaresorts.com</b>. Pay against an invoice from that domain or
+      the number above, never a payment link someone forwards you.</div>
+    </div>
+
+    <div class="card">
+      <h3>On site</h3>
+      <ul class="ticks">
+        <li>Valley views from most rooms</li>
+        <li>Outdoor pool and lawn space for functions</li>
+        <li>Two restaurants, including Rasa</li>
+        <li>Spa &amp; wellness centre</li>
+        <li>Fitness centre</li>
+        <li>Open ground for outdoor games and activities</li>
+      </ul>
+      <p class="small muted" style="margin-top:12px">Public reviews consistently praise the food, the
+      valley views and the spa. The recurring complaint is that the pool is smaller than expected —
+      worth seeing yourself if a pool function is in the plan.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Room categories</h2>
+    <p class="sub">Sizes are from the resort's site. Rates shown are their <b>public promotional
+    offers</b>, not a wedding room-block rate — use them only as a rough anchor when negotiating.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Category</th><th class="num">Size</th><th>Notes</th><th class="num">Published offer</th></tr></thead>
+        <tbody>
+          <tr><td><b>Jr. Suite</b></td><td class="num">900 sq ft</td><td>Largest — the couple, or immediate family</td><td class="num">₹30,000 + GST</td></tr>
+          <tr><td><b>Studio</b></td><td class="num">520 sq ft</td><td>Spacious, stylish</td><td class="num">₹20,000 + GST</td></tr>
+          <tr><td><b>Premium Backyard</b></td><td class="num">490 sq ft</td><td>Private backyard space</td><td class="num">—</td></tr>
+          <tr><td><b>Splendour Premium</b></td><td class="num">450 sq ft</td><td>Serene views</td><td class="num">₹15,000 + GST</td></tr>
+          <tr><td><b>Premium</b></td><td class="num">450 sq ft</td><td>Classic comfort with a view</td><td class="num">—</td></tr>
+          <tr><td><b>Superior</b></td><td class="num">360 sq ft</td><td>Workhorse room for most guests</td><td class="num">₹8,500 + GST</td></tr>
+          <tr><td><b>Executive</b></td><td class="num">360 sq ft</td><td>Efficient, all essentials</td><td class="num">—</td></tr>
+          <tr><td><b>Deluxe</b></td><td class="num">360 sq ft</td><td>Entry level</td><td class="num">₹7,000 + GST</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Ask them these</h2>
+    <p class="sub">Worth settling in writing before signing anything.</p>
+    <div class="card"><ul class="ticks">
+      <li>How many rooms in total, and how many can be blocked for 26–27 January?</li>
+      <li>Room-block rate versus these published offers — and by when must unsold rooms be released?</li>
+      <li>Which spaces can host the mandap, sangeet and reception, and what's the seated capacity of each?</li>
+      <li>Is outside catering permitted, or is their kitchen mandatory? Per-plate rate?</li>
+      <li>Corkage and outside-alcohol policy — and do they hold the liquor licence?</li>
+      <li>Is there a noise curfew? Hill stations often have one, which directly affects the sangeet.</li>
+      <li>Can decor vendors load in the day before? Any preferred-vendor list or restrictions?</li>
+      <li>Backup power, and the wet-weather plan for outdoor functions</li>
+      <li>Total cost including taxes and service charges, plus cancellation and postponement terms</li>
+    </ul></div>
+  </div>
+
+  <div class="sec">
+    <h2>Venue to-dos</h2>
+    <p class="sub">Anything venue-related — site visits, room blocks, contract points.</p>
+    <div id="board"></div>
+  </div>
+
+  <p class="small muted sec">Venue photographs are served directly from ikshanaresorts.com and remain
+  the property of Ikshana Resort &amp; Spa. Details captured 2 August 2026 — confirm everything with
+  the resort before committing.</p>
+
 </main>
-<footer>ShaadiDesk</footer>
+<footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
+
 <script src="assets/js/app.js"></script>
 <script src="assets/js/photos.js"></script>
 <script>
 boot("venues.html");
-document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("venues.html"));
+
+/* Linked from the resort's own server rather than copied into this repo. */
+const VENUE_PHOTOS = [
+  ["https://ikshanaresorts.com/wp-content/uploads/2025/07/DJI_20250625124952_0105_D_PRAVI-copy2-scaled.jpg","Aerial over the valley"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2024/11/valleyview-scaled.jpg","Valley view"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2024/05/IMG_5868-e1753280862647.jpg","A wedding at Ikshana"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2026/05/IMG_8972-scaled.jpg","Grounds"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2026/05/IMG_8991-scaled.jpg","Grounds"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2026/05/IMG_8993-scaled.jpg","Grounds"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2026/05/IMG_9004-scaled.jpg","Grounds"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2025/07/DSC09929-HDR-scaled.jpg","Jr. Suite"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2025/07/DSC09895-Edit-1-scaled.jpg","Studio"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2025/06/VISH0137-scaled.jpg","Premium Backyard"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2025/06/VISH0004-scaled.jpg","Executive"],
+  ["https://ikshanaresorts.com/wp-content/uploads/2024/05/IMG_5842.JPEG-scaled.jpg","Open lawns"]
+];
+
+(function venueGallery(){
+  const el = $("#venueGallery");
+  el.innerHTML = `<div class="gallery wide">${VENUE_PHOTOS.map(([u,c],i) =>
+    `<figure data-i="${i}"><img src="${u}" alt="${esc(c)}" loading="lazy">
+     <figcaption>${esc(c)}</figcaption></figure>`).join("")}</div>`;
+
+  el.querySelectorAll("figure").forEach(fig => fig.onclick = () => {
+    let i = +fig.dataset.i;
+    const bg = document.createElement("div");
+    bg.className = "lightbox";
+    const close = () => { bg.remove(); document.removeEventListener("keydown", onKey); };
+    const onKey = e => {
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") { i = (i-1+VENUE_PHOTOS.length)%VENUE_PHOTOS.length; draw(); }
+      if (e.key === "ArrowRight") { i = (i+1)%VENUE_PHOTOS.length; draw(); }
+    };
+    const draw = () => {
+      bg.innerHTML = `<button class="lb-nav prev">‹</button>
+        <figure><img src="${VENUE_PHOTOS[i][0]}" alt=""><figcaption>${esc(VENUE_PHOTOS[i][1])}</figcaption></figure>
+        <button class="lb-nav next">›</button><button class="lb-close">×</button>`;
+      bg.querySelector(".prev").onclick = e => { e.stopPropagation(); i = (i-1+VENUE_PHOTOS.length)%VENUE_PHOTOS.length; draw(); };
+      bg.querySelector(".next").onclick = e => { e.stopPropagation(); i = (i+1)%VENUE_PHOTOS.length; draw(); };
+      bg.querySelector(".lb-close").onclick = close;
+    };
+    bg.onclick = e => { if (e.target === bg) close(); };
+    document.addEventListener("keydown", onKey);
+    draw(); document.body.appendChild(bg);
+  });
+})();
+
 Board({
-  mount:"#board", key:"venues", addLabel:"venue", statusField:"status",
+  mount:"#board", key:"venues", addLabel:"venue task", statusField:"status",
   fields:[
-    { k:"name", label:"Venue", required:true },
-    { k:"city", label:"City" },
-    { k:"type", label:"Type", type:"select", options:["Hotel","Palace","Resort","Farmhouse","Banquet","Beach","Fort","Lawn","Other"] },
-    { k:"capacity", label:"Capacity", type:"number" },
-    { k:"cost", label:"Est. cost", type:"number", money:true },
+    { k:"name", label:"Task / item", required:true },
+    { k:"type", label:"Area", type:"select",
+      options:["Contract","Room block","Function space","Catering","Logistics","Site visit","Other"] },
+    { k:"cost", label:"Cost", type:"number", money:true },
     { k:"status", label:"Status", type:"select",
-      options:["Researching","Enquiry sent","Quote received","Visit booked","Visited","Shortlisted","Booked","Rejected"] },
-    { k:"visit", label:"Visit date", type:"date" },
+      options:["To do","Asked","Awaiting reply","Confirmed","Signed","Dropped"] },
+    { k:"visit", label:"Date", type:"date" },
     { k:"contact", label:"Contact" },
-    { k:"link", label:"Link", type:"url" },
     { k:"notes", label:"Notes", type:"textarea", hideInTable:true }
-  ],
-  summary(items){
-    const shortlisted = items.filter(i=>["Shortlisted","Booked"].includes(i.status)).length;
-    const visited = items.filter(i=>i.status==="Visited"||i.status==="Shortlisted"||i.status==="Booked").length;
-    const cheapest = items.filter(i=>+i.cost).sort((a,b)=>a.cost-b.cost)[0];
-    return `<div class="stats">
-      <div class="stat"><div class="k">On the list</div><div class="v">${items.length}</div></div>
-      <div class="stat"><div class="k">Visited</div><div class="v">${visited}</div></div>
-      <div class="stat"><div class="k">Shortlisted</div><div class="v">${shortlisted}</div></div>
-      <div class="stat"><div class="k">Lowest quote</div><div class="v sm">${cheapest?inr(cheapest.cost):"—"}</div></div>
-    </div>`;
-  }
+  ]
 });
 </script>
 </body>

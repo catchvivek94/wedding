@@ -5,7 +5,7 @@
    ========================================================================= */
 
 const WEDDING = {
-  date: "2027-01-27T00:00:00",
+  date: "2027-01-26T00:00:00",
   couple: "Vivek & Vidhi",
   hashtag: "#OurForever"
 };
@@ -97,7 +97,7 @@ const NAV = [
   ["index.html", "Dashboard"],
   ["planners.html", "Planners"],
   ["checklist.html", "Checklist"],
-  ["venues.html", "Venues"],
+  ["venues.html", "Venue"],
   ["attire.html", "Attire"],
   ["invites.html", "Invites"],
   ["guests.html", "Guests & RSVP"],
@@ -106,15 +106,14 @@ const NAV = [
 ];
 
 function renderNav(active) {
-  const d = daysToWedding();
   const el = document.createElement("div");
   el.className = "nav";
   el.innerHTML = `<div class="nav-inner">
-    <div class="brand">Shaadi<span>Desk</span></div>
+    <div class="brand">Vivek <span>&amp;</span> Vidhi</div>
     <nav class="nav-links">
       ${NAV.map(([h, n]) => `<a href="${h}"${h === active ? ' class="active"' : ""}>${n}</a>`).join("")}
     </nav>
-    <div class="nav-cd"><b>${d}</b> days to 27 Jan 2027</div>
+    <div class="nav-cd">26–27 Jan 2027</div>
   </div>`;
   document.body.prepend(el);
 }
