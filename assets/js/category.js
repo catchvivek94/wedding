@@ -26,10 +26,25 @@ function igEmbed(l) {
   return `https://www.instagram.com/${l.k === "p" ? "p" : "reel"}/${l.c}/embed/`;
 }
 
+/* Which credit roles matter on which page — used to highlight the relevant
+   vendor when one saved post credits a dozen different people. */
+const CAT_ROLES = {
+  photographers: /photo|film|video/i,
+  mua:           /mua|makeup|hair|hmua/i,
+  choreographers:/choreo/i,
+  music:         /dj|anchor|music|singer|flaut|band/i,
+  decor:         /decor|floral|furniture|bartender|cake|baker/i,
+  clothes:       /outfit|couture|wear|styl/i,
+  jewellery:     /jewel/i,
+  mandi:         /decor|floral|mehendi|henna/i
+};
+
 function renderCategory(catKey, opts = {}) {
   const cat = CATEGORIES[catKey];
   const mount = $("#cards");
   const scraped = (typeof SCRAPED !== "undefined") ? SCRAPED : {};
+  const roleRx = CAT_ROLES[catKey];
+  const matchesCat = r => roleRx && roleRx.test(r);
 
   let showReels = localStorage.getItem("cat.reels") !== "0";
   let q = "", statusFilter = "", onlyActive = false;
@@ -64,6 +79,14 @@ function renderCategory(catKey, opts = {}) {
         ${info.role ? `<span class="pill hot">${esc(info.role)}</span>` : ""}
         ${info.city ? `<span class="pill">${esc(info.city)}</span>` : ""}
         ${l.n ? `<span class="pill gold">${esc(l.n)}</span>` : ""}
+      </div>` : ""}
+
+      ${info.credits && info.credits.length ? `<div class="credits">
+        <div class="credits-h">Tagged in this post</div>
+        ${info.credits.map(c => `<div class="cr${matchesCat(c.r) ? " hit" : ""}">
+          <span class="cr-r">${esc(c.r)}</span>
+          <a href="https://instagram.com/${esc(c.h)}" target="_blank" rel="noopener">@${esc(c.h)}</a>
+        </div>`).join("")}
       </div>` : ""}
 
       ${info.bio ? `<div class="bio">${esc(info.bio)}</div>` : ""}
@@ -101,7 +124,8 @@ function renderCategory(catKey, opts = {}) {
       if (onlyActive && !ACTIVE.includes(cur)) return false;
       if (q) {
         const hay = [mine.name, mine.notes, mine.phone, mine.email, info.name,
-                     info.handle, info.bio, info.city, info.role, l.n, l.c]
+                     info.handle, info.bio, info.city, info.role, l.n, l.c,
+                     (info.credits || []).map(c => c.r + " " + c.h).join(" ")]
                     .join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
