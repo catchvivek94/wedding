@@ -46,10 +46,11 @@
       <input type="checkbox" id="onlyShort" style="width:auto"> Shortlisted only
     </label>
     <span class="spacer"></span>
+    <button class="btn" id="view">☰ Compact view</button>
     <button class="btn" id="csv">Export CSV</button>
   </div>
 
-  <div class="grid g3" id="cards"></div>
+  <div class="pgrid" id="cards"></div>
 
   <div class="sec">
     <h2>Links that led nowhere</h2>
@@ -67,6 +68,9 @@ boot("planners.html");
 
 const STATUSES = ["Not reviewed","Shortlisted","Contacted","Quote received","Meeting booked","Booked","Passed"];
 const cards = $("#cards");
+
+// Embeds are heavy — 39 of them is a lot. Remember the user's preference.
+let showReels = localStorage.getItem("pl.reels") !== "0";
 
 // role filter options
 const roles = [...new Set(PLANNERS.map(p => p.role))].sort();
@@ -110,9 +114,11 @@ function render() {
     const cur = saved.status || "Not reviewed";
     const isShort = ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(cur);
     return `<div class="pcard${isShort ? " is-short" : ""}">
-      ${p.reels.length ? `<iframe src="https://www.instagram.com/reel/${p.reels[0]}/embed/"
-          loading="lazy" style="width:100%;height:420px;border:1px solid var(--line);border-radius:10px"
-          scrolling="no" allowtransparency="true"></iframe>` : ""}
+      ${(showReels && p.reels.length) ? `<div class="embed">
+          <div class="ph">Loading reel…<br><a href="https://www.instagram.com/reel/${esc(p.reels[0])}/" target="_blank" rel="noopener">open on Instagram ↗</a></div>
+          <iframe src="https://www.instagram.com/reel/${esc(p.reels[0])}/embed/"
+            loading="lazy" scrolling="no" title="Reel by @${esc(p.handle)}"></iframe>
+        </div>` : ""}
       <div>
         <h3>${esc(p.name)}</h3>
         <div class="handle">
@@ -132,7 +138,9 @@ function render() {
         ${p.contact.length
           ? p.contact.map(c => `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")
           : `<span class="muted">No public contact — DM on Instagram</span>`}
-        ${p.reels.length > 1 ? `<span class="muted">${p.reels.length} of your saved posts</span>` : ""}
+        ${p.reels.length ? `<span><b>Saved post${p.reels.length>1?"s":""}:</b> ${
+          p.reels.map((r,i) => `<a href="https://www.instagram.com/reel/${esc(r)}/" target="_blank" rel="noopener">reel ${i+1} ↗</a>`).join(" · ")
+        }</span>` : ""}
       </div>
       <div style="display:flex;gap:7px;align-items:center">
         <select data-h="${esc(p.handle)}" data-f="status" style="flex:1">
@@ -170,6 +178,17 @@ function stats() {
     <div class="stat"><div class="k">Publish contact info</div><div class="v">${counts.contactable}</div></div>
     <div class="stat"><div class="k">Your shortlist</div><div class="v">${counts.short}</div></div>`;
 }
+
+function syncViewBtn() {
+  $("#view").textContent = showReels ? "☰ Compact view" : "▦ Show reels";
+}
+$("#view").onclick = () => {
+  showReels = !showReels;
+  localStorage.setItem("pl.reels", showReels ? "1" : "0");
+  syncViewBtn(); render();
+  window.scrollTo({ top: 0 });
+};
+syncViewBtn();
 
 ["q","role","status","sort","onlyShort"].forEach(id =>
   $("#"+id).addEventListener("input", render));
