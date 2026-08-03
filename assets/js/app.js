@@ -29,13 +29,24 @@ const Store = (() => {
     catch { cache = blank(); }
     return cache;
   }
-  function save() {
+  /* Write to localStorage only. Used when applying remote state, so that
+     pulling from the cloud doesn't immediately push the same data back up. */
+  function persist() {
     localStorage.setItem(KEY, JSON.stringify(load()));
     document.dispatchEvent(new CustomEvent("store:changed"));
   }
 
+  /* Normal save: persist locally, then queue a debounced push to the cloud
+     if sync is configured and signed in. Local always succeeds first, so a
+     network failure can never cost you an edit. */
+  function save() {
+    persist();
+    if (typeof Sync !== "undefined") Sync.schedulePush();
+  }
+
   return {
     all: load,
+    persist,
     get(k) { return load()[k]; },
     set(k, v) { load()[k] = v; save(); },
 
@@ -586,4 +597,13 @@ function boot(activePage) {
   seedOnce();
   migrate();
   renderNav(activePage);
+  if (typeof Sync !== "undefined") {
+    syncBadge();
+    /* Only reload when a pull genuinely brought different data — never after
+       one of our own pushes, or you'd get a reload mid-keystroke. */
+    document.addEventListener("sync:pulled", e => {
+      if (e.detail?.changed) location.reload();
+    });
+    Sync.init();
+  }
 }
