@@ -396,3 +396,14 @@ footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 20p
 .pcard.clickable:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .card-open{font-size:12px;font-weight:600;color:var(--gold);white-space:nowrap;padding:0 4px}
 .pcard.clickable:hover .card-open{color:var(--maroon)}
+
+/* Table rows open the same way cards do. */
+.clickable-row{cursor:pointer}
+.clickable-row:hover{background:var(--gold-soft)!important}
+.clickable-row:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.row-actions{align-items:center}
+.row-actions .card-open{opacity:0;transition:.15s}
+.clickable-row:hover .row-actions .card-open{opacity:1}
+/* The row detail popup is the main editor now, so give it room. */
+.modal{max-width:620px}
+.modal h2{padding-right:10px}

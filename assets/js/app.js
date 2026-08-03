@@ -338,7 +338,7 @@ function Board(cfg) {
           ${cols.map(f => `<th class="${f.type === "number" ? "num" : ""}">${esc(f.label)}</th>`).join("")}
           <th></th>
         </tr></thead>
-        <tbody>${items.map(it => `<tr data-id="${it.id}">
+        <tbody>${items.map(it => `<tr data-id="${it.id}" class="clickable-row" tabindex="0">
           ${cols.map(f => {
             let v = it[f.k];
             if (f.k === cfg.statusField) v = `<span class="pill ${pillClass(v)}">${esc(v || "—")}</span>`;
@@ -349,8 +349,8 @@ function Board(cfg) {
             return `<td class="${f.type === "number" ? "num" : ""}">${v}</td>`;
           }).join("")}
           <td><div class="row-actions">
-            <button class="btn sm" data-edit>Edit</button>
-            <button class="btn sm danger" data-del>×</button>
+            <span class="card-open">Open ↗</span>
+            <button class="btn sm danger" data-del title="Delete">×</button>
           </div></td>
         </tr>`).join("")}</tbody>
       </table></div>`
@@ -375,14 +375,28 @@ function Board(cfg) {
       a.href = URL.createObjectURL(blob); a.download = cfg.key + ".csv"; a.click();
     };
 
+    /* The whole row opens a detail popup — the Edit button was too small a target. */
+    const openRow = id => {
+      const it = Store.list(cfg.key).find(x => x.id === id);
+      if (!it) return;
+      openForm({
+        title: it[cfg.fields[0].k] || "Edit",
+        fields: cfg.fields, values: it,
+        onSave: v => { Store.update(cfg.key, id, v); render(); toast("Saved"); }
+      });
+    };
+
     $$("tr[data-id]", mount).forEach(tr => {
       const id = tr.dataset.id;
-      tr.querySelector("[data-edit]").onclick = () => {
-        const it = Store.list(cfg.key).find(x => x.id === id);
-        openForm({ title: "Edit", fields: cfg.fields, values: it,
-          onSave: v => { Store.update(cfg.key, id, v); render(); toast("Saved"); } });
-      };
-      tr.querySelector("[data-del]").onclick = () => {
+      tr.addEventListener("click", e => {
+        if (e.target.closest("a,button,input,select,textarea")) return;
+        openRow(id);
+      });
+      tr.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRow(id); }
+      });
+      tr.querySelector("[data-del]").onclick = e => {
+        e.stopPropagation();
         if (confirm("Delete this row?")) { Store.remove(cfg.key, id); render(); }
       };
     });
