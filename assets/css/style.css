@@ -334,16 +334,18 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
 /* ---- Detail modal (post on the left, everything else on the right) ---- */
 .detail-bg{position:fixed;inset:0;background:rgba(43,33,24,.5);backdrop-filter:blur(3px);
   z-index:150;display:flex;align-items:center;justify-content:center;padding:28px}
-.detail{position:relative;background:#fff;border-radius:16px;width:100%;max-width:1080px;
-  max-height:88vh;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);
+/* Instagram's embed chrome needs ~500px or its header wraps into the
+   "View profile" button and overflows the pane. */
+.detail{position:relative;background:#fff;border-radius:16px;width:100%;max-width:1180px;
+  max-height:88vh;display:grid;grid-template-columns:520px minmax(0,1fr);
   overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.32)}
 .detail-x{position:absolute;top:12px;right:14px;z-index:3;width:32px;height:32px;border:none;
   border-radius:50%;background:rgba(255,255,255,.9);font-size:20px;line-height:1;cursor:pointer;
   color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .detail-x:hover{background:#fff}
 .detail-media{background:#faf7f2;border-right:1px solid var(--line);display:flex;
-  flex-direction:column;min-height:0}
-.detail-media iframe{width:100%;flex:1;border:0;min-height:520px}
+  flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.detail-media iframe{width:100%;flex:1;border:0;min-height:560px;display:block}
 .detail-noembed{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
   padding:30px;color:var(--ink-soft);font-size:13.5px}
 .detail-posts{padding:10px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}
@@ -358,11 +360,14 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
 .kvrow>span{color:var(--ink-soft);min-width:112px;font-size:12px}
 .kvrow.hit{background:var(--gold-soft)}
 .kvrow.hit>span{color:#8a6c25;font-weight:700}
-@media(max-width:860px){
+@media(max-width:1120px){
+  .detail{grid-template-columns:460px minmax(0,1fr)}
+}
+@media(max-width:900px){
   .detail-bg{padding:0}
   .detail{grid-template-columns:1fr;max-height:100vh;border-radius:0;overflow:auto}
   .detail-media{border-right:none;border-bottom:1px solid var(--line)}
-  .detail-media iframe{min-height:460px}
+  .detail-media iframe{min-height:600px}
   .detail-info{overflow:visible}
 }
 
