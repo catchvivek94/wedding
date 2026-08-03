@@ -46,7 +46,9 @@ function renderCategory(catKey, opts = {}) {
   const roleRx = CAT_ROLES[catKey];
   const matchesCat = r => roleRx && roleRx.test(r);
 
-  let showReels = localStorage.getItem("cat.reels") !== "0";
+  /* Default OFF: 174 embedded videos is an enormous amount of scrolling,
+     and without them we fit four cards per row instead of two. */
+  let showReels = localStorage.getItem("cat.reels") === "1";
   let q = "", statusFilter = "", onlyActive = false;
 
   function saveKey(l) { return catKey + ":" + l.c; }
@@ -72,6 +74,8 @@ function renderCategory(catKey, opts = {}) {
         <div class="handle">
           ${man ? `<span class="pill gold">Added by you</span>
             <button class="btn sm danger" data-del="${esc(l.c)}" style="float:right">Delete</button>` : ""}
+          ${man?.handle ? `<a href="https://instagram.com/${esc(man.handle)}" target="_blank" rel="noopener">@${esc(man.handle)}</a>` : ""}
+          ${man?.city ? ` · ${esc(man.city)}` : ""}
           ${info.handle ? `<a href="https://instagram.com/${esc(info.handle)}" target="_blank" rel="noopener">@${esc(info.handle)}</a>` : ""}
           ${info.followers && info.followers !== "—" ? ` · ${esc(info.followers)} followers` : ""}
           ${(!info.handle && !man) ? `<a href="${igUrl(l)}" target="_blank" rel="noopener">open saved post ↗</a>` : ""}
@@ -87,37 +91,25 @@ function renderCategory(catKey, opts = {}) {
         ${l.n ? `<span class="pill gold">${esc(l.n)}</span>` : ""}
       </div>` : ""}
 
-      ${info.credits && info.credits.length ? `<div class="credits">
-        <div class="credits-h">Tagged in this post</div>
-        ${info.credits.map(c => `<div class="cr${matchesCat(c.r) ? " hit" : ""}">
-          <span class="cr-r">${esc(c.r)}</span>
-          <a href="https://instagram.com/${esc(c.h)}" target="_blank" rel="noopener">@${esc(c.h)}</a>
-        </div>`).join("")}
+      ${(() => {
+        const hits = (info.credits || []).filter(c => matchesCat(c.r));
+        return hits.length ? `<div class="credits">${hits.slice(0, 2).map(c =>
+          `<div class="cr hit"><span class="cr-r">${esc(c.r)}</span>
+           <a href="https://instagram.com/${esc(c.h)}" target="_blank" rel="noopener">@${esc(c.h)}</a></div>`
+        ).join("")}</div>` : (info.bio ? `<div class="bio">${esc(info.bio)}</div>` : "");
+      })()}
+
+      ${(mine.phone || mine.email) ? `<div class="contact">
+        ${mine.phone ? `<span><b>Phone:</b> <a href="tel:${esc(mine.phone)}">${esc(mine.phone)}</a></span>` : ""}
+        ${mine.email ? `<span><b>Email:</b> <a href="mailto:${esc(mine.email)}">${esc(mine.email)}</a></span>` : ""}
       </div>` : ""}
 
-      ${info.bio ? `<div class="bio">${esc(info.bio)}</div>` : ""}
-      ${info.note ? `<div class="small" style="background:var(--gold-soft);padding:8px 10px;border-radius:8px;color:#6a5526">${esc(info.note)}</div>` : ""}
-      ${info.contact && info.contact.length ? `<div class="contact">${info.contact.map(c =>
-        `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")}</div>` : ""}
-
-      <details class="edit"${(mine.name || mine.phone || mine.email) ? " open" : ""}>
-        <summary>Your details${(mine.name || mine.phone || mine.email) ? " ✓" : ""}</summary>
-        <div class="edit-grid">
-          ${EDITABLE.map(f => `<label class="ef">
-            <span>${f.label}</span>
-            <input type="${f.type || "text"}" data-k="${key}" data-f="${f.k}"
-              placeholder="${esc(f.ph)}" value="${esc(mine[f.k] || "")}">
-          </label>`).join("")}
-        </div>
-      </details>
-
-      <div style="display:flex;gap:7px;align-items:center">
-        <select data-k="${key}" data-f="status" style="flex:1">
+      <div class="card-foot">
+        <select data-k="${key}" data-f="status">
           ${VENDOR_STATUSES.map(s => `<option${s === cur ? " selected" : ""}>${s}</option>`).join("")}
         </select>
+        <button class="btn sm" data-info="${esc(l.c)}">Info</button>
       </div>
-      <textarea data-k="${key}" data-f="notes" placeholder="Notes — what you liked, what to ask…"
-        style="min-height:52px">${esc(mine.notes || "")}</textarea>
     </div>`;
   }
 
@@ -177,6 +169,37 @@ function renderCategory(catKey, opts = {}) {
         if (el.dataset.f === "status") render();
       });
     });
+    $$("[data-info]", mount).forEach(b => b.onclick = () => {
+      const l = allLinks().find(x => String(x.c) === b.dataset.info);
+      if (!l) return;
+      const man = l._manual;
+      const info = man ? {} : (scraped[l.c] || {});
+      const mine = Store.vendor(saveKey(l));
+      openDetail({
+        title: mine.name || man?.name || info.name || (info.handle ? "@" + info.handle : "Not identified yet"),
+        handle: man?.handle || info.handle,
+        followers: info.followers,
+        tags: [
+          man?.type && { label: man.type, cls: "hot" },
+          (man?.city || info.city) && { label: man?.city || info.city },
+          man && { label: "Added by you", cls: "gold" },
+          l.n && { label: l.n, cls: "gold" }
+        ].filter(Boolean),
+        bio: info.bio || man?.desc,
+        note: info.note,
+        via: info.via || (man?.referredBy ? "Referred by " + man.referredBy : ""),
+        contact: info.contact || [],
+        credits: info.credits || [],
+        creditHit: matchesCat,
+        embedUrl: man ? null : igEmbed(l),
+        postUrls: man ? [] : [igUrl(l)],
+        storeKey: saveKey(l),
+        editable: EDITABLE,
+        statuses: VENDOR_STATUSES,
+        onChange: render
+      });
+    });
+
     $$("[data-del]", mount).forEach(b => b.onclick = () => {
       if (confirm("Delete this card? Your notes on it go too.")) {
         Store.remove("custom:" + catKey, b.dataset.del);
@@ -188,18 +211,33 @@ function renderCategory(catKey, opts = {}) {
 
   /* Add a card by hand — a vendor you found elsewhere, or an event/booking. */
   $("#addCard").onclick = () => openForm({
-    title: "Add a card",
+    title: "Add to " + cat.title,
     fields: [
-      { k: "name", label: "Name", required: true },
-      { k: "type", label: "Type", type: "select",
+      { k: "name",    label: "Name",              required: true, ph: "Vendor or event name" },
+      { k: "type",    label: "Type", type: "select",
         options: ["Vendor","Event","Booking","Appointment","Shortlist idea","Other"] },
-      { k: "date", label: "Date", type: "date" },
-      { k: "desc", label: "What is it?", type: "textarea" }
+      { k: "handle",  label: "Instagram @handle",  ph: "without the @" },
+      { k: "phone",   label: "Phone",  type: "tel",   ph: "+91…" },
+      { k: "email",   label: "Email",  type: "email", ph: "name@…" },
+      { k: "website", label: "Website / link",       ph: "https://…" },
+      { k: "city",    label: "City / area" },
+      { k: "quote",   label: "Quote",               ph: "₹" },
+      { k: "date",    label: "Date",   type: "date" },
+      { k: "status",  label: "Status", type: "select", options: VENDOR_STATUSES, default: "Shortlisted" },
+      { k: "referredBy", label: "Referred by",      ph: "Who recommended them?" },
+      { k: "desc",    label: "Notes",  type: "textarea", ph: "What you know so far…" }
     ],
     onSave: v => {
-      const item = Store.add("custom:" + catKey, v);
-      Store.setVendor(catKey + ":" + item.id, { name: v.name, status: "Shortlisted" });
-      render(); window.scrollTo({ top: 0 }); toast("Card added — fill in contact details on it");
+      const item = Store.add("custom:" + catKey, {
+        name: v.name, type: v.type, date: v.date, desc: v.desc,
+        handle: v.handle.replace(/^@/, ""), city: v.city, referredBy: v.referredBy
+      });
+      Store.setVendor(catKey + ":" + item.id, {
+        name: v.name, phone: v.phone, email: v.email, website: v.website,
+        quote: v.quote, status: v.status || "Shortlisted",
+        notes: [v.desc, v.referredBy && ("Referred by " + v.referredBy)].filter(Boolean).join("\n")
+      });
+      render(); window.scrollTo({ top: 0 }); toast("Added — it's at the top of the list");
     }
   });
 

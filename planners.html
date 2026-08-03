@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-<main class="wrap">
+<main class="wrap wide">
   <div class="page-head">
     <div>
       <h1>Wedding Planners &amp; Vendors</h1>
@@ -46,14 +46,14 @@
       <input type="checkbox" id="onlyShort" style="width:auto"> Shortlisted only
     </label>
     <span class="spacer"></span>
+    <button class="btn primary" id="addCard">+ Add vendor</button>
     <button class="btn" id="view">☰ Compact view</button>
     <button class="btn" id="csv">Export CSV</button>
   </div>
 
   <div class="pgrid" id="cards"></div>
-  <p class="small muted" style="margin-top:14px">Reels are embedded from Instagram and need a live
-  connection — strict tracker blockers may stop them loading. Every card links to the original post
-  regardless. Use <b>Compact view</b> to strip the videos and scan faster.</p>
+  <p class="small muted" style="margin-top:14px">Every card links to its original post. Turn on <b>Show posts</b> to embed the videos inline —
+  they need a live connection and can be blocked by tracker blockers.</p>
 
   <div class="sec">
     <h2>Links that led nowhere</h2>
@@ -75,7 +75,7 @@ const STATUSES = ["Not reviewed","Shortlisted","Contacted","Quote received","Mee
 const cards = $("#cards");
 
 // Embeds are heavy — 39 of them is a lot. Remember the user's preference.
-let showReels = localStorage.getItem("pl.reels") !== "0";
+let showReels = localStorage.getItem("pl.reels") === "1";
 
 // role filter options
 const roles = [...new Set(PLANNERS.map(p => p.role))].sort();
@@ -114,6 +114,13 @@ function render() {
   if (sort === "name") list.sort((a,b) => a.name.localeCompare(b.name));
   if (sort === "contact") list.sort((a,b) => b.contact.length - a.contact.length);
 
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
+    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
+    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you"
+  }));
+  list = custom.concat(list);
+
   cards.innerHTML = list.map(p => {
     const saved = Store.vendor(p.handle);
     const cur = saved.status || "Not reviewed";
@@ -127,7 +134,11 @@ function render() {
       <div>
         <h3>${esc(p.name)}</h3>
         <div class="handle">
-          <a href="https://instagram.com/${esc(p.handle)}" target="_blank" rel="noopener">@${esc(p.handle)}</a>
+          ${p._manual ? `<span class="pill gold">Added by you</span>
+            <button class="btn sm danger" data-del="${esc(p._manual.id)}" style="float:right">Delete</button>` : ""}
+          ${(p._manual ? p._manual.handle : p.handle) && !String(p.handle).startsWith("custom:")
+            ? `<a href="https://instagram.com/${esc(p.handle)}" target="_blank" rel="noopener">@${esc(p.handle)}</a>`
+            : (p._manual && p._manual.handle ? `<a href="https://instagram.com/${esc(p._manual.handle)}" target="_blank" rel="noopener">@${esc(p._manual.handle)}</a>` : "")}
           ${p.followers && p.followers !== "—" ? ` · ${esc(p.followers)} followers` : ""}
         </div>
       </div>
@@ -136,34 +147,16 @@ function render() {
         ${p.city ? `<span class="pill">${esc(p.city)}</span>` : ""}
         ${p.tier && p.tier !== "—" ? `<span class="pill ${tierPill(p.tier)}">${esc(p.tier)}</span>` : ""}
       </div>
-      <div class="bio">${esc(p.bio)}</div>
-      ${p.note ? `<div class="small" style="background:var(--gold-soft);padding:8px 10px;border-radius:8px;color:#6a5526">${esc(p.note)}</div>` : ""}
-      <div class="small muted"><b>Found via:</b> ${esc(p.via)}</div>
-      <div class="contact">
-        ${p.contact.length
-          ? p.contact.map(c => `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")
-          : `<span class="muted">No public contact — DM on Instagram</span>`}
-        ${p.reels.length ? `<span><b>Saved post${p.reels.length>1?"s":""}:</b> ${
-          p.reels.map((r,i) => `<a href="https://www.instagram.com/reel/${esc(r)}/" target="_blank" rel="noopener">reel ${i+1} ↗</a>`).join(" · ")
-        }</span>` : ""}
-      </div>
-      <details class="edit"${(saved.vname||saved.phone||saved.email) ? " open" : ""}>
-        <summary>Your details${(saved.vname||saved.phone||saved.email) ? " ✓" : ""}</summary>
-        <div class="edit-grid">
-          ${[["vname","Vendor name","Confirm or correct"],["phone","Phone","+91…"],
-             ["email","Email","name@…"],["website","Website","link"],["quote","Quote","₹"]]
-            .map(([k,l,ph]) => `<label class="ef"><span>${l}</span>
-              <input type="text" data-h="${esc(p.handle)}" data-f="${k}"
-                placeholder="${esc(ph)}" value="${esc(saved[k]||"")}"></label>`).join("")}
-        </div>
-      </details>
-      <div style="display:flex;gap:7px;align-items:center">
-        <select data-h="${esc(p.handle)}" data-f="status" style="flex:1">
+      ${p.contact.length
+        ? `<div class="contact">${p.contact.slice(0,1).map(c =>
+            `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")}</div>`
+        : (saved.phone ? `<div class="contact"><span><b>Phone:</b> <a href="tel:${esc(saved.phone)}">${esc(saved.phone)}</a></span></div>` : "")}
+      <div class="card-foot">
+        <select data-h="${esc(p.handle)}" data-f="status">
           ${STATUSES.map(s => `<option${s === cur ? " selected" : ""}>${s}</option>`).join("")}
         </select>
+        <button class="btn sm" data-info="${esc(p.handle)}">Info</button>
       </div>
-      <textarea data-h="${esc(p.handle)}" data-f="notes" placeholder="Your notes — what you liked, what to ask…"
-        style="min-height:56px">${esc(saved.notes || "")}</textarea>
     </div>`;
   }).join("") || `<div class="empty">No vendors match those filters.</div>`;
 
@@ -193,7 +186,7 @@ function stats() {
 }
 
 function syncViewBtn() {
-  $("#view").textContent = showReels ? "☰ Compact view" : "▦ Show reels";
+  $("#view").textContent = showReels ? "☰ Compact view" : "▦ Show posts";
   cards.className = showReels ? "pgrid" : "pgrid no-embeds";
 }
 $("#view").onclick = () => {
@@ -223,6 +216,72 @@ $("#csv").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = "wedding-planners.csv"; a.click();
 };
+
+$$("[data-info]", cards).forEach(b => b.onclick = () => {
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
+    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
+    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
+  const p = custom.concat(PLANNERS).find(x => x.handle === b.dataset.info);
+  if (!p) return;
+  const saved = Store.vendor(p.handle);
+  openDetail({
+    title: saved.vname || p.name,
+    handle: p._manual ? p._manual.handle : p.handle,
+    followers: p.followers,
+    tags: [ p.role && { label: p.role, cls: "hot" },
+            p.city && { label: p.city },
+            p.tier && p.tier !== "—" && { label: p.tier, cls: tierPill(p.tier) },
+            p._manual && { label: "Added by you", cls: "gold" } ].filter(Boolean),
+    bio: p.bio, note: p.note, via: p.via,
+    contact: p.contact,
+    embedUrl: p.reels.length ? `https://www.instagram.com/reel/${p.reels[0]}/embed/` : null,
+    postUrls: p.reels.map(r => `https://www.instagram.com/reel/${r}/`),
+    storeKey: p.handle,
+    editable: [
+      { k:"vname", label:"Vendor name", ph:"Confirm or correct" },
+      { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
+      { k:"email", label:"Email", type:"email", ph:"name@…" },
+      { k:"website", label:"Website", ph:"https://…" },
+      { k:"quote", label:"Quote", ph:"₹" }
+    ],
+    statuses: STATUSES,
+    onChange: () => { render(); stats(); }
+  });
+});
+
+$$("[data-del]", cards).forEach(b => b.onclick = () => {
+  if (confirm("Delete this card? Your notes on it go too.")) {
+    Store.remove("custom:planners", b.dataset.del); render(); stats(); toast("Deleted");
+  }
+});
+
+$("#addCard").onclick = () => openForm({
+  title: "Add a planner",
+  fields: [
+    { k:"name", label:"Name", required:true, ph:"Vendor or event name" },
+    { k:"type", label:"Type", type:"select", options:["Planner","Decor / Design","Venue","Event","Booking","Other"] },
+    { k:"handle", label:"Instagram @handle", ph:"without the @" },
+    { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
+    { k:"email", label:"Email", type:"email", ph:"name@…" },
+    { k:"website", label:"Website / link", ph:"https://…" },
+    { k:"city", label:"City / area" },
+    { k:"quote", label:"Quote", ph:"₹" },
+    { k:"status", label:"Status", type:"select", options:STATUSES, default:"Shortlisted" },
+    { k:"referredBy", label:"Referred by", ph:"Who recommended them?" },
+    { k:"desc", label:"Notes", type:"textarea" }
+  ],
+  onSave: v => {
+    const item = Store.add("custom:planners", {
+      name:v.name, type:v.type, city:v.city, desc:v.desc,
+      handle:(v.handle||"").replace(/^@/,""), referredBy:v.referredBy });
+    Store.setVendor("custom:" + item.id, {
+      vname:v.name, phone:v.phone, email:v.email, website:v.website, quote:v.quote,
+      status:v.status || "Shortlisted",
+      notes:[v.desc, v.referredBy && ("Referred by " + v.referredBy)].filter(Boolean).join("\n") });
+    render(); stats(); window.scrollTo({top:0}); toast("Added — it's at the top of the list");
+  }
+});
 
 $("#dead").innerHTML = DEAD_LINKS.map(d =>
   `<p class="small" style="margin:0 0 8px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.url)}</a><br>

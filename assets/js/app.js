@@ -93,37 +93,72 @@ function toast(msg) {
 }
 
 /* ------------------------------------------------------------------- Nav */
+/* Seventeen flat links wrapped onto three rows and looked awful.
+   Grouped into five top-level items with dropdowns instead. */
 const NAV = [
-  ["index.html", "Dashboard"],
-  ["checklist.html", "Checklist"],
-  ["venues.html", "Venue"],
-  ["planners.html", "Planners"],
-  ["photographers.html", "Photo & Film"],
-  ["mua.html", "MUA & Hair"],
-  ["choreographers.html", "Choreo"],
-  ["music.html", "Music & DJ"],
-  ["decor.html", "Decor & Ideas"],
-  ["mandi.html", "Mandi"],
-  ["clothes.html", "Clothes"],
-  ["jewellery.html", "Jewellery"],
-  ["attire.html", "Attire"],
-  ["invites.html", "Invites"],
-  ["guests.html", "Guests"],
-  ["catering.html", "Food"],
-  ["budget.html", "Budget"]
+  { href: "index.html", label: "Dashboard" },
+  { href: "checklist.html", label: "Checklist" },
+  { href: "venues.html", label: "Venue" },
+  { label: "Vendors", items: [
+    ["planners.html", "💐", "Planners"],
+    ["photographers.html", "📷", "Photo & Film"],
+    ["mua.html", "💄", "MUA & Hair"],
+    ["choreographers.html", "💃", "Choreographers"],
+    ["music.html", "🎤", "Music, DJ & Anchors"],
+    ["decor.html", "🎪", "Decor & Ideas"],
+    ["mandi.html", "🌿", "Mandi & Mehendi"]
+  ]},
+  { label: "Style", items: [
+    ["clothes.html", "👗", "Clothes"],
+    ["jewellery.html", "💍", "Jewellery"],
+    ["attire.html", "🧵", "Attire tracker"]
+  ]},
+  { label: "Guests & Day", items: [
+    ["guests.html", "🎟", "Guests & RSVP"],
+    ["invites.html", "✉️", "Invites"],
+    ["catering.html", "🍽", "Food & Drink"],
+    ["budget.html", "💰", "Budget"]
+  ]}
 ];
 
 function renderNav(active) {
+  const link = (h, l, cls = "") =>
+    `<a href="${h}" class="${cls}${h === active ? " active" : ""}">${l}</a>`;
+
+  const groups = NAV.map(g => {
+    if (!g.items) return link(g.href, g.label);
+    const open = g.items.some(([h]) => h === active);
+    return `<div class="nav-group${open ? " has-active" : ""}">
+      <button type="button" class="nav-btn${open ? " active" : ""}">${g.label}<span class="caret">▾</span></button>
+      <div class="nav-menu">
+        ${g.items.map(([h, ic, l]) =>
+          `<a href="${h}"${h === active ? ' class="active"' : ""}><span>${ic}</span>${l}</a>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+
   const el = document.createElement("div");
   el.className = "nav";
   el.innerHTML = `<div class="nav-inner">
-    <div class="brand">Vivek <span>&amp;</span> Vidhi</div>
-    <nav class="nav-links">
-      ${NAV.map(([h, n]) => `<a href="${h}"${h === active ? ' class="active"' : ""}>${n}</a>`).join("")}
-    </nav>
+    <a class="brand" href="index.html">Vivek <span>&amp;</span> Vidhi</a>
+    <button class="nav-toggle" type="button" aria-label="Menu">☰</button>
+    <nav class="nav-links">${groups}</nav>
     <div class="nav-cd">26–27 Jan 2027</div>
   </div>`;
   document.body.prepend(el);
+
+  /* dropdowns: click to open, click outside or Escape to close */
+  const closeAll = except => $$(".nav-group", el).forEach(g => { if (g !== except) g.classList.remove("open"); });
+  $$(".nav-group", el).forEach(g => {
+    g.querySelector(".nav-btn").onclick = e => {
+      e.stopPropagation(); closeAll(g); g.classList.toggle("open");
+    };
+  });
+  document.addEventListener("click", () => closeAll());
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeAll(); });
+  el.querySelector(".nav-toggle").onclick = e => {
+    e.stopPropagation(); el.classList.toggle("open");
+  };
 }
 
 /* ------------------------------------------------------------- Modal form */
@@ -139,7 +174,8 @@ function openForm({ title, fields, values = {}, onSave }) {
     } else if (f.type === "textarea") {
       input = `<textarea name="${f.k}">${esc(v)}</textarea>`;
     } else {
-      input = `<input type="${f.type || "text"}" name="${f.k}" value="${esc(v)}"${f.required ? " required" : ""}>`;
+      input = `<input type="${f.type || "text"}" name="${f.k}" value="${esc(v)}"` +
+              `${f.ph ? ` placeholder="${esc(f.ph)}"` : ""}${f.required ? " required" : ""}>`;
     }
     return `<div class="field${f.wide ? " wide" : ""}"><label>${esc(f.label)}</label>${input}</div>`;
   }).join("");
@@ -163,6 +199,94 @@ function openForm({ title, fields, values = {}, onSave }) {
   };
   document.body.appendChild(bg);
   bg.querySelector("input,select,textarea")?.focus();
+}
+
+/* ---------------------------------------------------------- Detail modal */
+/* Two panes: the Instagram post on the left, everything you know and
+   everything you can edit on the right. Used by Planners and every
+   category page, so it only exists once. */
+function openDetail(cfg) {
+  const {
+    title, handle, followers, tags = [], bio, note, via,
+    contact = [], credits = [], creditHit = () => false,
+    embedUrl, postUrls = [], storeKey, editable = [], statuses = [], onChange
+  } = cfg;
+
+  const mine = Store.vendor(storeKey);
+  const bg = document.createElement("div");
+  bg.className = "detail-bg";
+
+  bg.innerHTML = `<div class="detail" role="dialog" aria-modal="true">
+    <button class="detail-x" aria-label="Close">×</button>
+
+    <div class="detail-media">
+      ${embedUrl
+        ? `<iframe src="${esc(embedUrl)}" loading="lazy" scrolling="no" title="Instagram post"></iframe>`
+        : `<div class="detail-noembed">
+             <div>No Instagram post for this one${postUrls.length ? "" : " — added by you"}.</div>
+           </div>`}
+      ${postUrls.length > 1 ? `<div class="detail-posts">Also saved:
+        ${postUrls.slice(1).map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">post ${i + 2} ↗</a>`).join(" · ")}
+      </div>` : ""}
+    </div>
+
+    <div class="detail-info">
+      <h2>${esc(title)}</h2>
+      <div class="detail-sub">
+        ${handle ? `<a href="https://instagram.com/${esc(handle)}" target="_blank" rel="noopener">@${esc(handle)}</a>` : ""}
+        ${followers && followers !== "—" ? ` · ${esc(followers)} followers` : ""}
+      </div>
+      ${tags.length ? `<div class="tags">${tags.map(t =>
+        `<span class="pill ${esc(t.cls || "")}">${esc(t.label)}</span>`).join("")}</div>` : ""}
+      ${bio ? `<p class="detail-bio">${esc(bio)}</p>` : ""}
+      ${note ? `<div class="note" style="margin:0 0 14px">${esc(note)}</div>` : ""}
+
+      ${contact.length ? `<section>
+        <h4>Published contact</h4>
+        ${contact.map(c => `<div class="kvrow"><span>${esc(c.t)}</span>
+          <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></div>`).join("")}
+      </section>` : ""}
+
+      ${credits.length ? `<section>
+        <h4>Tagged in this post</h4>
+        ${credits.map(c => `<div class="kvrow${creditHit(c.r) ? " hit" : ""}"><span>${esc(c.r)}</span>
+          <a href="https://instagram.com/${esc(c.h)}" target="_blank" rel="noopener">@${esc(c.h)}</a></div>`).join("")}
+      </section>` : ""}
+
+      <section>
+        <h4>Your record</h4>
+        ${statuses.length ? `<div class="field"><label>Status</label>
+          <select data-d="status">${statuses.map(s =>
+            `<option${s === (mine.status || statuses[0]) ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>
+        </div>` : ""}
+        <div class="fields-2">
+          ${editable.map(f => `<div class="field"><label>${esc(f.label)}</label>
+            <input type="${f.type || "text"}" data-d="${esc(f.k)}"
+              placeholder="${esc(f.ph || "")}" value="${esc(mine[f.k] || "")}"></div>`).join("")}
+        </div>
+        <div class="field"><label>Notes</label>
+          <textarea data-d="notes" placeholder="What you liked, what to ask, what they quoted…">${esc(mine.notes || "")}</textarea>
+        </div>
+        <div class="small muted">Saves as you type.</div>
+      </section>
+
+      ${via ? `<p class="small muted" style="margin-top:16px"><b>Found via:</b> ${esc(via)}</p>` : ""}
+    </div>
+  </div>`;
+
+  const close = () => { bg.remove(); document.removeEventListener("keydown", onKey); onChange?.(); };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  bg.onclick = e => { if (e.target === bg) close(); };
+  bg.querySelector(".detail-x").onclick = close;
+  document.addEventListener("keydown", onKey);
+
+  $$("[data-d]", bg).forEach(el => {
+    el.addEventListener(el.tagName === "SELECT" ? "change" : "input", () => {
+      Store.setVendor(storeKey, { [el.dataset.d]: el.value });
+    });
+  });
+
+  document.body.appendChild(bg);
 }
 
 /* ----------------------------------------------------------------- Board */

@@ -43,18 +43,55 @@ a:hover{text-decoration:underline}
 .nav-inner{max-width:1240px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .brand{font-family:"Cormorant Garamond",Georgia,serif;font-size:21px;font-weight:600;color:var(--ink);white-space:nowrap}
 .brand span{color:var(--gold)}
-.nav-links{display:flex;gap:2px;flex-wrap:wrap;flex:1}
-.nav-links a{
-  padding:7px 12px;border-radius:8px;font-size:13.5px;font-weight:500;
+.nav-inner{position:relative}
+a.brand{text-decoration:none}
+a.brand:hover{text-decoration:none}
+.nav-links{display:flex;gap:2px;flex:1;align-items:center}
+.nav-links>a,.nav-btn{
+  padding:8px 13px;border-radius:8px;font:inherit;font-size:13.5px;font-weight:500;
   color:var(--ink-soft);text-decoration:none;white-space:nowrap;
+  background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
 }
-.nav-links a:hover{background:var(--gold-soft);color:var(--ink);text-decoration:none}
-.nav-links a.active{background:var(--maroon);color:#fff}
+.nav-links>a:hover,.nav-btn:hover{background:var(--gold-soft);color:var(--ink);text-decoration:none}
+.nav-links>a.active,.nav-btn.active{background:var(--maroon);color:#fff}
+.caret{font-size:9px;opacity:.7}
+
+.nav-group{position:relative}
+.nav-menu{
+  position:absolute;top:calc(100% + 6px);left:0;min-width:216px;z-index:60;
+  background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;
+  box-shadow:0 12px 32px rgba(43,33,24,.16);
+  display:none;flex-direction:column;gap:1px;
+}
+.nav-group.open .nav-menu{display:flex}
+.nav-menu a{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  font-size:13.5px;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.nav-menu a span{width:18px;text-align:center;font-size:14px}
+.nav-menu a:hover{background:var(--gold-soft);text-decoration:none}
+.nav-menu a.active{background:var(--maroon-soft);color:var(--maroon);font-weight:600}
+
 .nav-cd{font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
-.nav-cd b{color:var(--maroon);font-size:15px}
+.nav-toggle{display:none;background:none;border:none;font-size:21px;cursor:pointer;
+  color:var(--ink-soft);padding:4px 8px;margin-left:auto}
+
+@media(max-width:920px){
+  .nav-toggle{display:block}
+  .nav-cd{display:none}
+  .nav-links{display:none;width:100%;flex-direction:column;align-items:stretch;
+    gap:2px;padding:8px 0 4px;border-top:1px solid var(--line);margin-top:8px}
+  .nav.open .nav-links{display:flex}
+  .nav-menu{position:static;display:flex;box-shadow:none;border:none;padding:2px 0 6px 14px;
+    min-width:0;background:none}
+  .nav-btn{justify-content:flex-start}
+  .caret{display:none}
+}
 
 /* ---- Layout ---- */
 .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+/* Vendor pages get more room so four cards fit comfortably. */
+.wrap.wide{max-width:1560px}
 .page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px}
 .sub{color:var(--ink-soft);font-size:14px;margin:6px 0 22px;max-width:70ch}
 
@@ -236,14 +273,27 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
 /* Instagram embeds need >=326px of inner width or they collapse. Card padding
    is 17px each side, so the track minimum must stay comfortably above 360px. */
 .pgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(470px,1fr))}
-/* Compact view has no embeds, so it can pack much tighter. */
-.pgrid.no-embeds{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-@media(max-width:520px){
+/* Compact view has no embeds, so it packs four to a row on a laptop. */
+.pgrid.no-embeds{grid-template-columns:repeat(4,1fr);align-items:start}
+@media(max-width:1180px){.pgrid.no-embeds{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.pgrid.no-embeds{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){
   .pgrid,.pgrid.no-embeds{grid-template-columns:1fr}
   .pcard{padding:12px}
 }
 .pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:17px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:9px;min-width:0}
+  padding:15px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
+.pcard h3{font-size:17px;line-height:1.25}
+/* Keep bios from making one card three times taller than its neighbours. */
+.pcard .bio{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pcard .bio:hover{-webkit-line-clamp:unset}
+.card-foot{display:flex;gap:6px;align-items:center}
+.card-foot select{flex:1;font-size:12.5px;padding:6px 9px}
+.credits .more summary{cursor:pointer;font-size:11.5px;color:var(--ink-soft);padding:3px 6px;
+  list-style:none;user-select:none}
+.credits .more summary::-webkit-details-marker{display:none}
+.credits .more summary:before{content:"+ ";color:var(--gold)}
+.credits .more[open] summary:before{content:"− "}
 .pcard.is-short{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),var(--shadow)}
 /* Instagram's embed renders its own header + chrome and needs real estate:
    below ~430px wide the account name wraps into the "View profile" button. */
@@ -280,6 +330,41 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
   text-transform:uppercase;letter-spacing:.05em}
 .edit-grid input{font-size:12.5px;padding:6px 9px}
 @media(max-width:560px){.edit-grid{grid-template-columns:1fr}}
+
+/* ---- Detail modal (post on the left, everything else on the right) ---- */
+.detail-bg{position:fixed;inset:0;background:rgba(43,33,24,.5);backdrop-filter:blur(3px);
+  z-index:150;display:flex;align-items:center;justify-content:center;padding:28px}
+.detail{position:relative;background:#fff;border-radius:16px;width:100%;max-width:1080px;
+  max-height:88vh;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);
+  overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.32)}
+.detail-x{position:absolute;top:12px;right:14px;z-index:3;width:32px;height:32px;border:none;
+  border-radius:50%;background:rgba(255,255,255,.9);font-size:20px;line-height:1;cursor:pointer;
+  color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.detail-x:hover{background:#fff}
+.detail-media{background:#faf7f2;border-right:1px solid var(--line);display:flex;
+  flex-direction:column;min-height:0}
+.detail-media iframe{width:100%;flex:1;border:0;min-height:520px}
+.detail-noembed{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:30px;color:var(--ink-soft);font-size:13.5px}
+.detail-posts{padding:10px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}
+.detail-info{padding:26px 26px 30px;overflow:auto;min-height:0}
+.detail-info h2{font-size:26px;margin-bottom:4px;padding-right:34px}
+.detail-sub{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+.detail-bio{font-size:14px;color:var(--ink-soft);margin:0 0 14px;line-height:1.6}
+.detail-info section{border-top:1px solid var(--line);padding-top:14px;margin-top:16px}
+.detail-info h4{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--ink-soft);margin:0 0 10px;font-family:inherit}
+.kvrow{display:flex;gap:10px;font-size:13.5px;padding:4px 7px;border-radius:6px;align-items:baseline}
+.kvrow>span{color:var(--ink-soft);min-width:112px;font-size:12px}
+.kvrow.hit{background:var(--gold-soft)}
+.kvrow.hit>span{color:#8a6c25;font-weight:700}
+@media(max-width:860px){
+  .detail-bg{padding:0}
+  .detail{grid-template-columns:1fr;max-height:100vh;border-radius:0;overflow:auto}
+  .detail-media{border-right:none;border-bottom:1px solid var(--line)}
+  .detail-media iframe{min-height:460px}
+  .detail-info{overflow:visible}
+}
 
 /* ---- Modal ---- */
 .modal-bg{position:fixed;inset:0;background:rgba(43,33,24,.42);backdrop-filter:blur(2px);
