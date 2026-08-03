@@ -54,13 +54,14 @@ function renderCategory(catKey, opts = {}) {
   function card(l) {
     const key = saveKey(l);
     const mine = Store.vendor(key);
-    const info = scraped[l.c] || {};
+    const man = l._manual;
+    const info = man ? {} : (scraped[l.c] || {});
     const cur = mine.status || "Not reviewed";
     const active = ACTIVE.includes(cur);
-    const title = mine.name || info.name || (info.handle ? "@" + info.handle : "Not identified yet");
-    const embed = igEmbed(l);
+    const title = mine.name || man?.name || info.name || (info.handle ? "@" + info.handle : "Not identified yet");
+    const embed = man ? null : igEmbed(l);
 
-    return `<div class="pcard${active ? " is-short" : ""}">
+    return `<div class="pcard${active ? " is-short" : ""}${man ? " is-manual" : ""}">
       ${(showReels && embed) ? `<div class="embed">
         <div class="ph">Loading…<br><a href="${igUrl(l)}" target="_blank" rel="noopener">open on Instagram ↗</a></div>
         <iframe src="${embed}" loading="lazy" scrolling="no" title="Saved post"></iframe>
@@ -69,11 +70,16 @@ function renderCategory(catKey, opts = {}) {
       <div>
         <h3>${esc(title)}</h3>
         <div class="handle">
+          ${man ? `<span class="pill gold">Added by you</span>
+            <button class="btn sm danger" data-del="${esc(l.c)}" style="float:right">Delete</button>` : ""}
           ${info.handle ? `<a href="https://instagram.com/${esc(info.handle)}" target="_blank" rel="noopener">@${esc(info.handle)}</a>` : ""}
           ${info.followers && info.followers !== "—" ? ` · ${esc(info.followers)} followers` : ""}
-          ${!info.handle ? `<a href="${igUrl(l)}" target="_blank" rel="noopener">open saved post ↗</a>` : ""}
+          ${(!info.handle && !man) ? `<a href="${igUrl(l)}" target="_blank" rel="noopener">open saved post ↗</a>` : ""}
         </div>
       </div>
+      ${man?.type ? `<div class="tags"><span class="pill hot">${esc(man.type)}</span>
+        ${man.date ? `<span class="pill">${fmtDate(man.date)}</span>` : ""}</div>` : ""}
+      ${man?.desc ? `<div class="bio">${esc(man.desc)}</div>` : ""}
 
       ${(info.role || info.city || l.n) ? `<div class="tags">
         ${info.role ? `<span class="pill hot">${esc(info.role)}</span>` : ""}
@@ -115,8 +121,14 @@ function renderCategory(catKey, opts = {}) {
     </div>`;
   }
 
+  /* Cards you add by hand live in Store under "custom:<category>". */
+  function customLinks() {
+    return Store.list("custom:" + catKey).map(c => ({ c: c.id, k: "manual", n: "", _manual: c }));
+  }
+  function allLinks() { return customLinks().concat(cat.links); }
+
   function visible() {
-    return cat.links.filter(l => {
+    return allLinks().filter(l => {
       const mine = Store.vendor(saveKey(l));
       const info = scraped[l.c] || {};
       const cur = mine.status || "Not reviewed";
@@ -134,16 +146,18 @@ function renderCategory(catKey, opts = {}) {
   }
 
   function stats() {
-    const total = cat.links.length;
+    const links = allLinks();
+    const total = links.length;
     let identified = 0, active = 0, booked = 0;
-    cat.links.forEach(l => {
+    links.forEach(l => {
       const mine = Store.vendor(saveKey(l));
-      if (mine.name || scraped[l.c]) identified++;
+      if (mine.name || l._manual || scraped[l.c]) identified++;
       if (ACTIVE.includes(mine.status)) active++;
       if (mine.status === "Booked") booked++;
     });
     $("#stats").innerHTML = `
-      <div class="stat"><div class="k">Saved posts</div><div class="v">${total}</div></div>
+      <div class="stat"><div class="k">Cards</div><div class="v">${total}</div>
+        <div class="small muted" style="margin-top:5px">${cat.links.length} saved · ${total - cat.links.length} yours</div></div>
       <div class="stat"><div class="k">Identified</div><div class="v">${identified}</div>
         <div class="small muted" style="margin-top:5px">${total - identified} still to name</div></div>
       <div class="stat"><div class="k">In play</div><div class="v">${active}</div></div>
@@ -163,8 +177,31 @@ function renderCategory(catKey, opts = {}) {
         if (el.dataset.f === "status") render();
       });
     });
+    $$("[data-del]", mount).forEach(b => b.onclick = () => {
+      if (confirm("Delete this card? Your notes on it go too.")) {
+        Store.remove("custom:" + catKey, b.dataset.del);
+        render(); toast("Deleted");
+      }
+    });
     stats();
   }
+
+  /* Add a card by hand — a vendor you found elsewhere, or an event/booking. */
+  $("#addCard").onclick = () => openForm({
+    title: "Add a card",
+    fields: [
+      { k: "name", label: "Name", required: true },
+      { k: "type", label: "Type", type: "select",
+        options: ["Vendor","Event","Booking","Appointment","Shortlist idea","Other"] },
+      { k: "date", label: "Date", type: "date" },
+      { k: "desc", label: "What is it?", type: "textarea" }
+    ],
+    onSave: v => {
+      const item = Store.add("custom:" + catKey, v);
+      Store.setVendor(catKey + ":" + item.id, { name: v.name, status: "Shortlisted" });
+      render(); window.scrollTo({ top: 0 }); toast("Card added — fill in contact details on it");
+    }
+  });
 
   /* toolbar wiring */
   $("#q").oninput = e => { q = e.target.value.toLowerCase(); render(); };

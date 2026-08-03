@@ -301,3 +301,5 @@ ul.ticks li:before{content:"›";position:absolute;left:6px;top:6px;color:var(--
 .sec>h2{margin-bottom:4px}
 hr{border:none;border-top:1px solid var(--line);margin:26px 0}
 footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 20px 40px}
+
+.pcard.is-manual{border-left:3px solid var(--gold)}
