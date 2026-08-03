@@ -170,15 +170,19 @@ th.num{text-align:right}
 /* ---- Planner cards ---- */
 /* Instagram embeds need >=326px of inner width or they collapse. Card padding
    is 17px each side, so the track minimum must stay comfortably above 360px. */
-.pgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
-@media(max-width:430px){
-  .pgrid{grid-template-columns:1fr}
+.pgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(470px,1fr))}
+/* Compact view has no embeds, so it can pack much tighter. */
+.pgrid.no-embeds{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+@media(max-width:520px){
+  .pgrid,.pgrid.no-embeds{grid-template-columns:1fr}
   .pcard{padding:12px}
 }
 .pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:17px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:9px;min-width:0}
 .pcard.is-short{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),var(--shadow)}
-.pcard .embed{position:relative;width:100%;height:560px;border:1px solid var(--line);
+/* Instagram's embed renders its own header + chrome and needs real estate:
+   below ~430px wide the account name wraps into the "View profile" button. */
+.pcard .embed{position:relative;width:100%;height:680px;border:1px solid var(--line);
   border-radius:10px;overflow:hidden;background:#faf7f2}
 .pcard .embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .pcard .embed .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;

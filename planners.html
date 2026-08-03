@@ -51,6 +51,9 @@
   </div>
 
   <div class="pgrid" id="cards"></div>
+  <p class="small muted" style="margin-top:14px">Reels are embedded from Instagram and need a live
+  connection — strict tracker blockers may stop them loading. Every card links to the original post
+  regardless. Use <b>Compact view</b> to strip the videos and scan faster.</p>
 
   <div class="sec">
     <h2>Links that led nowhere</h2>
@@ -181,6 +184,7 @@ function stats() {
 
 function syncViewBtn() {
   $("#view").textContent = showReels ? "☰ Compact view" : "▦ Show reels";
+  cards.className = showReels ? "pgrid" : "pgrid no-embeds";
 }
 $("#view").onclick = () => {
   showReels = !showReels;
