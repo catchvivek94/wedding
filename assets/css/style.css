@@ -424,3 +424,14 @@ footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 20p
 .sync-badge.s-error{background:#fbeced;color:var(--red)}
 .sync-badge.s-signed-out{background:var(--maroon-soft);color:var(--maroon)}
 @media(max-width:920px){.sync-badge{display:none}}
+
+/* ---- Bulk enquiries ---- */
+.olist{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:4px}
+.orow{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;
+  font-size:13.5px;cursor:pointer;text-transform:none;font-weight:400;
+  letter-spacing:0;color:var(--ink);margin:0}
+.orow:hover{background:var(--gold-soft)}
+.orow input{width:auto;flex:none}
+.oname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.omsg{background:#faf7f2;border:1px solid var(--line);border-radius:11px;padding:15px 17px;
+  font-size:13.5px;line-height:1.65;white-space:pre-wrap;max-height:300px;overflow:auto}

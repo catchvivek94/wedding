@@ -6,7 +6,7 @@
 <title>Wedding Planners  · Vivek &amp; Vidhi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=1582dd2b">
+<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
 </head>
 <body>
 <main class="wrap wide">
@@ -46,7 +46,8 @@
       <input type="checkbox" id="onlyShort" style="width:auto"> Shortlisted only
     </label>
     <span class="spacer"></span>
-    <button class="btn primary" id="addCard">+ Add vendor</button>
+    <button class="btn primary" id="enquire">✉️ Send enquiries</button>
+    <button class="btn" id="addCard">+ Add vendor</button>
     <button class="btn" id="view">☰ Compact view</button>
     <button class="btn" id="csv">Export CSV</button>
   </div>
@@ -64,11 +65,12 @@
 
 <footer>Vivek &amp; Vidhi · vendor list scraped 2 Aug 2026 · your notes save automatically in this browser</footer>
 
-<script src="assets/js/data-planners.js?v=1582dd2b"></script>
-<script src="assets/js/config.js?v=1582dd2b"></script>
-<script src="assets/js/sync.js?v=1582dd2b"></script>
-<script src="assets/js/app.js?v=1582dd2b"></script>
-<script src="assets/js/photos.js?v=1582dd2b"></script>
+<script src="assets/js/data-planners.js?v=b31d1207"></script>
+<script src="assets/js/config.js?v=b31d1207"></script>
+<script src="assets/js/sync.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/outreach.js?v=b31d1207"></script>
+<script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
 boot("planners.html");
 document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("planners.html"));
@@ -298,6 +300,14 @@ $("#addCard").onclick = () => openForm({
     render(); stats(); window.scrollTo({top:0}); toast("Added — it's at the top of the list");
   }
 });
+
+$("#enquire").onclick = () => {
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, contact: [] }));
+  /* Planners only, as agreed — decor studios and photographers excluded. */
+  const planners = PLANNERS.filter(p => /planner/i.test(p.role));
+  openOutreach(custom.concat(planners));
+};
 
 $("#dead").innerHTML = DEAD_LINKS.map(d =>
   `<p class="small" style="margin:0 0 8px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.url)}</a><br>
