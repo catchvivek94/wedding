@@ -1,0 +1,28 @@
+/* Inherit the portal palette and typography; scope shopping layout changes. */
+.kurta-page{max-width:1320px!important}
+.kurta-breadcrumb{display:flex;gap:9px;font-size:13px;color:var(--ink-soft);margin-bottom:25px}
+.kurta-eyebrow{font-size:11px;letter-spacing:.16em;color:var(--maroon);font-weight:700;margin:0 0 10px}
+.kurta-notice{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;background:var(--gold-soft);padding:14px 18px;margin:6px 0 22px;font-size:13px}
+.kurta-notice p{margin:3px 0 0;color:var(--ink-soft)}
+.kurta-progress{margin-bottom:22px}.kurta-progress label{text-transform:none;letter-spacing:0}
+.kurta-progress progress{width:100%;height:8px;accent-color:var(--maroon)}
+.kurta-jump{margin-bottom:30px}.kurta-page section{scroll-margin-top:110px;margin-bottom:36px}
+.kurta-samples,.kurta-people{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kurta-sample{display:flex;flex-direction:column}.kurta-sample h3{font-size:23px;line-height:1.2;margin:16px 0 0;min-height:55px}
+.kurta-sample .btn-row{margin-top:auto}.kurta-sample .btn{font-size:12px;padding:8px 10px}
+.kurta-sample-top,.kurta-person-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.kurta-person-head{margin-bottom:18px}.kurta-person-head h3{font-size:24px;margin:0}
+.kurta-person label:not(.kurta-check){margin-top:12px}.kurta-person textarea{min-height:65px}
+.kurta-check{display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;margin:14px 0}.kurta-check input{width:auto}
+.kurta-feedback{color:var(--ink-soft);margin-bottom:0;min-height:42px}
+.kurta-filters{align-items:end}.kurta-filters>div{flex:1;min-width:140px}.kurta-filters input,.kurta-filters select{max-width:none!important}
+.kurta-dialog{color:var(--ink);border:1px solid var(--line);border-radius:var(--radius);padding:26px;max-width:440px;width:calc(100% - 32px);box-shadow:var(--shadow)}
+.kurta-dialog::backdrop{background:rgba(43,33,24,.4)}
+@media(max-width:1000px){.kurta-samples,.kurta-people{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.kurta-samples,.kurta-people{grid-template-columns:1fr}.kurta-page .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kurta-page .stat{padding:12px 10px}.kurta-page .stat .small{font-size:10px}.kurta-sample h3{min-height:0}}
+
+.kurta-pick{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--gold-soft);margin:8px 0;color:var(--ink)}
+.kurta-pick span.small{display:block;color:var(--ink-soft)}.kurta-pick-icon{font-size:24px;color:var(--maroon)}
+.kurta-person summary{cursor:pointer;color:var(--maroon);font-size:13px;font-weight:600;padding-top:10px;border-top:1px solid var(--line)}
+
+.kurta-people{align-items:start}
