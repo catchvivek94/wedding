@@ -119,8 +119,8 @@ const NAV = [
     ["decor.html", "🎪", "Decor & Ideas"],
     ["mandi.html", "🌿", "Mandi & Mehendi"]
   ]},
-  { label: "Style", items: [
-    ["clothes.html", "👗", "Clothes"],
+  { label: "Styling", items: [
+    ["clothes.html", "👗", "Clothing"],
     ["jewellery.html", "💍", "Jewellery"],
     ["attire.html", "🧵", "Attire tracker"]
   ]},

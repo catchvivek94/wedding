@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wedding Planners  · Vivek &amp; Vidhi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+</head>
+<body>
+<main class="wrap wide">
+  <div class="page-head">
+    <div>
+      <h1>Planner research archive</h1><p class="sub">Historical research · <a href="planners.html">Back to finalized planner</a></p>
+      <p class="sub">Everything pulled from the 42 Instagram links you saved — account, what they actually do,
+      where they're based, and whatever contact route they publish. Several reels were posted by couples
+      rather than planners, so the <b>Found via</b> line tells you how each vendor surfaced.</p>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search name, city, bio…">
+    <select id="role">
+      <option value="">All roles</option>
+    </select>
+    <select id="status">
+      <option value="">All statuses</option>
+      <option>Not reviewed</option>
+      <option>Shortlisted</option>
+      <option>Contacted</option>
+      <option>Quote received</option>
+      <option>Meeting booked</option>
+      <option>Booked</option>
+      <option>Passed</option>
+    </select>
+    <select id="sort">
+      <option value="rel">Sort: relevance</option>
+      <option value="foll">Sort: following size</option>
+      <option value="name">Sort: name A–Z</option>
+      <option value="contact">Sort: has contact info</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:6px;text-transform:none;font-size:13.5px;font-weight:500;margin:0">
+      <input type="checkbox" id="onlyShort" style="width:auto"> Shortlisted only
+    </label>
+    <span class="spacer"></span>
+    <button class="btn primary" id="enquire">✉️ Send enquiries</button>
+    <button class="btn" id="addCard">+ Add vendor</button>
+    <button class="btn" id="view">☰ Compact view</button>
+    <button class="btn" id="csv">Export CSV</button>
+  </div>
+
+  <div class="pgrid" id="cards"></div>
+  <p class="small muted" style="margin-top:14px">Every card links to its original post. Turn on <b>Show posts</b> to embed the videos inline —
+  they need a live connection and can be blocked by tracker blockers.</p>
+
+  <div class="sec">
+    <h2>Links that led nowhere</h2>
+    <p class="sub">These three couldn't be read automatically. They're now cards in the list above so you can fill them in after asking around.</p>
+    <div class="card" id="dead"></div>
+  </div>
+</main>
+
+<footer>Vivek &amp; Vidhi · vendor list scraped 2 Aug 2026 · your notes save automatically in this browser</footer>
+
+<script src="assets/js/data-planners.js?v=b31d1207"></script>
+<script src="assets/js/config.js?v=b31d1207"></script>
+<script src="assets/js/sync.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/outreach.js?v=b31d1207"></script>
+<script src="assets/js/photos.js?v=b31d1207"></script>
+<script>
+boot("planners.html");
+document.querySelector("main.wrap").insertAdjacentHTML("afterbegin", photoBanner("planners.html"));
+
+const STATUSES = ["Not reviewed","Shortlisted","Contacted","Quote received","Meeting booked","Booked","Passed"];
+const cards = $("#cards");
+
+// Embeds are heavy — 39 of them is a lot. Remember the user's preference.
+let showReels = localStorage.getItem("pl.reels") === "1";
+
+// role filter options
+const roles = [...new Set(PLANNERS.map(p => p.role))].sort();
+$("#role").innerHTML = '<option value="">All roles</option>' +
+  roles.map(r => `<option>${esc(r)}</option>`).join("");
+
+function follNum(f) {
+  if (!f || f === "—") return -1;
+  const n = parseFloat(f);
+  return f.includes("K") ? n * 1000 : n;
+}
+
+function tierPill(t) {
+  const map = { "Ultra-luxury":"hot", "Luxury":"gold", "Premium":"", "Mid–Premium":"", "Mid":"", "Budget":"warn" };
+  return map[t] ?? "";
+}
+
+const openPlanner = handle => {
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
+    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
+    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
+  const p = custom.concat(PLANNERS).find(x => x.handle === handle);
+  if (!p) return;
+  const saved = Store.vendor(p.handle);
+  openDetail({
+    title: saved.vname || p.name,
+    handle: p._manual ? p._manual.handle : p.handle,
+    followers: p.followers,
+    tags: [ p.role && { label: p.role, cls: "hot" },
+            p.city && { label: p.city },
+            p.tier && p.tier !== "—" && { label: p.tier, cls: tierPill(p.tier) },
+            p._manual && { label: "Added by you", cls: "gold" } ].filter(Boolean),
+    bio: p.bio, note: p.note, via: p.via,
+    contact: p.contact,
+    embedUrl: p.reels.length ? `https://www.instagram.com/reel/${p.reels[0]}/embed/` : null,
+    postUrls: p.reels.map(r => `https://www.instagram.com/reel/${r}/`),
+    storeKey: p.handle,
+    editable: [
+      { k:"vname", label:"Vendor name", ph:"Confirm or correct" },
+      { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
+      { k:"email", label:"Email", type:"email", ph:"name@…" },
+      { k:"website", label:"Website", ph:"https://…" },
+      { k:"quote", label:"Quote", ph:"₹" }
+    ],
+    statuses: STATUSES,
+    onChange: () => { render(); stats(); }
+  });
+};
+
+function render() {
+  const q = $("#q").value.toLowerCase();
+  const role = $("#role").value;
+  const st = $("#status").value;
+  const onlyShort = $("#onlyShort").checked;
+  const sort = $("#sort").value;
+
+  let list = PLANNERS.filter(p => {
+    const saved = Store.vendor(p.handle);
+    const cur = saved.status || "Not reviewed";
+    if (role && p.role !== role) return false;
+    if (st && cur !== st) return false;
+    if (onlyShort && !["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(cur)) return false;
+    if (q && !(p.name + p.handle + p.bio + p.city + p.role + (p.note||"")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (sort === "foll") list.sort((a,b) => follNum(b.followers) - follNum(a.followers));
+  if (sort === "name") list.sort((a,b) => a.name.localeCompare(b.name));
+  if (sort === "contact") list.sort((a,b) => b.contact.length - a.contact.length);
+
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
+    tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
+    via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you"
+  }));
+  list = custom.concat(list);
+
+  cards.innerHTML = list.map(p => {
+    const saved = Store.vendor(p.handle);
+    const cur = saved.status || "Not reviewed";
+    const isShort = ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(cur);
+    return `<div class="pcard clickable${isShort ? " is-short" : ""}" data-open="${esc(p.handle)}" role="button" tabindex="0">
+      ${(showReels && p.reels.length) ? `<div class="embed">
+          <div class="ph">Loading reel…<br><a href="https://www.instagram.com/reel/${esc(p.reels[0])}/" target="_blank" rel="noopener">open on Instagram ↗</a></div>
+          <iframe src="https://www.instagram.com/reel/${esc(p.reels[0])}/embed/"
+            loading="lazy" scrolling="no" title="Reel by @${esc(p.handle)}"></iframe>
+        </div>` : ""}
+      <div>
+        <h3>${esc(p.name)}</h3>
+        <div class="handle">
+          ${p._manual ? `<span class="pill gold">Added by you</span>
+            <button class="btn sm danger" data-del="${esc(p._manual.id)}" style="float:right">Delete</button>` : ""}
+          ${(p._manual ? p._manual.handle : p.handle) && !String(p.handle).startsWith("custom:")
+            ? `<a href="https://instagram.com/${esc(p.handle)}" target="_blank" rel="noopener">@${esc(p.handle)}</a>`
+            : (p._manual && p._manual.handle ? `<a href="https://instagram.com/${esc(p._manual.handle)}" target="_blank" rel="noopener">@${esc(p._manual.handle)}</a>` : "")}
+          ${p.followers && p.followers !== "—" ? ` · ${esc(p.followers)} followers` : ""}
+        </div>
+      </div>
+      <div class="tags">
+        <span class="pill hot">${esc(p.role)}</span>
+        ${p.city ? `<span class="pill">${esc(p.city)}</span>` : ""}
+        ${p.tier && p.tier !== "—" ? `<span class="pill ${tierPill(p.tier)}">${esc(p.tier)}</span>` : ""}
+      </div>
+      ${p.contact.length
+        ? `<div class="contact">${p.contact.slice(0,1).map(c =>
+            `<span><b>${esc(c.t)}:</b> <a href="${esc(c.h)}" target="_blank" rel="noopener">${esc(c.v)}</a></span>`).join("")}</div>`
+        : (saved.phone ? `<div class="contact"><span><b>Phone:</b> <a href="tel:${esc(saved.phone)}">${esc(saved.phone)}</a></span></div>` : "")}
+      <div class="card-foot">
+        <select data-h="${esc(p.handle)}" data-f="status" data-stop>
+          ${STATUSES.map(s => `<option${s === cur ? " selected" : ""}>${s}</option>`).join("")}
+        </select>
+        <span class="card-open">Open ↗</span>
+      </div>
+    </div>`;
+  }).join("") || `<div class="empty">No vendors match those filters.</div>`;
+
+  $$("[data-h]", cards).forEach(el => {
+    const ev = el.tagName === "SELECT" ? "change" : "input";
+    el.addEventListener(ev, () => {
+      Store.setVendor(el.dataset.h, { [el.dataset.f]: el.value });
+      if (el.dataset.f === "status") { render(); stats(); }
+      else stats();
+    });
+  });
+
+  /* Listeners must be re-attached on every render — innerHTML wipes them. */
+  $$("[data-stop]", cards).forEach(el => el.addEventListener("click", e => e.stopPropagation()));
+  $$("[data-open]", cards).forEach(el => {
+    el.addEventListener("click", e => {
+      if (e.target.closest("a,select,button,input,textarea,details")) return;
+      openPlanner(el.dataset.open);
+    });
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPlanner(el.dataset.open); }
+    });
+  });
+  $$("[data-del]", cards).forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    if (confirm("Delete this card? Your notes on it go too.")) {
+      Store.remove("custom:planners", b.dataset.del); render(); stats(); toast("Deleted");
+    }
+  });
+}
+
+function stats() {
+  const counts = { total: PLANNERS.length, planners: 0, short: 0, contactable: 0 };
+  PLANNERS.forEach(p => {
+    if (p.role.includes("Planner")) counts.planners++;
+    if (p.contact.length) counts.contactable++;
+    const s = Store.vendor(p.handle).status;
+    if (["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(s)) counts.short++;
+  });
+  $("#stats").innerHTML = `
+    <div class="stat"><div class="k">Vendors found</div><div class="v">${counts.total}</div></div>
+    <div class="stat"><div class="k">Actual planners</div><div class="v">${counts.planners}</div></div>
+    <div class="stat"><div class="k">Publish contact info</div><div class="v">${counts.contactable}</div></div>
+    <div class="stat"><div class="k">Your shortlist</div><div class="v">${counts.short}</div></div>`;
+}
+
+function syncViewBtn() {
+  $("#view").textContent = showReels ? "☰ Compact view" : "▦ Show posts";
+  cards.className = showReels ? "pgrid" : "pgrid no-embeds";
+}
+$("#view").onclick = () => {
+  showReels = !showReels;
+  localStorage.setItem("pl.reels", showReels ? "1" : "0");
+  syncViewBtn(); render();
+  window.scrollTo({ top: 0 });
+};
+syncViewBtn();
+
+["q","role","status","sort","onlyShort"].forEach(id =>
+  $("#"+id).addEventListener("input", render));
+$("#role").addEventListener("change", render);
+$("#status").addEventListener("change", render);
+$("#sort").addEventListener("change", render);
+
+$("#csv").onclick = () => {
+  const head = "Name,Handle,Role,City,Tier,Followers,Bio,Contact,Found via,Your status,Quote,Your notes";
+  const body = PLANNERS.map(p => {
+    const s = Store.vendor(p.handle);
+    return [p.name, "@"+p.handle, p.role, p.city, p.tier, p.followers, p.bio,
+      p.contact.map(c => c.t+": "+c.v).join(" | "), p.via,
+      s.status || "Not reviewed", s.quote || "", s.notes || ""]
+      .map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
+  }).join("\n");
+  const blob = new Blob([head+"\n"+body], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "wedding-planners.csv"; a.click();
+};
+
+
+
+$("#addCard").onclick = () => openForm({
+  title: "Add a planner",
+  fields: [
+    { k:"name", label:"Name", required:true, ph:"Vendor or event name" },
+    { k:"type", label:"Type", type:"select", options:["Planner","Decor / Design","Venue","Event","Booking","Other"] },
+    { k:"handle", label:"Instagram @handle", ph:"without the @" },
+    { k:"phone", label:"Phone", type:"tel", ph:"+91…" },
+    { k:"email", label:"Email", type:"email", ph:"name@…" },
+    { k:"website", label:"Website / link", ph:"https://…" },
+    { k:"city", label:"City / area" },
+    { k:"quote", label:"Quote", ph:"₹" },
+    { k:"status", label:"Status", type:"select", options:STATUSES, default:"Shortlisted" },
+    { k:"referredBy", label:"Referred by", ph:"Who recommended them?" },
+    { k:"desc", label:"Notes", type:"textarea" }
+  ],
+  onSave: v => {
+    const item = Store.add("custom:planners", {
+      name:v.name, type:v.type, city:v.city, desc:v.desc,
+      handle:(v.handle||"").replace(/^@/,""), referredBy:v.referredBy });
+    Store.setVendor("custom:" + item.id, {
+      vname:v.name, phone:v.phone, email:v.email, website:v.website, quote:v.quote,
+      status:v.status || "Shortlisted",
+      notes:[v.desc, v.referredBy && ("Referred by " + v.referredBy)].filter(Boolean).join("\n") });
+    render(); stats(); window.scrollTo({top:0}); toast("Added — it's at the top of the list");
+  }
+});
+
+$("#enquire").onclick = () => {
+  const custom = Store.list("custom:planners").map(c => ({
+    handle: "custom:" + c.id, name: c.name, contact: [] }));
+  /* Planners only, as agreed — decor studios and photographers excluded. */
+  const planners = PLANNERS.filter(p => /planner/i.test(p.role));
+  openOutreach(custom.concat(planners));
+};
+
+$("#dead").innerHTML = DEAD_LINKS.map(d =>
+  `<p class="small" style="margin:0 0 8px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.url)}</a><br>
+   <span class="muted">${esc(d.reason)}</span></p>`).join("");
+
+stats(); render();
+</script>
+</body>
+</html>
