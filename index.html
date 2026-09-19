@@ -6,7 +6,7 @@
 <title>Vivek &amp; Vidhi · 26–27 January 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
 </head>
 <body>
 <main class="wrap">
@@ -25,8 +25,8 @@
   <div class="stats" id="stats"></div>
 
   <div class="sec">
-    <h2>Modules</h2>
-    <p class="sub">Each one is a working board — add rows, set status, filter, export.</p>
+    <h2>Wedding details &amp; saved research</h2>
+    <p class="sub">Your confirmed details, saved selections, and research.</p>
     <div class="grid g3" id="tiles"></div>
   </div>
 
@@ -50,8 +50,8 @@
         <h3>Wedding details</h3>
         <p class="small muted">Shown in page headers.</p>
         <div class="field" style="margin-top:12px"><label>Couple</label><input id="sCouple"></div>
-        <div class="field"><label>City</label><input id="sCity" placeholder="e.g. Udaipur"></div>
-        <div class="field"><label>Venue</label><input id="sVenue" placeholder="Once you've booked it"></div>
+        <div class="field"><label>City</label><input id="sCity"></div>
+        <div class="field"><label>Venue</label><input id="sVenue"></div>
         <button class="btn primary" id="saveSettings">Save</button>
       </div>
     </div>
@@ -63,7 +63,7 @@
 
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script src="assets/js/data-planners.js?v=b31d1207"></script>
 <script src="assets/js/data-categories.js?v=b31d1207"></script>
@@ -77,7 +77,7 @@ const s = Store.get("settings");
 
 /* stats */
 function stats() {
-  const cl = Store.list("checklist");
+  const cl = Store.visibleList("checklist");
   const done = cl.filter(t => t.status === "Done").length;
   const pct = cl.length ? Math.round(done/cl.length*100) : 0;
 
@@ -86,30 +86,31 @@ function stats() {
     ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(v.status)).length;
   const booked = Object.values(vend).filter(v => v.status === "Booked").length;
 
-  const budget = Store.list("budget");
+  const budget = Store.visibleList("budget");
   const est = budget.reduce((a,b) => a + (+b.estimated||0), 0);
   const act = budget.reduce((a,b) => a + (+b.actual||0), 0);
 
-  const g = Store.list("guests");
+  const g = Store.visibleList("guests");
   const yes = g.filter(x => x.rsvp === "Attending").reduce((a,b) => a + (+b.pax||1), 0);
 
   $("#stats").innerHTML = `
-    <div class="stat"><div class="k">Checklist</div><div class="v">${pct}%</div>
+    ${cl.length ? `<div class="stat"><div class="k">Checklist</div><div class="v">${pct}%</div>
       <div class="bar"><i style="width:${pct}%"></i></div>
-      <div class="small muted" style="margin-top:5px">${done} of ${cl.length} done</div></div>
+      <div class="small muted" style="margin-top:5px">${done} of ${cl.length} done</div></div>` : ""}
     <div class="stat"><div class="k">Vendors in play</div><div class="v">${short}</div>
       <div class="small muted" style="margin-top:5px">${booked} booked · ${PLANNERS.length + Object.values(CATEGORIES).reduce((a,c)=>a+c.links.length,0)} in directory</div></div>
-    <div class="stat"><div class="k">Budget estimated</div><div class="v sm">${inr(est)}</div>
-      <div class="small muted" style="margin-top:5px">${inr(act)} committed so far</div></div>
-    <div class="stat"><div class="k">Guests confirmed</div><div class="v">${yes}</div>
-      <div class="small muted" style="margin-top:5px">${g.length} on the list</div></div>`;
+    ${budget.length ? `<div class="stat"><div class="k">Budget estimated</div><div class="v sm">${inr(est)}</div>
+      <div class="small muted" style="margin-top:5px">${inr(act)} committed so far</div></div>` : ""}
+    ${g.length ? `<div class="stat"><div class="k">Guests confirmed</div><div class="v">${yes}</div>
+      <div class="small muted" style="margin-top:5px">${g.length} on the list</div></div>` : ""}`;
 }
 
 /* tiles */
 const TILES = [
+  ["men-kurtas.html","👔","Men’s kurtas","Member selections and the product shortlist.","kurtas"],
   ["checklist.html","✅","Checklist","Every task, dated back from the wedding. The spine of all this.","checklist"],
   ["venues.html","🏛","Venue","Ikshana Resort &amp; Spa, Khandala — photos and what to ask them.","venues"],
-  ["planners.html","💐","Planners","42 saved posts, 42 vendors identified, with contact info and your notes.","cat:planners"],
+  ["planners.html","💐","Planners","Planner finalized. Historical vendor research and notes.","cat:planners"],
   ["photographers.html","📷","Photo &amp; Film","Photographers and videographers.","cat:photographers"],
   ["mua.html","💄","MUA &amp; Hair","Makeup artists and hair stylists.","cat:mua"],
   ["choreographers.html","💃","Choreographers","Sangeet choreography.","cat:choreographers"],
@@ -126,19 +127,22 @@ const TILES = [
 ];
 $("#tiles").innerHTML = TILES.map(([h,ic,t,d,key]) => {
   let n, unit = "item";
+  if (key === "kurtas") return `<a class="tile" href="${h}"><div class="ico">${ic}</div><h3>${t}</h3><p>${d}</p></a>`;
   if (key === "cat:planners") { n = PLANNERS.length; unit = "vendor"; }
   else if (key.startsWith("cat:")) { n = CATEGORIES[key.slice(4)].links.length; unit = "saved post"; }
-  else n = Store.list(key).length;
+  else n = Store.visibleList(key).length;
+  if (!n && key !== "venues") return "";
   return `<a class="tile" href="${h}"><div class="ico">${ic}</div>
     <h3>${t}</h3><p>${d}</p><div class="meta">${n} ${unit}${n===1?"":"s"} →</div></a>`;
 }).join("");
 
 /* next up */
 function next() {
-  const items = Store.list("checklist")
+  const items = Store.visibleList("checklist")
     .filter(t => t.status !== "Done")
     .sort((a,b) => (a.due||"9").localeCompare(b.due||"9"))
     .slice(0,8);
+  $("#next").closest(".sec").hidden = !items.length;
   $("#next").innerHTML = items.length ? `<table>
     <thead><tr><th>Task</th><th>Category</th><th>Due</th><th>Priority</th></tr></thead>
     <tbody>${items.map(t => {
@@ -147,7 +151,7 @@ function next() {
       <td>${overdue ? `<span class="pill hot">${fmtDate(t.due)}</span>` : fmtDate(t.due)}</td>
       <td><span class="pill ${t.priority==="High"?"warn":""}">${esc(t.priority)}</span></td></tr>`;
     }).join("")}</tbody></table>`
-    : `<div class="empty">Nothing pending. Suspicious.</div>`;
+    : `<div class="empty">No saved deadlines.</div>`;
 }
 
 /* settings */

@@ -1,4 +1,4 @@
-/* Local review drafts only. The Google Sheet remains the shared master. */
+/* Google Sheet is authoritative; offline drafts are never automatically uploaded. */
 (() => {
   const KEY = 'weddingKurta.drafts.v1';
   let drafts;
@@ -9,7 +9,7 @@
   for (const row of Store.list('kurtaSelections')) {
     if (!drafts[row.name]) drafts[row.name] = {url: row.url || '', ordered: false, notes: ''};
   }
-  let dirty = false;
+  let dirty = false, live = false, refreshing = false;
   const validURL = value => {
     if (!value) return '';
     try {
@@ -21,7 +21,7 @@
   const status = row => validURL(row.url || '') ? (row.ordered ? 'Ordered' : 'Finalized') : 'Pending';
   const selection = (name, id) => {
     const source = KURTA_SHEET_MEMBERS.find(row => row.id === id);
-    return drafts[id] || (KURTA_MEMBERS.filter(row => row[0] === name).length === 1 && drafts[name]) || {url: source?.urls.length === 1 ? source.urls[0] : '', ordered: source?.ordered || false, notes: ''};
+    return (KurtaCloud.enabled ? {url:source?.urls.length===1?source.urls[0]:'',ordered:source?.ordered||false,notes:''} : null) || drafts[id] || (KURTA_MEMBERS.filter(row => row[0] === name).length === 1 && drafts[name]) || {url: source?.urls.length === 1 ? source.urls[0] : '', ordered: source?.ordered || false, notes: ''};
   };
   const website = value => {
     const host = new URL(value).hostname.replace(/^www\./, '');
@@ -57,7 +57,7 @@
   function summary() {
     const rows = KURTA_MEMBERS.map(([name,,id]) => selection(name,id));
     const finalized = rows.filter(row => status(row) !== 'Pending').length;
-    $('#kurtaProgress').textContent = `${finalized} / ${rows.length} finalized in this browser`;
+    $('#kurtaProgress').textContent = `${finalized} / ${rows.length} finalized${live ? " in the Sheet" : " in this browser"}`;
     $('#finalizedCount').textContent = finalized;
     $('#pendingCount').textContent = rows.length - finalized;
     $('#orderedCount').textContent = rows.filter(row => status(row) === 'Ordered').length;
@@ -76,21 +76,21 @@
       if ((query && !name.toLowerCase().includes(query)) || (sizeFilter && size !== sizeFilter) || (statusFilter && state !== statusFilter)) return '';
       count++;
       const safe = validURL(row.url || '');
-      const urls = safe ? [safe] : !drafts[id] && !drafts[name] && source.urls.length > 1 ? source.urls : [];
+      const urls = safe ? [safe] : (KurtaCloud.enabled || (!drafts[id] && !drafts[name])) && source.urls.length > 1 ? source.urls : [];
       return `<tr class="kurta-person" data-member="${index}">
-        <th scope="row"><strong>${esc(name)}</strong><span class="kurta-source">${drafts[id] || drafts[name] ? 'Browser draft' : ''}</span></th>
+        <th scope="row"><strong>${esc(name)}</strong><span class="kurta-source">${!KurtaCloud.enabled && (drafts[id] || drafts[name]) ? 'Browser draft' : ''}</span></th>
         <td>${esc(size || 'TBC')}</td>
         <td><div class="kurta-picks">${urls.length ? urls.map((url,i)=>`<div class="kurta-option">${preview(url, `${name}${urls.length > 1 ? ` · option ${i+1}` : '’s kurta'}`)}${urls.length>1?`<small>Option ${i+1}</small>`:''}</div>`).join('') : '<span class="muted">—</span>'}</div></td>
         <td class="kurta-websites">${urls.length ? urls.map((url,i)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(website(url))}${urls.length>1?` · ${i+1}`:''} ↗</a>`).join('') : '<span class="muted">—</span>'}</td>
         <td><span class="pill ${state === 'Pending' ? '' : 'gold'}">${urls.length>1?'To confirm':state}</span></td>
-        <td><button type="button" class="btn sm" data-edit="${index}" aria-label="Edit ${esc(name)}">Edit</button></td>
+        <td>${KurtaCloud.enabled ? `<a class="btn sm" href="https://docs.google.com/spreadsheets/d/1hmqgzqWfTX95TDVx_oNQt0JDQs217eEfZZem3b1UWdM/edit#gid=1612224464" target="_blank" rel="noopener noreferrer">Edit in Sheet ↗</a>` : `<button type="button" class="btn sm" data-edit="${index}" aria-label="Edit ${esc(name)}">Edit</button>`}</td>
       </tr><tr class="kurta-edit-row" data-editor="${index}" hidden><td colspan="6">
-<form data-index="${index}">
+<form data-index="${index}" data-id="${esc(id)}" data-revision="${esc(source.revision || '')}">
           <label for="url-${index}">Finalized link</label><input id="url-${index}" name="url" type="url" value="${esc(row.url || '')}" placeholder="Paste a product link" aria-describedby="feedback-${index}">
-          <label for="notes-${index}">Notes</label><textarea id="notes-${index}" name="notes" rows="2" maxlength="1000" placeholder="Colour, fit or delivery notes">${esc(row.notes || '')}</textarea>
+          <label for="notes-${index}" ${live ? 'hidden' : ''}>Notes (this browser)</label><textarea ${live ? 'hidden' : ''} id="notes-${index}" name="notes" rows="2" maxlength="1000" placeholder="Colour, fit or delivery notes">${esc(row.notes || '')}</textarea>
           <label class="kurta-check"><input name="ordered" type="checkbox" ${row.ordered ? 'checked' : ''}> Ordered</label>
-          <div class="btn-row"><button class="btn primary" type="submit">Save draft</button>${safe ? `<a class="btn" href="${esc(safe)}" target="_blank" rel="noopener noreferrer">View pick ↗</a>` : ''}</div>
-          <p id="feedback-${index}" class="small kurta-feedback" role="status">Saved changes stay in this browser.</p>
+          <div class="btn-row"><button class="btn primary" type="submit">${live ? 'Save to Sheet' : 'Save draft'}</button>${safe ? `<a class="btn" href="${esc(safe)}" target="_blank" rel="noopener noreferrer">View pick ↗</a>` : ''}</div>
+          <p id="feedback-${index}" class="small kurta-feedback" role="status">${live ? 'Changes save directly to the shared Sheet.' : 'Saved changes stay in this browser.'}</p>
         </form></td></tr>`;
     }).join('');
     $('#resultCount').textContent = `${count} of ${KURTA_MEMBERS.length} members`;
@@ -108,13 +108,14 @@
         form.dataset.dirty = 'true'; dirty = true;
         form.querySelector('[role=status]').textContent = 'Unsaved changes';
       });
-      form.addEventListener('submit', event => {
+      form.addEventListener('submit', async event => {
         event.preventDefault();
         const [name,,id] = KURTA_MEMBERS[Number(form.dataset.index)];
         const data = new FormData(form), raw = data.get('url').trim(), url = validURL(raw);
         const feedback = form.querySelector('[role=status]');
         if (url === null) { feedback.textContent = 'Enter one valid http or https product link.'; return; }
         if (data.has('ordered') && !url) { feedback.textContent = 'Add a finalized link before marking this ordered.'; return; }
+        if (KurtaCloud.enabled) return; // Production selections are edited in the Sheet.
         const next = {...drafts, [id]: {url, ordered: data.has('ordered'), notes: data.get('notes').trim()}};
         try { localStorage.setItem(KEY, JSON.stringify(next)); }
         catch { feedback.textContent = 'Could not save. Browser storage is unavailable or full. Keep this page open and copy your changes.'; return; }
@@ -140,13 +141,16 @@
       });
     });
   }
-  $('#kurtaSamples').innerHTML = KURTA_SAMPLES.map((sample, index) => `<article class="card kurta-sample">
+  function renderSamples() { $('#kurtaSamples').innerHTML = KURTA_SAMPLES.map((sample, index) => `<article class="card kurta-sample">
     <div class="kurta-sample-top"><span class="pill gold">${esc(website(sample.url))}</span><span class="small muted">${String(index + 1).padStart(2, '0')}</span></div>
-    <h3>${esc(sample.name)}</h3><p class="small muted">${sample.url.includes('myntra.com') ? 'Myntra' : 'Nykaa'} · Check sizes on the product page</p>
-    <div class="btn-row"><a class="btn" href="${esc(sample.url)}" target="_blank" rel="noopener noreferrer">View product ↗</a><button class="btn primary" data-sample="${index}">Choose for someone</button></div>
+    <h3>${esc(sample.name)}</h3><p class="small muted">${esc(website(sample.url))} · Check sizes on the product page</p>
+    <div class="btn-row"><a class="btn" href="${esc(sample.url)}" target="_blank" rel="noopener noreferrer">View product ↗</a>${KurtaCloud.enabled ? '' : `<button class="btn primary" data-sample="${index}">Choose for someone</button>`}</div>
   </article>`).join('');
+  }
+  function renderOptions() {
   $('#sampleMember').innerHTML = KURTA_MEMBERS.map(([name, size, id], index) => `<option value="${index}">${esc(name)} · ${esc(size || 'size to confirm')}</option>`).join('');
   $('#sizeFilter').innerHTML += [...new Set(KURTA_MEMBERS.map(row => row[1]).filter(Boolean))].map(size => `<option>${esc(size)}</option>`).join('');
+  }
   function discardAllowed() { return !dirty || confirm('Discard unsaved changes before changing this view?'); }
   for (const control of ['memberSearch','sizeFilter','statusFilter']) {
     const element = $('#'+control); let previous = element.value;
@@ -155,12 +159,14 @@
       previous = element.value; renderPeople();
     });
   }
+  $('#memberSearch').addEventListener('input',()=>{if(KurtaCloud.enabled)renderPeople();});
   let sampleIndex = 0;
-  $$('[data-sample]').forEach(button => button.onclick = () => {
+  $('#kurtaSamples').onclick = event => {
+    const button=event.target.closest('[data-sample]');if(!button)return;
     sampleIndex = Number(button.dataset.sample);
     $('#sampleTitle').textContent = KURTA_SAMPLES[sampleIndex].name;
     $('#sampleDialog').showModal();
-  });
+  };
   $('#cancelSample').onclick = () => $('#sampleDialog').close();
   $('#chooseSample').onclick = () => {
     if (!discardAllowed()) return;
@@ -176,12 +182,41 @@
     form.scrollIntoView({behavior:'smooth',block:'center'}); form.elements.url.focus({preventScroll:true});
   };
   $('#exportDrafts').onclick = () => {
-    const blob = new Blob([JSON.stringify({kind:'local-kurta-drafts',exportedAt:new Date().toISOString(),members:KURTA_MEMBERS.map(([name,size,id])=>({id,name,size,...selection(name,id)}))},null,2)],{type:'application/json'});
+    const blob = new Blob([JSON.stringify({kind:live?'sheet-selections':'local-kurta-drafts',exportedAt:new Date().toISOString(),members:KURTA_MEMBERS.map(([name,size,id])=>({id,name,size,...selection(name,id)}))},null,2)],{type:'application/json'});
     const url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url; a.download = 'kurta-drafts.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+    a.href = url; a.download = live ? 'kurta-selections.json' : 'kurta-drafts.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
   window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
   $('a[href="#samples"]').onclick = () => { $('#sampleShortlist').open = true; };
   $('#closePhoto').onclick = () => $('#photoDialog').close();
-  summary(); renderPeople();
+  async function refreshSheet() {
+    if(!KurtaCloud.enabled || refreshing || dirty) return;
+    refreshing=true;$('#sheetStatus').textContent='Reading Google Sheet…';
+    try {
+      const result=await KurtaCloud.read();
+      if(!Array.isArray(result.members)||!Array.isArray(result.samples))throw new Error('Invalid Sheet response.');
+      // A user may have started editing during the network request.
+      if(dirty) {$('#sheetStatus').textContent='Refresh paused while you edit.';return;}
+      KURTA_SHEET_MEMBERS=result.members;
+      KURTA_MEMBERS=result.members.filter(row=>row.name&&!/^TBD\b/i.test(row.name)).map(row=>[row.name,row.size,row.id]);
+      KURTA_SAMPLES=result.samples;
+      live=true;renderSamples();
+      const size=$('#sizeFilter').value;$('#sizeFilter').innerHTML='<option value="">All sizes</option>';
+      renderOptions();$('#sizeFilter').value=size;
+      renderPeople();summary();
+      $('#sheetStatus').textContent='Live Sheet · updated '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      $('#sheetHelp').textContent='Refreshes every minute while this page is visible. Edit selections in the Google Sheet.';
+      $('#shortlistCount').textContent=KURTA_SAMPLES.length+' options';
+      $('#selectionHelp').textContent='Click a photo to enlarge it. Edit selections in the Google Sheet.';
+
+      $('#exportDrafts').textContent='Download selections';
+    }catch(error){$('#sheetStatus').textContent=live?'Sheet refresh failed · showing last loaded data':'Sheet unavailable · showing saved snapshot';$('#sheetHelp').textContent=error.message;}
+    finally {refreshing=false;}
+  }
+  $('#refreshSheet').onclick=()=>{if(discardAllowed()){dirty=false;refreshSheet();}};
+  $('#refreshSheet').hidden=!KurtaCloud.enabled;
+  renderSamples();renderOptions();summary();renderPeople();refreshSheet();
+  setInterval(()=>{if(document.visibilityState==='visible')refreshSheet();},60000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshSheet();});
+
 })();

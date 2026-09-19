@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Food & Drink  · Vivek &amp; Vidhi</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
 </head>
 <body>
 <main class="wrap">
@@ -17,7 +17,7 @@
 <footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
 boot("catering.html");
@@ -40,7 +40,7 @@ Board({
   summary(items){
     const total = items.reduce((a,b)=>a+((+b.perPlate||0)*(+b.pax||0)),0);
     const booked = items.filter(i=>i.status==="Booked").length;
-    const guests = Store.list("guests").filter(g=>g.rsvp==="Attending").reduce((a,b)=>a+(+b.pax||1),0);
+    const guests = Store.visibleList("guests").filter(g=>g.rsvp==="Attending").reduce((a,b)=>a+(+b.pax||1),0);
     return `<div class="stats">
       <div class="stat"><div class="k">Services</div><div class="v">${items.length}</div></div>
       <div class="stat"><div class="k">Booked</div><div class="v">${booked}</div></div>

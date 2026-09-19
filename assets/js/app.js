@@ -50,6 +50,17 @@ const Store = (() => {
     get(k) { return load()[k]; },
     set(k, v) { load()[k] = v; save(); },
 
+    visibleList(k) {
+      const defaults = legacyStarterData()[k] || [];
+      return this.list(k).filter(row => {
+        let original = defaults.find(item => item.id === row.id);
+        if (k === 'venues' && /^vm\d+$/.test(row.id || '')) original = defaults.find(item => item.name === row.name);
+        if (!original) return true;
+        return [...new Set([...Object.keys(original), ...Object.keys(row)])]
+          .filter(key => key !== 'id')
+          .some(key => String(row[key] ?? '') !== String(original[key] ?? ''));
+      });
+    },
     list(k) { const d = load(); if (!Array.isArray(d[k])) d[k] = []; return d[k]; },
     add(k, item) {
       item.id = item.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
@@ -136,7 +147,10 @@ function renderNav(active) {
   const link = (h, l, cls = "") =>
     `<a href="${h}" class="${cls}${h === active ? " active" : ""}">${l}</a>`;
 
-  const groups = NAV.map(g => {
+  const boardPages = {"checklist.html":"checklist", "attire.html":"attire", "invites.html":"invites", "guests.html":"guests", "catering.html":"catering", "budget.html":"budget"};
+  const hasData = href => !boardPages[href] || Store.visibleList(boardPages[href]).length > 0;
+  const groups = NAV.map(group => group.items ? {...group, items:group.items.filter(([href])=>hasData(href))} : group)
+    .filter(group => group.items ? group.items.length : hasData(group.href)).map(g => {
     if (!g.items) return link(g.href, g.label);
     const open = g.items.some(([h]) => h === active);
     return `<div class="nav-group${open ? " has-active" : ""}">
@@ -317,7 +331,7 @@ function Board(cfg) {
   }
 
   function rows() {
-    let items = Store.list(cfg.key);
+    let items = Store.visibleList(cfg.key);
     if (statusFilter) items = items.filter(i => i[cfg.statusField] === statusFilter);
     if (filter) {
       const q = filter.toLowerCase();
@@ -330,7 +344,7 @@ function Board(cfg) {
     const items = rows();
     const cols = cfg.fields.filter(f => !f.hideInTable);
 
-    const summary = cfg.summary ? cfg.summary(Store.list(cfg.key)) : "";
+    const summary = cfg.summary && Store.visibleList(cfg.key).length ? cfg.summary(Store.visibleList(cfg.key)) : "";
 
     mount.innerHTML = `
       ${summary}
@@ -454,11 +468,9 @@ function backupBar(mount) {
   };
 }
 
-/* --------------------------------------------------------------- Seeding */
-/* First visit: pre-load a realistic Indian-wedding checklist keyed to 27 Jan 2027. */
-function seedOnce() {
-  const d = Store.all();
-  if (d._seeded) return;
+/* Historical defaults are comparison data only. Never insert them into Store. */
+function legacyStarterData() {
+  const d = {};
 
   const T = [
     ["Lock the guest-count range (this drives every other number)", "Planning", "2026-08-15", "High"],
@@ -554,48 +566,11 @@ function seedOnce() {
     { id: "i5", item: "Welcome / itinerary cards for hotel rooms", format: "Print", vendor: "", qty: "", cost: "", status: "Not started", sendBy: "2027-01-15", notes: "" }
   ];
 
-  d._seeded = true;
-  Store.set("_seeded", true);
-}
-
-/* ------------------------------------------------------------ Migrations */
-/* seedOnce only runs on a first visit, so anyone who already has data needs
-   these applied separately. Each step is idempotent and never touches rows
-   the user has edited. */
-function migrate() {
-  const d = Store.all();
-  const done = d._migrations || (d._migrations = {});
-
-  // Venue is booked — drop the leftover shortlist row and load the real to-dos.
-  if (!done.venueBooked) {
-    const rows = Store.list("venues");
-    const untouched = r => r.id === "v1" && /Zorba/i.test(r.name || "") &&
-                           !r.cost && !r.contact && !r.visit;
-    const i = rows.findIndex(untouched);
-    if (i > -1) rows.splice(i, 1);
-    if (rows.length === 0) {
-      [["Confirm noise curfew and hard stop for the sangeet","Function space","Khandala is a hill station — assume there is one until told otherwise"],
-       ["Allocate spaces: mandap, sangeet, reception + seated capacity of each","Function space",""],
-       ["Agree room block size and the release date for unsold rooms","Room block",""],
-       ["Confirm decor load-in the day before, and any preferred-vendor list","Logistics",""],
-       ["Settle catering: in-house vs outside, corkage and liquor licence","Catering",""],
-       ["Get the wet-weather plan in writing for every outdoor function","Logistics","Who makes the call, and by when on the day"],
-       ["Check backup power covers the sound and lighting rig","Logistics",""],
-       ["Payment schedule — instalment dates and triggers","Contract",""],
-       ["Get name + mobile of the on-site coordinator for 26–27 Jan","Contract",""],
-       ["Site visit with the planner once one is booked","Site visit",""]
-      ].forEach(([name, type, notes]) =>
-        rows.push({ id: "vm" + rows.length, name, type, status: "To do", notes }));
-    }
-    done.venueBooked = true;
-    Store.set("_migrations", done);
-  }
+  return d;
 }
 
 /* ------------------------------------------------------------------ Boot */
 function boot(activePage) {
-  seedOnce();
-  migrate();
   renderNav(activePage);
   if (typeof Sync !== "undefined") {
     syncBadge();
