@@ -573,7 +573,6 @@ function legacyStarterData() {
 function boot(activePage) {
   renderNav(activePage);
   if (typeof Sync !== "undefined") {
-    syncBadge();
     /* Only reload when a pull genuinely brought different data — never after
        one of our own pushes, or you'd get a reload mid-keystroke. */
     document.addEventListener("sync:pulled", e => {
