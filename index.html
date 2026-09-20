@@ -25,8 +25,8 @@
   <div class="stats" id="stats"></div>
 
   <div class="sec">
-    <h2>Wedding details &amp; saved research</h2>
-    <p class="sub">Your confirmed details, saved selections, and research.</p>
+    <h2>Our wedding</h2>
+    <p class="sub">The venue, our planner, and what we’re wearing.</p>
     <div class="grid g3" id="tiles"></div>
   </div>
 
@@ -65,8 +65,6 @@
 <script src="assets/js/sync.js?v=b31d1207"></script>
 <script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
-<script src="assets/js/data-planners.js?v=b31d1207"></script>
-<script src="assets/js/data-categories.js?v=b31d1207"></script>
 <script>
 boot("index.html");
 
@@ -81,11 +79,6 @@ function stats() {
   const done = cl.filter(t => t.status === "Done").length;
   const pct = cl.length ? Math.round(done/cl.length*100) : 0;
 
-  const vend = Store.all().vendors;
-  const short = Object.values(vend).filter(v =>
-    ["Shortlisted","Contacted","Quote received","Meeting booked","Booked"].includes(v.status)).length;
-  const booked = Object.values(vend).filter(v => v.status === "Booked").length;
-
   const budget = Store.visibleList("budget");
   const est = budget.reduce((a,b) => a + (+b.estimated||0), 0);
   const act = budget.reduce((a,b) => a + (+b.actual||0), 0);
@@ -93,48 +86,26 @@ function stats() {
   const g = Store.visibleList("guests");
   const yes = g.filter(x => x.rsvp === "Attending").reduce((a,b) => a + (+b.pax||1), 0);
 
+  $("#stats").hidden = !cl.length && !budget.length && !g.length;
   $("#stats").innerHTML = `
     ${cl.length ? `<div class="stat"><div class="k">Checklist</div><div class="v">${pct}%</div>
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="small muted" style="margin-top:5px">${done} of ${cl.length} done</div></div>` : ""}
-    <div class="stat"><div class="k">Vendors in play</div><div class="v">${short}</div>
-      <div class="small muted" style="margin-top:5px">${booked} booked · ${PLANNERS.length + Object.values(CATEGORIES).reduce((a,c)=>a+c.links.length,0)} in directory</div></div>
     ${budget.length ? `<div class="stat"><div class="k">Budget estimated</div><div class="v sm">${inr(est)}</div>
       <div class="small muted" style="margin-top:5px">${inr(act)} committed so far</div></div>` : ""}
     ${g.length ? `<div class="stat"><div class="k">Guests confirmed</div><div class="v">${yes}</div>
       <div class="small muted" style="margin-top:5px">${g.length} on the list</div></div>` : ""}`;
 }
 
-/* tiles */
+/* Confirmed details only; research remains accessible through navigation. */
 const TILES = [
-  ["men-kurtas.html","👔","Men’s kurtas","Member selections and the product shortlist.","kurtas"],
-  ["checklist.html","✅","Checklist","Every task, dated back from the wedding. The spine of all this.","checklist"],
-  ["venues.html","🏛","Venue","Ikshana Resort &amp; Spa, Khandala — photos and what to ask them.","venues"],
-  ["planners.html","💐","Planners","Planner finalized. Historical vendor research and notes.","cat:planners"],
-  ["photographers.html","📷","Photo &amp; Film","Photographers and videographers.","cat:photographers"],
-  ["mua.html","💄","MUA &amp; Hair","Makeup artists and hair stylists.","cat:mua"],
-  ["choreographers.html","💃","Choreographers","Sangeet choreography.","cat:choreographers"],
-  ["music.html","🎤","Music, DJ &amp; Anchors","Live singers, DJs and anchors.","cat:music"],
-  ["decor.html","🎪","Decor &amp; Ideas","Decor, favours, games and guest experiences.","cat:decor"],
-  ["mandi.html","🌿","Mandi","Mandi and mehendi setups.","cat:mandi"],
-  ["clothes.html","👗","Clothes","Outfit and couture inspiration.","cat:clothes"],
-  ["jewellery.html","💍","Jewellery","Jewellery and pairings.","cat:jewellery"],
-  ["attire.html","🧵","Attire","Your actual outfit commissions, per function.","attire"],
-  ["invites.html","✉️","Invites","Save-the-dates through welcome cards.","invites"],
-  ["guests.html","🎟","Guests &amp; RSVP","Guest list, RSVPs, dietary needs, tables.","guests"],
-  ["catering.html","🍽","Food &amp; Drink","Menus per function and per-plate costs.","catering"],
-  ["budget.html","💰","Budget","Estimated vs actual, by category.","budget"]
+  ["men-kurtas.html", "👔", "Men’s kurtas", "Member selections and the product shortlist.", "View selections"],
+  ["venues.html", "🏛", "Venue", "Ikshana Resort &amp; Spa, Khandala", "View venue"],
+  ["planners.html", "💐", "Wedding planner", "The Wed Fam · Mumbai", "Meet our planner"]
 ];
-$("#tiles").innerHTML = TILES.map(([h,ic,t,d,key]) => {
-  let n, unit = "item";
-  if (key === "kurtas") return `<a class="tile" href="${h}"><div class="ico">${ic}</div><h3>${t}</h3><p>${d}</p></a>`;
-  if (key === "cat:planners") { n = PLANNERS.length; unit = "vendor"; }
-  else if (key.startsWith("cat:")) { n = CATEGORIES[key.slice(4)].links.length; unit = "saved post"; }
-  else n = Store.visibleList(key).length;
-  if (!n && key !== "venues") return "";
-  return `<a class="tile" href="${h}"><div class="ico">${ic}</div>
-    <h3>${t}</h3><p>${d}</p><div class="meta">${n} ${unit}${n===1?"":"s"} →</div></a>`;
-}).join("");
+$("#tiles").innerHTML = TILES.map(([href,icon,title,description,label]) =>
+  `<a class="tile" href="${href}"><div class="ico">${icon}</div><h3>${title}</h3><p>${description}</p><div class="meta">${label} →</div></a>`
+).join("");
 
 /* next up */
 function next() {
