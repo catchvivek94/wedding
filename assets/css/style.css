@@ -435,3 +435,6 @@ footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 20p
 .oname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .omsg{background:#faf7f2;border:1px solid var(--line);border-radius:11px;padding:15px 17px;
   font-size:13.5px;line-height:1.65;white-space:pre-wrap;max-height:300px;overflow:auto}
+
+/* Honor conditional sections even when component styles set display. */
+[hidden]{display:none!important}

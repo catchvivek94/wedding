@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Venue — Ikshana Resort &amp; Spa</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
 </head>
 <body>
 <main class="wrap">
@@ -70,25 +70,8 @@
   </div>
 
   <div class="sec">
-    <h2>Still to nail down</h2>
-    <p class="sub">The booking is done — these are the operational answers you'll need from the
-    resort before your planner can build a run sheet. Track them as tasks below.</p>
-    <div class="card"><ul class="ticks">
-      <li><b>Noise curfew</b> — hill stations usually have one, and it decides when the sangeet has to stop</li>
-      <li><b>Function spaces</b> — which space for the mandap, sangeet and reception, and the seated capacity of each</li>
-      <li><b>Room block</b> — how many rooms you're holding, and the date unsold ones get released</li>
-      <li><b>Vendor load-in</b> — can decor start setting up the day before, and is there a preferred-vendor list</li>
-      <li><b>Catering</b> — in-house kitchen or outside caterer, and the corkage / liquor-licence position</li>
-      <li><b>Wet-weather plan</b> — where each outdoor function moves to, and who calls it</li>
-      <li><b>Backup power</b> — and whether it covers the sound and lighting rig</li>
-      <li><b>Payment schedule</b> — instalment dates and what triggers each one</li>
-      <li><b>On-site contact</b> — the name and mobile of whoever runs your two days</li>
-    </ul></div>
-  </div>
-
-  <div class="sec">
     <h2>Venue to-dos</h2>
-    <p class="sub">Pre-loaded with the outstanding items above. Add anything else venue-related here.</p>
+    <p class="sub">Your saved venue tasks.</p>
     <div id="board"></div>
   </div>
 
@@ -101,7 +84,7 @@
 
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
 boot("venues.html");
@@ -152,6 +135,7 @@ const VENUE_PHOTOS = [
   });
 })();
 
+document.querySelector("#board").closest(".sec").hidden = !Store.visibleList("venues").length;
 Board({
   mount:"#board", key:"venues", addLabel:"venue task", statusField:"status",
   fields:[

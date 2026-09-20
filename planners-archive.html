@@ -6,7 +6,7 @@
 <title>Wedding Planners  · Vivek &amp; Vidhi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
 </head>
 <body>
 <main class="wrap wide">
@@ -68,7 +68,7 @@
 <script src="assets/js/data-planners.js?v=b31d1207"></script>
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/outreach.js?v=b31d1207"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
@@ -98,7 +98,7 @@ function tierPill(t) {
 }
 
 const openPlanner = handle => {
-  const custom = Store.list("custom:planners").map(c => ({
+  const custom = Store.visibleList("custom:planners").map(c => ({
     handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
     tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
     via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you" }));
@@ -151,7 +151,7 @@ function render() {
   if (sort === "name") list.sort((a,b) => a.name.localeCompare(b.name));
   if (sort === "contact") list.sort((a,b) => b.contact.length - a.contact.length);
 
-  const custom = Store.list("custom:planners").map(c => ({
+  const custom = Store.visibleList("custom:planners").map(c => ({
     handle: "custom:" + c.id, name: c.name, role: c.type || "Planner", city: c.city || "",
     tier: "—", followers: "—", bio: c.desc || "", contact: [], reels: [], _manual: c,
     via: c.referredBy ? "Added by you — referred by " + c.referredBy : "Added by you"
@@ -302,7 +302,7 @@ $("#addCard").onclick = () => openForm({
 });
 
 $("#enquire").onclick = () => {
-  const custom = Store.list("custom:planners").map(c => ({
+  const custom = Store.visibleList("custom:planners").map(c => ({
     handle: "custom:" + c.id, name: c.name, contact: [] }));
   /* Planners only, as agreed — decor studios and photographers excluded. */
   const planners = PLANNERS.filter(p => /planner/i.test(p.role));

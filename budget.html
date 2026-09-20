@@ -5,23 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Budget  · Vivek &amp; Vidhi</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=b31d1207">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
 </head>
 <body>
 <main class="wrap">
   <h1>Budget</h1>
-  <p class="sub">Pre-loaded with twelve typical line items and placeholder estimates totalling roughly ₹70 lakh —
-  overwrite every one of them with your own numbers. They exist to give you a shape to react to, nothing more.</p>
-  <div class="note">The only benchmark from your actual research: <b>WeCurate Events</b> publishes a
-  planner fee starting at <b>₹5 lakh</b>. Most planners here quote privately, and full-service fees
-  commonly run 10–15% of total wedding spend. Treat these placeholders as arithmetic, not advice.</div>
+  <p class="sub">Your recorded costs and payments.</p>
   <div id="board"></div>
   <div class="sec"><h2>By category</h2><div class="tbl-wrap" id="cat"></div></div>
 </main>
 <footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=b31d1207"></script>
+<script src="assets/js/app.js?v=real-data1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
 boot("budget.html");
@@ -56,7 +52,8 @@ const b = Board({
 });
 
 function cats() {
-  const items = Store.list("budget");
+  const items = Store.visibleList("budget");
+  $("#cat").closest(".sec").hidden = !items.length;
   const m = {};
   items.forEach(i => {
     const c = i.category || "Other";
