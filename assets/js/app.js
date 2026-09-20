@@ -119,6 +119,7 @@ function toast(msg) {
    Grouped into five top-level items with dropdowns instead. */
 const NAV = [
   { href: "index.html", label: "Dashboard" },
+  { href: "invitation.html", label: "Invitation" },
   { href: "checklist.html", label: "Checklist" },
   { href: "venues.html", label: "Venue" },
   { label: "Vendors", items: [
