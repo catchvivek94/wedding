@@ -42,36 +42,19 @@
     <div id="gallery"></div>
   </div>
 
-  <div class="sec">
-    <h2>Housekeeping</h2>
-    <div class="grid g2">
-      <div id="backup"></div>
-      <div class="card">
-        <h3>Wedding details</h3>
-        <p class="small muted">Shown in page headers.</p>
-        <div class="field" style="margin-top:12px"><label>Couple</label><input id="sCouple"></div>
-        <div class="field"><label>City</label><input id="sCity"></div>
-        <div class="field"><label>Venue</label><input id="sVenue"></div>
-        <button class="btn primary" id="saveSettings">Save</button>
-      </div>
-    </div>
-  </div>
-
 </main>
 
-<footer>Vivek &amp; Vidhi · 26–27 January 2027 · data stays in this browser</footer>
+<footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
 
 <script src="assets/js/config.js?v=b31d1207"></script>
 <script src="assets/js/sync.js?v=b31d1207"></script>
-<script src="assets/js/app.js?v=real-data1"></script>
+<script src="assets/js/app.js?v=public-ui1"></script>
 <script src="assets/js/photos.js?v=b31d1207"></script>
 <script>
 boot("index.html");
 
 $("#heroBg").style.backgroundImage = `url("assets/img/${HERO_PHOTOS[0]}")`;
 photoGallery("#gallery");
-
-const s = Store.get("settings");
 
 /* stats */
 function stats() {
@@ -125,16 +108,6 @@ function next() {
     : `<div class="empty">No saved deadlines.</div>`;
 }
 
-/* settings */
-$("#sCouple").value = s.couple || "";
-$("#sCity").value = s.city || "";
-$("#sVenue").value = s.venue || "";
-$("#saveSettings").onclick = () => {
-  Store.set("settings", { ...s, couple: $("#sCouple").value, city: $("#sCity").value, venue: $("#sVenue").value });
-  toast("Saved"); location.reload();
-};
-
-backupBar("#backup");
 stats(); next();
 </script>
 </body>
