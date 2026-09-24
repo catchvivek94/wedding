@@ -1,6 +1,57 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invitation · Vivek &amp; Vidhi</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css?v=real-data2">
-<style>body{margin:0} .invitation-frame{display:block;width:100%;height:calc(100svh - 70px);min-height:600px;border:0}</style></head>
-<body><main><iframe class="invitation-frame" src="assets/invitation/index.html" title="Vidhi and Vivek’s wedding invitation"></iframe></main>
-<script src="assets/js/app.js?v=invitation1"></script><script>boot('invitation.html');</script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invitation options · Vivek &amp; Vidhi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=real-data2">
+<style>
+body{margin:0}
+.invitation-options{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line,#e6ddd0);background:var(--paper,#fffaf2)}
+.invitation-options h1{font-size:23px;margin:0}
+.option-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.option-controls button,.preview-link{font:500 13px Inter,sans-serif;border-radius:22px;padding:10px 16px;text-decoration:none}
+.option-controls button{border:1px solid #cbbca6;background:transparent;color:#604b36;cursor:pointer}
+.option-controls button[aria-pressed="true"]{background:#60432e;border-color:#60432e;color:#fff5e2}
+.preview-link{color:#795836}
+.option-controls button:focus-visible,.preview-link:focus-visible{outline:3px solid #b18b52;outline-offset:3px}
+.invitation-frame{display:block;width:100%;height:calc(100svh - 150px);min-height:620px;border:0}
+@media(max-width:600px){.invitation-options{padding:12px 16px}.invitation-options h1{font-size:21px}.option-controls{gap:6px}.option-controls button,.preview-link{padding:10px 12px;font-size:12px}.invitation-frame{height:calc(100svh - 190px);min-height:560px}}
+</style>
+</head>
+<body>
+<main>
+<section class="invitation-options" aria-label="Invitation design options">
+<h1>Invitation designs</h1>
+<div class="option-controls" role="group" aria-label="Choose an invitation design">
+<button type="button" data-option="1" aria-pressed="true" aria-controls="invitation-preview">Option 1 · Botanical</button>
+<button type="button" data-option="2" aria-pressed="false" aria-controls="invitation-preview">Option 2 · Cinematic</button>
+<a class="preview-link" id="full-preview" href="assets/invitation/index.html" target="_blank" rel="noopener">Open full screen ↗</a>
+</div>
+</section>
+<iframe id="invitation-preview" class="invitation-frame" src="assets/invitation/index.html" title="Option 1: Botanical wedding invitation"></iframe>
+</main>
+<script src="assets/js/app.js?v=invitation1"></script>
+<script>
+boot('invitation.html');
+const designs = {
+  '1': {path:'assets/invitation/index.html', name:'Botanical'},
+  '2': {path:'assets/invitation-cinematic/index.html', name:'Cinematic'}
+};
+const frame=document.getElementById('invitation-preview');
+const buttons=document.querySelectorAll('[data-option]');
+function selectDesign(option, updateUrl=true) {
+  const key=Object.hasOwn(designs,option) ? option : '1';
+  const design=designs[key];
+  if(frame.getAttribute('src')!==design.path) frame.src=design.path;
+  frame.title=`Option ${key}: ${design.name} wedding invitation`;
+  document.getElementById('full-preview').href=design.path;
+  buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.option===key)));
+  if(updateUrl){const url=new URL(location.href);url.searchParams.set('option',key);history.replaceState(null,'',url);}
+}
+buttons.forEach(button=>button.addEventListener('click',()=>selectDesign(button.dataset.option)));
+selectDesign(new URLSearchParams(location.search).get('option')||'1',false);
+</script>
+</body>
+</html>
