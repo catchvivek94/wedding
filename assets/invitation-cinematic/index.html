@@ -36,6 +36,27 @@
 .event .dress-note .dress-detail{font-size:12px;margin-top:7px;color:#765f40}
 .wedding .dress-note{margin:24px auto 0}.wedding .colour-wash{margin-left:auto;margin-right:auto}
 @media(max-width:550px){.event .dress-note p{font-size:13px}.event .dress-note .dress-detail{font-size:11px}.dress-note em{font-size:28px}.dress-note .colour-wash{width:170px;height:11px}}
+
+/* Separate paper layers and sequence flap, card, then page reveal. */
+.envelope-stage{isolation:isolate;perspective:1400px}
+.envelope-body{z-index:1}
+.envelope-letter{z-index:2;inset:16px 7% 12px;border-radius:3px;box-shadow:0 3px 12px #59391d18;transition:none}
+.envelope-front{z-index:3}
+.envelope-flap{z-index:4;transition:none;backface-visibility:visible}
+.envelope-caption{z-index:4;transition:opacity .2s}
+.envelope-intro{transition:opacity .25s ease}
+.envelope-intro>h1,.envelope-intro>.eyebrow,.envelope-intro>.place,.envelope-open,.envelope-status{transition:opacity .2s ease}
+.envelope-intro.is-opening>h1,.envelope-intro.is-opening>.eyebrow,.envelope-intro.is-opening>.place,.envelope-intro.is-opening>.envelope-open,.envelope-intro.is-opening>.envelope-status{opacity:0;pointer-events:none}
+.opening .envelope-flap{animation:unfold-flap .65s ease-in-out both;transform:none;z-index:4}
+.opening .envelope-letter{animation:lift-letter 1s cubic-bezier(.22,.65,.3,1) .65s both;transform:none}
+.opening .envelope-caption{opacity:0}
+.opening .wax-seal{opacity:0;transform:translate(-50%,-50%) scale(.8);transition:opacity .2s,transform .2s}
+.envelope-intro.is-departing{opacity:0;pointer-events:none}
+@keyframes unfold-flap{0%{transform:rotateX(0);z-index:4}49%{z-index:4}50%,100%{z-index:0}100%{transform:rotateX(180deg)}}
+@keyframes lift-letter{0%{transform:translateY(0);z-index:2}65%{transform:translateY(-110%);z-index:2}66%{z-index:6}100%{transform:translateY(-110%);z-index:6;box-shadow:0 12px 30px #59391d25}}
+.invitation.arriving{animation:invitation-arrive .6s ease both}
+@keyframes invitation-arrive{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.opening .envelope-flap,.opening .envelope-letter,.invitation.arriving{animation:none}.envelope-intro{transition:none}}
 </style></head><body>
 <!-- EDIT YOUR NAMES, DATES, VENUE AND EVENTS BELOW. -->
 
@@ -80,9 +101,9 @@
 (()=>{
 const intro=document.getElementById('envelope-intro'),invitation=document.getElementById('invitation'),stage=document.getElementById('envelope-stage'),seal=document.getElementById('wax-seal'),open=document.getElementById('envelope-open'),replay=document.getElementById('replay-envelope'),status=document.getElementById('envelope-status');
 let opening=false;
-function reveal(){intro.hidden=true;invitation.hidden=false;opening=false;window.scrollTo({top:0,behavior:'instant'});document.getElementById('names').focus({preventScroll:true});window.invitationMotion?.start();}
-function openInvitation(){if(opening)return;opening=true;seal.disabled=true;open.disabled=true;seal.setAttribute('aria-expanded','true');open.setAttribute('aria-expanded','true');status.textContent='Opening your invitation…';stage.classList.add('opening');if(matchMedia('(prefers-reduced-motion: reduce)').matches)reveal();else setTimeout(reveal,1300);}
-function reset(){window.invitationMotion?.reset();invitation.hidden=true;intro.hidden=false;stage.classList.remove('opening');seal.disabled=false;open.disabled=false;seal.setAttribute('aria-expanded','false');open.setAttribute('aria-expanded','false');status.textContent='Tap the wax seal to open';if(location.hash)history.replaceState(null,'',location.pathname+location.search);window.scrollTo({top:0,behavior:'instant'});seal.focus({preventScroll:true});}
+function reveal(){intro.hidden=true;invitation.hidden=false;invitation.classList.add('arriving');opening=false;window.scrollTo({top:0,behavior:'instant'});document.getElementById('names').focus({preventScroll:true});window.invitationMotion?.start();}
+function openInvitation(){if(opening)return;opening=true;seal.disabled=true;open.disabled=true;seal.setAttribute('aria-expanded','true');open.setAttribute('aria-expanded','true');status.textContent='Opening your invitation…';intro.classList.add('is-opening');stage.classList.add('opening');if(matchMedia('(prefers-reduced-motion: reduce)').matches)reveal();else {setTimeout(()=>intro.classList.add('is-departing'),1750);setTimeout(reveal,2050);}}
+function reset(){window.invitationMotion?.reset();invitation.hidden=true;intro.hidden=false;stage.classList.remove('opening');intro.classList.remove('is-opening','is-departing');invitation.classList.remove('arriving');seal.disabled=false;open.disabled=false;seal.setAttribute('aria-expanded','false');open.setAttribute('aria-expanded','false');status.textContent='Tap the wax seal to open';if(location.hash)history.replaceState(null,'',location.pathname+location.search);window.scrollTo({top:0,behavior:'instant'});seal.focus({preventScroll:true});}
 seal.addEventListener('click',openInvitation);open.addEventListener('click',openInvitation);replay.addEventListener('click',reset);replay.hidden=false;
 })();
 </script>
