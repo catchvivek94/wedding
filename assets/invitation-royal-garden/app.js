@@ -25,7 +25,6 @@
       for (const entry of entries) {
         visible.set(entry.target, entry.intersectionRatio);
         if (entry.isIntersecting && entry.intersectionRatio >= .16) entry.target.classList.add('is-visible');
-        else if (!entry.isIntersecting && !preference.matches) entry.target.classList.remove('is-visible');
       }
       const active = [...visible].sort((a,b) => b[1]-a[1])[0];
       if (active && active[1] > 0) select(active[0].id);
