@@ -27,6 +27,7 @@ body{margin:0}
 <div class="option-controls" role="group" aria-label="Choose an invitation design">
 <button type="button" data-option="1" aria-pressed="true" aria-controls="invitation-preview">Option 1 · Botanical</button>
 <button type="button" data-option="2" aria-pressed="false" aria-controls="invitation-preview">Option 2 · Cinematic</button>
+<button type="button" data-option="3" aria-pressed="false" aria-controls="invitation-preview">Option 3 · Royal Garden</button>
 <a class="preview-link" id="full-preview" href="assets/invitation/index.html" target="_blank" rel="noopener">Open full screen ↗</a>
 </div>
 </section>
@@ -37,7 +38,8 @@ body{margin:0}
 boot('invitation.html');
 const designs = {
   '1': {path:'assets/invitation/index.html', name:'Botanical'},
-  '2': {path:'assets/invitation-cinematic/index.html?v=20260925-families', name:'Cinematic'}
+  '2': {path:'assets/invitation-cinematic/index.html?v=20260925-families', name:'Cinematic'},
+  '3': {path:'assets/invitation-royal-garden/index.html', name:'Royal Garden'}
 };
 const frame=document.getElementById('invitation-preview');
 const buttons=document.querySelectorAll('[data-option]');
