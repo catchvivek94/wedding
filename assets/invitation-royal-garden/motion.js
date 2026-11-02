@@ -4,6 +4,8 @@
   const pages = [...document.querySelectorAll('.event')];
   const scenes = [];
   let frame = 0, previous = 0;
+  const button=document.getElementById("motion-control");
+  let paused=false;
   const vertex = `
     attribute vec2 position;
     varying vec2 uv;
@@ -14,19 +16,22 @@
     varying vec2 uv;
     uniform sampler2D artwork;
     uniform float time;
+    uniform vec2 pageSize;
+    uniform float theme;
     // Smooth envelopes become exactly zero in the surrounding paper.
     // The coordinate field stays continuous across every leaf and stem.
     vec2 breeze(vec2 p,vec2 center,vec2 radius,vec2 anchor,float angle,float period,float phase){
       float r=length((p-center)/radius);
       float envelope=1.-smoothstep(.18,1.,r);
       float wave=sin(time*6.2831853/period+phase);
-      float a=angle*wave*envelope;
+      float a=angle*1.55*wave*envelope;
       vec2 arm=p-anchor;
       return vec2(-arm.y,arm.x)*a;
     }
     void main(){
-      vec2 p=vec2(uv.x,1.-uv.y)*vec2(600.,800.);
+      vec2 p=vec2(uv.x,1.-uv.y)*pageSize;
       vec2 d=vec2(0.);
+      if(theme<.5){
       d+=breeze(p,vec2(181.,77.),vec2(97.,86.),vec2(135.,39.),.035,7.8,.2);
       d+=breeze(p,vec2(302.,39.),vec2(72.,62.),vec2(300.,0.),.031,6.4,1.8);
       d+=breeze(p,vec2(430.,99.),vec2(100.,108.),vec2(414.,46.),-.035,8.7,3.2);
@@ -39,8 +44,30 @@
       float edge=smoothstep(31.,42.,min(p.x,600.-p.x));
       edge*=smoothstep(0.,18.,p.y-.55*abs(p.x-300.));
       d*=edge;
-      vec2 source=clamp(p-d,vec2(.5),vec2(599.5,799.5));
-      gl_FragColor=texture2D(artwork,vec2(source.x/600.,1.-source.y/800.));
+      }else if(theme<1.5){
+        // Banana fronds bend gently; brass lamps and bowls remain anchored.
+        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.017,6.7,.3);
+        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.018,7.6,2.2);
+        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.014,6.2,1.3);
+        d*=smoothstep(0.,13.,min(p.x,pageSize.x-p.x));
+      }else{
+        // Sway only complete hanging strands, softly blended into the canopy.
+        d+=breeze(p,vec2(76.,142.),vec2(34.,136.),vec2(76.,0.),.018,5.8,.4);
+        d+=breeze(p,vec2(216.,158.),vec2(43.,154.),vec2(218.,0.),-.016,6.9,1.8);
+        d+=breeze(p,vec2(328.,137.),vec2(34.,128.),vec2(328.,0.),.016,6.3,3.2);
+        d+=breeze(p,vec2(485.,150.),vec2(34.,145.),vec2(485.,0.),-.016,7.2,2.7);
+        d+=breeze(p,vec2(563.,166.),vec2(33.,148.),vec2(563.,10.),.017,6.5,4.3);
+      }
+      vec2 source=clamp(p-d,vec2(.5),pageSize-vec2(.5));
+      vec4 color=texture2D(artwork,vec2(source.x/pageSize.x,1.-source.y/pageSize.y));
+      if(theme>1.5){
+        // A restrained warm shimmer on the painted lanterns, no added particles.
+        float glow=exp(-pow(length((p-vec2(374.,50.))/vec2(23.,35.)),2.));
+        glow+=exp(-pow(length((p-vec2(319.,158.))/vec2(20.,30.)),2.));
+        glow+=exp(-pow(length((p-vec2(481.,226.))/vec2(22.,35.)),2.));
+        color.rgb+=vec3(.065,.043,.012)*glow*(.5+.5*sin(time*2.1));
+      }
+      gl_FragColor=color;
     }
   `;
   function shader(gl, type, source) {
@@ -52,23 +79,22 @@
   function stop(){cancelAnimationFrame(frame);frame=0;previous=0;}
   function tick(now){
     frame=0;
-    if(reduced.matches || document.hidden) return;
+    if(reduced.matches || document.hidden || !document.body.classList.contains('invitation-open')) return;
     if(!previous || now-previous>=32){
       const elapsed=previous ? Math.min((now-previous)/1000,.1) : 0;
       previous=now;
       for(const scene of scenes){
         if(!scene.visible || scene.paused || scene.lost) continue;
-        scene.time+=elapsed;
+        scene.time+=elapsed*1.32;
         scene.draw();
       }
     }
     if(scenes.some(s=>s.visible&&!s.paused&&!s.lost)) frame=requestAnimationFrame(tick);
   }
-  function start(){if(!frame&&!reduced.matches&&!document.hidden) frame=requestAnimationFrame(tick);}
+  function start(){if(!frame&&!reduced.matches&&!document.hidden&&document.body.classList.contains('invitation-open')) frame=requestAnimationFrame(tick);}
   function createScene(page, image){
     const canvas=page.querySelector('.living-art');
     const paper=page.querySelector('.paper');
-    const button=page.querySelector('.motion-toggle');
     const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,powerPreference:'low-power'});
     if(!gl) return;
     try {
@@ -90,14 +116,17 @@
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
       const clock=gl.getUniformLocation(program,'time');
-      const scene={visible:false,paused:false,lost:false,time:0,draw(){
+      const height=Number(page.querySelector('image.still-art').getAttribute('height'));
+      gl.uniform2f(gl.getUniformLocation(program,'pageSize'),600,height);
+      gl.uniform1f(gl.getUniformLocation(program,'theme'),page.id==='wedding'?1:page.id==='sangeet'?2:0);
+      const scene={visible:false,paused:paused,lost:false,time:0,draw(){
         gl.uniform1f(clock,this.time);gl.drawArrays(gl.TRIANGLES,0,6);
         canvas.dataset.motionTime=this.time.toFixed(2);
       }};
       const resize=()=>{
         const width=Math.min(1200,Math.round(paper.clientWidth*Math.min(devicePixelRatio||1,2)));
         if(!width) return;
-        canvas.width=width;canvas.height=Math.round(width*4/3);
+        canvas.width=width;canvas.height=Math.round(width*height/600);
         gl.viewport(0,0,canvas.width,canvas.height);scene.draw();
       };
       new ResizeObserver(resize).observe(paper);resize();
@@ -106,28 +135,37 @@
         start();
       },{rootMargin:'40px'}).observe(page);
       canvas.addEventListener('webglcontextlost',()=>{
-        scene.lost=true;paper.classList.remove('has-art-motion');button.hidden=true;
-      });
-      button.addEventListener('click',()=>{
-        scene.paused=!scene.paused;
-        button.setAttribute('aria-pressed',String(scene.paused));
-        button.textContent=scene.paused?'Resume motion':'Pause motion';
-        button.setAttribute('aria-label',`${scene.paused?'Resume':'Pause'} gentle motion for ${page.getAttribute('aria-label')}`);
-        start();
+        scene.lost=true;paper.classList.remove('has-art-motion');
       });
       scenes.push(scene);paper.classList.add('has-art-motion');
-      button.hidden=reduced.matches;
+      button.disabled=reduced.matches;
     } catch(error) {
       // The complete still illustration remains available on unsupported devices.
       console.warn('Botanical motion unavailable:',error.message);
     }
   }
-  const image=new Image();
-  image.onload=()=>{pages.forEach(page=>createScene(page,image));start();};
-  image.src=document.querySelector('image.still-art').getAttribute('href');
+  button.addEventListener('click',()=>{
+    paused=!paused;
+    scenes.forEach(scene=>{scene.paused=paused;});
+    button.setAttribute('aria-pressed',String(paused));
+    button.setAttribute('aria-label',paused?'Resume gentle animation':'Pause gentle animation');
+    if(paused)stop();else start();
+  });
+  document.addEventListener('invitation:opened',start);
+  const images=new Map();
+  pages.forEach(page=>{
+    const src=page.querySelector('image.still-art').getAttribute('href');
+    if(!images.has(src)) images.set(src,[]);
+    images.get(src).push(page);
+  });
+  images.forEach((targets,src)=>{
+    const image=new Image();
+    image.onload=()=>{targets.forEach(page=>createScene(page,image));start();};
+    image.src=src;
+  });
   document.addEventListener('visibilitychange',()=>{if(document.hidden) stop();else start();});
   reduced.addEventListener('change',()=>{
-    pages.forEach(page=>{page.querySelector('.motion-toggle').hidden=reduced.matches||!page.querySelector('.paper').classList.contains('has-art-motion');});
+    button.disabled=reduced.matches;
     if(reduced.matches)stop();else start();
   });
 })();
