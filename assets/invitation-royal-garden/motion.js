@@ -58,7 +58,7 @@
         d+=breeze(p,vec2(532.,147.),vec2(35.,76.),vec2(532.,55.),-.013,7.2,2.7);
       }
       if(theme>2.5 && theme<3.5){
-        // Mehendi: keep the parasol, table, chair and tiger completely still.
+        // Mehendi: keep the parasol, table, chair completely still.
         d+=breeze(p,vec2(96.,394.),vec2(97.,104.),vec2(40.,520.),.009,7.8,.3);
         d+=breeze(p,vec2(537.,501.),vec2(67.,74.),vec2(575.,584.),-.009,8.6,2.1);
         d+=breeze(p,vec2(460.,62.),vec2(125.,75.),vec2(578.,5.),.006,8.1,1.4);

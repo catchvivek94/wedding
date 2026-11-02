@@ -55,6 +55,10 @@
 @media(max-width:520px){.wax-seal{width:70px;height:70px}}
 @media(prefers-reduced-motion:reduce){.motion-ready .living-art,.motion-ready image.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}}
 
-/* Dark Phere paper is visible before its suspended decorations arrive. */
-#phere .paper{background:#061724}
+/* Warm sunset paper appears before the suspended decorations. */
+#phere .paper{background:#eac8b9}
 #haldi .paper{background:#f5f1e6}
+
+/* Venue and location stay in place, with discreet, keyboard-accessible links. */
+.venue-link text{text-decoration:underline;text-decoration-thickness:.45px;text-underline-offset:3px;cursor:pointer}
+.venue-link:hover text,.venue-link:focus-visible text{text-decoration-thickness:1px}

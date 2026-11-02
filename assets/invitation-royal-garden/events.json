@@ -1,0 +1,189 @@
+{
+  "couple": "Vidhi & Vivek",
+  "bride_parents": [
+    "Chetan Patel",
+    "Leela Patel"
+  ],
+  "groom_parents": [
+    "Shashikant Kulkarni",
+    "Madhuri Kulkarni"
+  ],
+  "venue": "Ikshana Resort and Spa",
+  "location": "Khandala",
+  "map_url": "https://maps.app.goo.gl/1yEEkUati3wdLUSb9",
+  "source_url": "https://catchvivek94.github.io/wedding/assets/invitation-cinematic/index.html?v=20260925-families",
+  "design_reference": "https://www.instagram.com/p/C3H6adqqhE8/",
+  "events": [
+    {
+      "id": "haldi",
+      "nav": "Haldi & Mehendi",
+      "title": [
+        "Carnival, Haldi",
+        "& Mehendi"
+      ],
+      "eyebrow": "A SPLASH OF SUNSHINE",
+      "date": "TUESDAY, 26 JANUARY 2027",
+      "time": "12 NOON - 3 PM",
+      "details": [
+        "Join us for an afternoon of colour, laughter,",
+        "haldi and mehendi as our celebrations begin."
+      ],
+      "dress_label": "DRESS CODE",
+      "dress": [
+        "Fuchsia & tangerine for everyone."
+      ],
+      "colors": [
+        {
+          "name": "Fuchsia",
+          "hex": "#C61765"
+        },
+        {
+          "name": "Tangerine",
+          "hex": "#EC8B35"
+        }
+      ],
+      "suggestions": [
+        "Light, festive Indian wear: a kurta set,",
+        "saree or lehenga, with comfortable footwear."
+      ],
+      "note": "Choose fabrics you can move and celebrate in.",
+      "accent": "#AD315D"
+    },
+    {
+      "id": "phere",
+      "nav": "Phere & Varmala",
+      "title": [
+        "Phere & Varmala"
+      ],
+      "eyebrow": "BLESSINGS FOR A BEAUTIFUL BEGINNING",
+      "date": "TUESDAY, 26 JANUARY 2027",
+      "time": "6 PM",
+      "details": [
+        "Be with us as we exchange garlands and",
+        "take our vows, surrounded by love and blessings."
+      ],
+      "dress_label": "DRESS CODE",
+      "dress": [
+        "Pink, beige, white, cream,",
+        "pastel blue & pastel green."
+      ],
+      "colors": [
+        {
+          "name": "Pink",
+          "hex": "#DCA9B7"
+        },
+        {
+          "name": "Beige",
+          "hex": "#CFBB9D"
+        },
+        {
+          "name": "White",
+          "hex": "#FEFCF7"
+        },
+        {
+          "name": "Cream",
+          "hex": "#EEE2BF"
+        },
+        {
+          "name": "Blue",
+          "hex": "#B5C8D7"
+        },
+        {
+          "name": "Green",
+          "hex": "#B9C9AD"
+        }
+      ],
+      "suggestions": [
+        "Soft pastel sarees, lehengas or kurta sets",
+        "with delicate jewellery and traditional accents."
+      ],
+      "note": "Ladies, please avoid white and ivory.",
+      "accent": "#956A51"
+    },
+    {
+      "id": "wedding",
+      "nav": "Maharashtrian Wedding",
+      "title": [
+        "Maharashtrian",
+        "Wedding"
+      ],
+      "eyebrow": "THE DAY OUR FOREVERS BEGIN",
+      "date": "WEDNESDAY, 27 JANUARY 2027",
+      "time": "10 AM",
+      "details": [
+        "Two families, one blessing, a lifetime of love.",
+        "Join us for our Maharashtrian wedding ceremony."
+      ],
+      "dress_label": "SUGGESTED ATTIRE",
+      "dress": [
+        "Traditional Indian or Maharashtrian attire."
+      ],
+      "colors": [],
+      "suggestions": [
+        "A Paithani or silk saree, a festive kurta",
+        "or a dhoti-kurta with traditional accessories."
+      ],
+      "note": "Attire suggestions; no colour palette is specified.",
+      "accent": "#7C7844"
+    },
+    {
+      "id": "sangeet",
+      "nav": "Sangeet & Party",
+      "title": [
+        "Sangeet & Party"
+      ],
+      "eyebrow": "AFTER-DARK ELEGANCE",
+      "date": "WEDNESDAY, 27 JANUARY 2027",
+      "time": "7 PM",
+      "details": [
+        "An evening of music, dance and celebration.",
+        "Come ready to make memories on the dance floor."
+      ],
+      "dress_label": "DRESS CODE",
+      "dress": [
+        "Indo-Western in rich, dark shades."
+      ],
+      "colors": [
+        {
+          "name": "Navy",
+          "hex": "#26354E"
+        },
+        {
+          "name": "Terracotta",
+          "hex": "#AA5E43"
+        },
+        {
+          "name": "Chocolate",
+          "hex": "#6A4937"
+        },
+        {
+          "name": "Cherry red",
+          "hex": "#8F2944"
+        },
+        {
+          "name": "Dark choc.",
+          "hex": "#3D2925"
+        },
+        {
+          "name": "Black",
+          "hex": "#292827"
+        },
+        {
+          "name": "Deep red",
+          "hex": "#621B2A"
+        },
+        {
+          "name": "Pine green",
+          "hex": "#2D4C3B"
+        }
+      ],
+      "suggestions": [
+        "Try a draped saree, an Indo-Western lehenga,",
+        "or a bandhgala with a contemporary silhouette."
+      ],
+      "note": "Indo-Western attire only; no Western wear.",
+      "accent": "#6E3744"
+    }
+  ],
+  "venue_url": "https://ikshanaresorts.com/"
+}
