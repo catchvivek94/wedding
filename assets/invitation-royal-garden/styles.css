@@ -13,3 +13,28 @@
 @media print{@page{size:600pt 800pt;margin:0}.envelope-gate,.floating-dock,dialog,footer{display:none!important}body{background:white;overflow:visible!important}.invitation-content{visibility:visible!important;max-width:none;box-shadow:none;animation:none!important}main{padding:0;margin:0}.event{width:600pt;height:800pt;break-after:page}.event:last-child{break-after:auto}.paper svg{width:600pt;height:800pt}.living-art{display:none!important}.still-art{visibility:visible!important}.reveal-copy{opacity:1!important}}
 
 @media print{#wedding{page:maharashtrian;height:1100pt}#wedding .paper svg{height:1100pt}#sangeet{page:sangeet;height:750pt}#sangeet .paper svg{height:750pt}@page maharashtrian{size:600pt 1100pt;margin:0}@page sangeet{size:600pt 750pt;margin:0}}
+/* A three-beat entrance: paper, whole illustration, then readable type. */
+#wedding .paper{background:#fff}#sangeet .paper{background:#071629}
+.motion-ready .living-art,.motion-ready image.still-art{opacity:0;transform:translateY(9px) scale(.985);transform-origin:50% 65%;transition:opacity 1.15s ease .28s,transform 1.65s cubic-bezier(.16,.7,.25,1) .28s}
+.motion-ready rect.still-art{opacity:0}.motion-ready .is-visible .living-art,.motion-ready .is-visible image.still-art{opacity:1;transform:none}
+.motion-ready .reveal-copy{opacity:0;transform:translateY(5px);transition:opacity .85s ease var(--reveal-delay,1800ms),transform 1.1s ease var(--reveal-delay,1800ms)}
+.motion-ready .is-visible .reveal-copy{opacity:1;transform:none}
+.floating-dock{width:min(420px,calc(100% - 32px));padding:7px 9px;bottom:calc(12px + env(safe-area-inset-bottom));border-radius:40px}
+.floating-dock button{flex:1;min-width:0;min-height:39px;padding:4px 7px;gap:3px;font-size:12px;font-weight:normal;border-radius:26px;transition:background .3s,color .3s}
+.floating-dock .event-number{font-size:8px;letter-spacing:1.3px;opacity:.55}.floating-dock button[aria-current]{background:#e5dfcb;color:#644d32}.floating-dock button:hover{background:#ece6d7;color:#644d32}
+/* Champagne paper, a restrained card and an embossed wine-coloured wax seal. */
+.envelope-trigger{width:min(460px,83vw)}.envelope-trigger:focus-visible{outline:none}.envelope-trigger:focus-visible .wax-seal{outline:2px solid #97713c;outline-offset:6px}
+.envelope{aspect-ratio:1.5;filter:drop-shadow(0 16px 20px #69423822)}
+.env-back{background:#d4b88c}.env-lining{border-color:#c3a371}
+.env-pocket{background:linear-gradient(135deg,#e4cda5,#d7bb90)}.env-fold-left{background:linear-gradient(120deg,#e6cea5,#d6ba8f)}.env-fold-right{background:linear-gradient(250deg,#e4caa1,#d2b389)}.env-front{background:linear-gradient(0deg,#ddc49b,#e6d1af)}.flap-outside{background:linear-gradient(170deg,#f1dfbd,#dfc49a)}.flap-outside::before{border-color:#b99c6b55}.flap-inside{background:#ceaf83}
+.front-inscription{color:#765334;font-size:8px;letter-spacing:2px;bottom:10%}
+.env-card{background:#fcf9ef;inset:6% 12% 5%;border:1px solid #d1bd98;outline:1px solid #e9ddc7;outline-offset:-9px;gap:12px;transition:transform 1.15s cubic-bezier(.22,.65,.2,1) 1.3s}
+.env-card::before{content:'❧';color:#8f9271;font-size:27px;line-height:1;margin-top:3px}.card-overline{margin-top:0;font-size:6px;letter-spacing:1.4px}.card-names{font-size:28px;line-height:1.05;font-weight:normal}.card-names i{font-size:17px;color:#956848}.card-location{font-size:6px;letter-spacing:1.2px}
+.wax-seal{position:absolute;z-index:10;left:50%;top:66%;width:78px;height:78px;transform:translate(-50%,-50%) rotate(-7deg);border-radius:48% 52% 49% 51% / 51% 47% 53% 49%;background:radial-gradient(circle at 30% 20%,#a14a50,#7c2735 56%,#5b1929);box-shadow:inset 2px 2px 3px #e7a78c66,inset -3px -3px 5px #49152099,0 5px 9px #5025203b;border:3px solid #a05458;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ead1a2;transition:transform .55s ease,opacity .45s ease}
+.seal-rim{position:absolute;inset:5px;border:1px solid #d5a17d99;border-radius:50%;box-shadow:0 0 0 1px #521c2988}.seal-sprig{font-size:15px;line-height:13px;color:#cea77b}.seal-initials{font-size:21px;line-height:24px;font-style:italic;text-shadow:0 1px 1px #340c16}.seal-initials i{font-size:13px}.seal-date{font-size:5px;letter-spacing:1.2px;line-height:10px}
+.envelope-trigger:hover .wax-seal{transform:translate(-50%,-50%) rotate(-3deg) scale(1.035)}.envelope-gate.opening .wax-seal{opacity:0;transform:translate(-50%,-70%) rotate(-15deg) scale(1.1);pointer-events:none}
+.envelope-gate.opening .env-flap{transition-delay:.38s;animation-delay:.38s}.envelope-gate.opening .env-card{transform:translateY(-49%)}
+@media(max-width:520px){.floating-dock{width:calc(100% - 26px);padding:6px;bottom:calc(9px + env(safe-area-inset-bottom))}.floating-dock button{font-size:11px;min-height:36px;gap:3px;padding:3px}.wax-seal{width:68px;height:68px}.seal-initials{font-size:19px}.card-names{font-size:25px}.envelope-trigger{width:85vw}}
+@media(prefers-reduced-motion:reduce){.motion-ready .living-art,.motion-ready image.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}}
+@media print{.living-art,.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}#sangeet,#sangeet .paper svg{height:800pt}@page sangeet{size:600pt 800pt;margin:0}}
+.motion-ready .event:not(.is-visible) .living-art,.motion-ready .event:not(.is-visible) image.still-art,.motion-ready .event:not(.is-visible) .reveal-copy{transition:none}

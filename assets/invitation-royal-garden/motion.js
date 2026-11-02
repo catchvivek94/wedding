@@ -46,25 +46,24 @@
       d*=edge;
       }else if(theme<1.5){
         // Banana fronds bend gently; brass lamps and bowls remain anchored.
-        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.017,6.7,.3);
-        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.018,7.6,2.2);
-        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.014,6.2,1.3);
+        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.010,7.4,.3);
+        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.011,8.3,2.2);
+        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.008,6.9,1.3);
         d*=smoothstep(0.,13.,min(p.x,pageSize.x-p.x));
       }else{
-        // Sway only complete hanging strands, softly blended into the canopy.
-        d+=breeze(p,vec2(76.,142.),vec2(34.,136.),vec2(76.,0.),.018,5.8,.4);
-        d+=breeze(p,vec2(216.,158.),vec2(43.,154.),vec2(218.,0.),-.016,6.9,1.8);
-        d+=breeze(p,vec2(328.,137.),vec2(34.,128.),vec2(328.,0.),.016,6.3,3.2);
-        d+=breeze(p,vec2(485.,150.),vec2(34.,145.),vec2(485.,0.),-.016,7.2,2.7);
-        d+=breeze(p,vec2(563.,166.),vec2(33.,148.),vec2(563.,10.),.017,6.5,4.3);
+        // Individual lanterns and their cords move as complete painted forms.
+        d+=breeze(p,vec2(61.,80.),vec2(28.,65.),vec2(61.,0.),.012,5.8,.4);
+        d+=breeze(p,vec2(116.,130.),vec2(28.,63.),vec2(116.,70.),-.014,6.9,1.8);
+        d+=breeze(p,vec2(334.,112.),vec2(29.,65.),vec2(334.,36.),.012,6.3,3.2);
+        d+=breeze(p,vec2(532.,147.),vec2(35.,76.),vec2(532.,55.),-.013,7.2,2.7);
       }
       vec2 source=clamp(p-d,vec2(.5),pageSize-vec2(.5));
       vec4 color=texture2D(artwork,vec2(source.x/pageSize.x,1.-source.y/pageSize.y));
       if(theme>1.5){
         // A restrained warm shimmer on the painted lanterns, no added particles.
-        float glow=exp(-pow(length((p-vec2(374.,50.))/vec2(23.,35.)),2.));
-        glow+=exp(-pow(length((p-vec2(319.,158.))/vec2(20.,30.)),2.));
-        glow+=exp(-pow(length((p-vec2(481.,226.))/vec2(22.,35.)),2.));
+        float glow=exp(-pow(length((p-vec2(480.,68.))/vec2(23.,35.)),2.));
+        glow+=exp(-pow(length((p-vec2(334.,138.))/vec2(20.,30.)),2.));
+        glow+=exp(-pow(length((p-vec2(532.,177.))/vec2(22.,35.)),2.));
         color.rgb+=vec3(.065,.043,.012)*glow*(.5+.5*sin(time*2.1));
       }
       gl_FragColor=color;
@@ -138,13 +137,13 @@
         scene.lost=true;paper.classList.remove('has-art-motion');
       });
       scenes.push(scene);paper.classList.add('has-art-motion');
-      button.disabled=reduced.matches;
+      if(button)button.disabled=reduced.matches;
     } catch(error) {
       // The complete still illustration remains available on unsupported devices.
       console.warn('Botanical motion unavailable:',error.message);
     }
   }
-  button.addEventListener('click',()=>{
+  button?.addEventListener('click',()=>{
     paused=!paused;
     scenes.forEach(scene=>{scene.paused=paused;});
     button.setAttribute('aria-pressed',String(paused));
@@ -165,7 +164,7 @@
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden) stop();else start();});
   reduced.addEventListener('change',()=>{
-    button.disabled=reduced.matches;
+    if(button)button.disabled=reduced.matches;
     if(reduced.matches)stop();else start();
   });
 })();
