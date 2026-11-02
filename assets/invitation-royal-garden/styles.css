@@ -38,3 +38,19 @@
 @media(prefers-reduced-motion:reduce){.motion-ready .living-art,.motion-ready image.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}}
 @media print{.living-art,.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}#sangeet,#sangeet .paper svg{height:800pt}@page sangeet{size:600pt 800pt;margin:0}}
 .motion-ready .event:not(.is-visible) .living-art,.motion-ready .event:not(.is-visible) image.still-art,.motion-ready .event:not(.is-visible) .reveal-copy{transition:none}
+
+/* Preserve the original single-page artwork and typography. */
+@media screen{
+  .invitation-open .invitation-content{animation:none}
+  .motion-ready .living-art,.motion-ready image.still-art{transform:none;transition:opacity .95s cubic-bezier(.2,.6,.3,1) .12s}
+  .motion-ready .reveal-copy{transform:translateY(3px);transition:opacity .65s ease var(--reveal-delay,800ms),transform .85s cubic-bezier(.2,.6,.3,1) var(--reveal-delay,800ms)}
+  .motion-ready .is-visible .reveal-copy{transform:none}
+  .floating-dock{backdrop-filter:none;background:#fbfaf3}
+  .floating-dock button{min-height:44px}
+}
+/* A slim, softly embossed seal above the fold; no ribbon over the lettering. */
+.wax-seal{top:59%;width:80px;height:80px;background:none;border:0;box-shadow:none;filter:drop-shadow(0 3px 3px #48202c30);transform:translate(-50%,-50%) rotate(-4deg)}
+.seal-art{display:block;width:100%;height:100%;overflow:visible}
+.envelope-trigger:hover .wax-seal{transform:translate(-50%,-50%) rotate(-2deg) scale(1.025)}
+@media(max-width:520px){.wax-seal{width:70px;height:70px}}
+@media(prefers-reduced-motion:reduce){.motion-ready .living-art,.motion-ready image.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}}
