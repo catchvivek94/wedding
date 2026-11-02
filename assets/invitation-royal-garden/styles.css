@@ -54,3 +54,7 @@
 .envelope-trigger:hover .wax-seal{transform:translate(-50%,-50%) rotate(-2deg) scale(1.025)}
 @media(max-width:520px){.wax-seal{width:70px;height:70px}}
 @media(prefers-reduced-motion:reduce){.motion-ready .living-art,.motion-ready image.still-art,.reveal-copy{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* Dark Phere paper is visible before its suspended decorations arrive. */
+#phere .paper{background:#061724}
+#haldi .paper{background:#f5f1e6}

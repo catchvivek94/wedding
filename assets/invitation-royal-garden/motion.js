@@ -24,7 +24,7 @@
       float r=length((p-center)/radius);
       float envelope=1.-smoothstep(.18,1.,r);
       float wave=sin(time*6.2831853/period+phase);
-      float a=angle*1.55*wave*envelope;
+      float a=angle*2.5*wave*envelope;
       vec2 arm=p-anchor;
       return vec2(-arm.y,arm.x)*a;
     }
@@ -46,25 +46,39 @@
       d*=edge;
       }else if(theme<1.5){
         // Banana fronds bend gently; brass lamps and bowls remain anchored.
-        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.010,7.4,.3);
-        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.011,8.3,2.2);
-        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.008,6.9,1.3);
+        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.014,7.4,.3);
+        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.015,8.3,2.2);
+        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.012,6.9,1.3);
         d*=smoothstep(0.,13.,min(p.x,pageSize.x-p.x));
-      }else{
+      }else if(theme<2.5){
         // Individual lanterns and their cords move as complete painted forms.
         d+=breeze(p,vec2(61.,80.),vec2(28.,65.),vec2(61.,0.),.012,5.8,.4);
         d+=breeze(p,vec2(116.,130.),vec2(28.,63.),vec2(116.,70.),-.014,6.9,1.8);
         d+=breeze(p,vec2(334.,112.),vec2(29.,65.),vec2(334.,36.),.012,6.3,3.2);
         d+=breeze(p,vec2(532.,147.),vec2(35.,76.),vec2(532.,55.),-.013,7.2,2.7);
       }
+      if(theme>2.5 && theme<3.5){
+        // Mehendi: keep the parasol, table, chair and tiger completely still.
+        d+=breeze(p,vec2(96.,394.),vec2(97.,104.),vec2(40.,520.),.009,7.8,.3);
+        d+=breeze(p,vec2(537.,501.),vec2(67.,74.),vec2(575.,584.),-.009,8.6,2.1);
+        d+=breeze(p,vec2(460.,62.),vec2(125.,75.),vec2(578.,5.),.006,8.1,1.4);
+        d+=breeze(p,vec2(442.,129.),vec2(30.,55.),vec2(442.,72.),.006,7.2,2.4);
+        d*=smoothstep(8.,20.,min(p.x,600.-p.x));
+      }else if(theme>3.5){
+        // Phere: gentle suspended-light movement, with the stage anchored.
+        d+=breeze(p,vec2(162.,63.),vec2(98.,87.),vec2(162.,0.),.008,8.2,.4);
+        d+=breeze(p,vec2(470.,85.),vec2(76.,84.),vec2(470.,0.),-.008,9.1,2.2);
+        d+=breeze(p,vec2(46.,292.),vec2(29.,220.),vec2(46.,0.),.004,9.8,1.5);
+        d+=breeze(p,vec2(557.,276.),vec2(24.,206.),vec2(557.,0.),-.004,8.9,3.7);
+      }
       vec2 source=clamp(p-d,vec2(.5),pageSize-vec2(.5));
       vec4 color=texture2D(artwork,vec2(source.x/pageSize.x,1.-source.y/pageSize.y));
-      if(theme>1.5){
+      if(theme>1.5 && theme<2.5){
         // A restrained warm shimmer on the painted lanterns, no added particles.
         float glow=exp(-pow(length((p-vec2(480.,68.))/vec2(23.,35.)),2.));
         glow+=exp(-pow(length((p-vec2(334.,138.))/vec2(20.,30.)),2.));
         glow+=exp(-pow(length((p-vec2(532.,177.))/vec2(22.,35.)),2.));
-        color.rgb+=vec3(.065,.043,.012)*glow*(.5+.5*sin(time*2.1));
+        color.rgb+=vec3(.09,.06,.018)*glow*(.5+.5*sin(time*2.1));
       }
       gl_FragColor=color;
     }
@@ -84,7 +98,7 @@
       previous=now;
       for(const scene of scenes){
         if(!scene.visible || scene.paused || scene.lost) continue;
-        scene.time+=elapsed*1.32;
+        scene.time+=elapsed*1.45;
         scene.draw();
       }
     }
@@ -121,7 +135,7 @@
       const clock=gl.getUniformLocation(program,'time');
       const height=Number(page.querySelector('image.still-art').getAttribute('height'));
       gl.uniform2f(gl.getUniformLocation(program,'pageSize'),600,height);
-      gl.uniform1f(gl.getUniformLocation(program,'theme'),page.id==='wedding'?1:page.id==='sangeet'?2:0);
+      gl.uniform1f(gl.getUniformLocation(program,'theme'),page.id==='wedding'?1:page.id==='sangeet'?2:page.id==='haldi'?3:page.id==='phere'?4:0);
       const scene={visible:false,paused:paused,lost:false,time:0,draw(){
         gl.uniform1f(clock,this.time);gl.drawArrays(gl.TRIANGLES,0,6);
         canvas.dataset.motionTime=this.time.toFixed(2);
