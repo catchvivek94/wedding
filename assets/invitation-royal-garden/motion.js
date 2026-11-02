@@ -79,8 +79,8 @@
   function tick(now){
     frame=0;
     if(reduced.matches || document.hidden || !document.body.classList.contains('invitation-open')) return;
-    if(!previous || now-previous>=32){
-      const elapsed=previous ? Math.min((now-previous)/1000,.1) : 0;
+    {
+      const elapsed=previous ? Math.min((now-previous)/1000,.05) : 0;
       previous=now;
       for(const scene of scenes){
         if(!scene.visible || scene.paused || scene.lost) continue;
@@ -113,7 +113,11 @@
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
+      const textureCanvas=document.createElement('canvas');
+      textureCanvas.width=Math.min(image.naturalWidth,1200);
+      textureCanvas.height=Math.round(textureCanvas.width*image.naturalHeight/image.naturalWidth);
+      textureCanvas.getContext('2d').drawImage(image,0,0,textureCanvas.width,textureCanvas.height);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,textureCanvas);
       const clock=gl.getUniformLocation(program,'time');
       const height=Number(page.querySelector('image.still-art').getAttribute('height'));
       gl.uniform2f(gl.getUniformLocation(program,'pageSize'),600,height);
@@ -124,7 +128,7 @@
       }};
       const resize=()=>{
         const width=Math.min(1200,Math.round(paper.clientWidth*Math.min(devicePixelRatio||1,2)));
-        if(!width) return;
+        if(!width || canvas.width===width) return;
         canvas.width=width;canvas.height=Math.round(width*height/600);
         gl.viewport(0,0,canvas.width,canvas.height);scene.draw();
       };
@@ -159,7 +163,12 @@
   });
   images.forEach((targets,src)=>{
     const image=new Image();
-    image.onload=()=>{targets.forEach(page=>createScene(page,image));start();};
+    image.onload=()=>{
+      // Yield between contexts so loading another chapter cannot freeze a swipe.
+      let index=0;
+      function next(){if(index<targets.length){createScene(targets[index++],image);requestAnimationFrame(next);}start();}
+      requestAnimationFrame(next);
+    };
     image.src=src;
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden) stop();else start();});
