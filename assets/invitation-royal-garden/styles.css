@@ -82,11 +82,14 @@
 @media(prefers-reduced-motion:reduce){.floating-dock *{animation:none!important;transition:none!important}}
 
 /* Separate alpha artwork: paper, borders and scenery never bend or translate. */
-.painting-layers,.scene-background,.foreground-placement,.foreground-element{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.painting-layers,.scene-background,.foreground-placement,.foreground-element,.foliage-elements,.stationary-foliage{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .painting-layers{z-index:0;visibility:hidden;overflow:hidden}
 .has-layered-motion .painting-layers{visibility:visible}
 .has-layered-motion .still-art{visibility:hidden}
-.scene-background{display:block;transform:none;animation:none;object-fit:fill}
+.scene-background,.stationary-foliage{display:block;transform:none;animation:none;object-fit:fill}
+.foliage-elements{display:block;transform:none;animation:none}
+/* The paper and its background never translate, scale or rotate, including on entry. */
+.paper,.painting-layers,.scene-background{transform:none!important;animation:none!important}
 .foreground-placement{transform-origin:0 0}
 .foreground-element{object-fit:fill;animation:anchored-sway var(--period) ease-in-out infinite;animation-play-state:paused;will-change:transform}
 .foreground-active .foreground-element{animation-play-state:running}
