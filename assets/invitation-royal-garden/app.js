@@ -23,11 +23,17 @@
     pages.forEach(p=>observer.observe(p));
   }
   let scrollFrame=0;
+  function indicate(id){
+    const index=menu.findIndex(b=>b.dataset.event===id);
+    dock.style.setProperty('--active-event',Math.max(0,index));
+    dock.classList.toggle('has-current',index>=0);
+    menu.forEach(b=>{if(b.dataset.event===id)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');});
+  }
   function updateCurrent(){
     scrollFrame=0;
     const line=innerHeight*.35;
-    const active=pages.reduce((best,page)=>Math.abs(page.getBoundingClientRect().top-line)<Math.abs(best.getBoundingClientRect().top-line)?page:best,pages[0]);
-    menu.forEach(b=>{if(b.dataset.event===active.id)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');});
+    const active=pages.find(page=>{const r=page.getBoundingClientRect();return r.top<=line&&r.bottom>line;})||pages[0];
+    indicate(active.id);
   }
   addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(updateCurrent);},{passive:true});
   opener.addEventListener('click',()=>{
@@ -48,8 +54,15 @@
   });
   menu.forEach(button=>button.addEventListener('click',()=>{
     const page=document.getElementById(button.dataset.event);
+    indicate(page.id);
+    if(!preference.matches){
+      button.classList.remove('tap-feedback');
+      requestAnimationFrame(()=>button.classList.add('tap-feedback'));
+    }
     // Let the viewport observer introduce each page naturally during the scroll.
     page.scrollIntoView({behavior:preference.matches?'instant':'smooth',block:'start'});
   }));
+  menu.forEach(button=>button.addEventListener('animationend',()=>button.classList.remove('tap-feedback')));
+  addEventListener('resize',updateCurrent);
   preference.addEventListener('change',()=>{if(document.body.classList.contains('invitation-open'))observe();});
 })();

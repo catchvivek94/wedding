@@ -22,9 +22,10 @@
     // The coordinate field stays continuous across every leaf and stem.
     vec2 breeze(vec2 p,vec2 center,vec2 radius,vec2 anchor,float angle,float period,float phase){
       float r=length((p-center)/radius);
-      float envelope=1.-smoothstep(.18,1.,r);
-      float wave=sin(time*6.2831853/period+phase);
-      float a=angle*2.5*wave*envelope;
+      float envelope=1.-smoothstep(.35,1.,r);
+      float t=time*6.2831853/period+phase;
+      float wave=.82*sin(t)+.18*sin(t*1.73+phase);
+      float a=angle*1.0*wave*envelope;
       vec2 arm=p-anchor;
       return vec2(-arm.y,arm.x)*a;
     }
@@ -32,53 +33,50 @@
       vec2 p=vec2(uv.x,1.-uv.y)*pageSize;
       vec2 d=vec2(0.);
       if(theme<.5){
-      d+=breeze(p,vec2(181.,77.),vec2(97.,86.),vec2(135.,39.),.035,7.8,.2);
-      d+=breeze(p,vec2(302.,39.),vec2(72.,62.),vec2(300.,0.),.031,6.4,1.8);
-      d+=breeze(p,vec2(430.,99.),vec2(100.,108.),vec2(414.,46.),-.035,8.7,3.2);
-      d+=breeze(p,vec2(535.,154.),vec2(51.,72.),vec2(568.,157.),.040,7.1,1.1);
-      d+=breeze(p,vec2(49.,274.),vec2(41.,86.),vec2(32.,341.),.037,6.8,2.1);
-      d+=breeze(p,vec2(566.,398.),vec2(61.,84.),vec2(599.,467.),-.037,9.2,4.0);
-      d+=breeze(p,vec2(60.,628.),vec2(81.,52.),vec2(63.,663.),.036,8.2,2.8);
-      d+=breeze(p,vec2(550.,663.),vec2(74.,40.),vec2(555.,697.),-.040,7.6,5.1);
-      // Pin the outside edge and keep the architecture, border and copy still.
-      float edge=smoothstep(31.,42.,min(p.x,600.-p.x));
-      edge*=smoothstep(0.,18.,p.y-.55*abs(p.x-300.));
-      d*=edge;
+        d+=breeze(p,vec2(180.,107.),vec2(95.,100.),vec2(171.,30.),.13,5.3,.2);
+        d+=breeze(p,vec2(310.,62.),vec2(69.,65.),vec2(300.,0.),.12,4.8,1.8);
+        d+=breeze(p,vec2(430.,149.),vec2(91.,125.),vec2(413.,55.),-.11,6.1,3.2);
+        d+=breeze(p,vec2(52.,335.),vec2(47.,110.),vec2(30.,438.),.12,5.6,2.1);
+        d+=breeze(p,vec2(546.,489.),vec2(66.,95.),vec2(598.,555.),-.14,6.5,4.0);
+        d+=breeze(p,vec2(68.,780.),vec2(91.,70.),vec2(66.,852.),.12,5.8,2.8);
+        d+=breeze(p,vec2(550.,872.),vec2(67.,63.),vec2(568.,918.),-.14,5.2,5.1);
+        d*=smoothstep(21.,35.,min(p.x,600.-p.x));
       }else if(theme<1.5){
-        // Banana fronds bend gently; brass lamps and bowls remain anchored.
-        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.014,7.4,.3);
-        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.015,8.3,2.2);
-        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.012,6.9,1.3);
-        d*=smoothstep(0.,13.,min(p.x,pageSize.x-p.x));
+        // Fronds flex from their stems; brass lamps and bowls remain fixed.
+        d+=breeze(p,vec2(161.,113.),vec2(181.,99.),vec2(23.,260.),.075,5.6,.3);
+        d+=breeze(p,vec2(175.,252.),vec2(165.,130.),vec2(18.,411.),-.070,6.3,2.2);
+        d+=breeze(p,vec2(372.,558.),vec2(124.,114.),vec2(359.,809.),.060,5.4,1.3);
+        d*=smoothstep(0.,18.,min(p.x,600.-p.x));
       }else if(theme<2.5){
-        // Individual lanterns and their cords move as complete painted forms.
-        d+=breeze(p,vec2(61.,80.),vec2(28.,65.),vec2(61.,0.),.012,5.8,.4);
-        d+=breeze(p,vec2(116.,130.),vec2(28.,63.),vec2(116.,70.),-.014,6.9,1.8);
-        d+=breeze(p,vec2(334.,112.),vec2(29.,65.),vec2(334.,36.),.012,6.3,3.2);
-        d+=breeze(p,vec2(532.,147.),vec2(35.,76.),vec2(532.,55.),-.013,7.2,2.7);
-      }
-      if(theme>2.5 && theme<3.5){
-        // Mehendi: keep the parasol, table, chair completely still.
-        d+=breeze(p,vec2(96.,394.),vec2(97.,104.),vec2(40.,520.),.009,7.8,.3);
-        d+=breeze(p,vec2(537.,501.),vec2(67.,74.),vec2(575.,584.),-.009,8.6,2.1);
-        d+=breeze(p,vec2(460.,62.),vec2(125.,75.),vec2(578.,5.),.006,8.1,1.4);
-        d+=breeze(p,vec2(442.,129.),vec2(30.,55.),vec2(442.,72.),.006,7.2,2.4);
-        d*=smoothstep(8.,20.,min(p.x,600.-p.x));
-      }else if(theme>3.5){
-        // Phere: gentle suspended-light movement, with the stage anchored.
-        d+=breeze(p,vec2(162.,63.),vec2(98.,87.),vec2(162.,0.),.008,8.2,.4);
-        d+=breeze(p,vec2(470.,85.),vec2(76.,84.),vec2(470.,0.),-.008,9.1,2.2);
-        d+=breeze(p,vec2(46.,292.),vec2(29.,220.),vec2(46.,0.),.004,9.8,1.5);
-        d+=breeze(p,vec2(557.,276.),vec2(24.,206.),vec2(557.,0.),-.004,8.9,3.7);
+        // Broad continuous fields encompass the complete lantern and its cord.
+        d+=breeze(p,vec2(58.,108.),vec2(37.,110.),vec2(58.,0.),.13,4.8,.4);
+        d+=breeze(p,vec2(119.,173.),vec2(32.,100.),vec2(119.,75.),-.14,5.7,1.8);
+        d+=breeze(p,vec2(332.,155.),vec2(41.,108.),vec2(332.,48.),.13,5.1,3.2);
+        d+=breeze(p,vec2(524.,191.),vec2(41.,130.),vec2(524.,48.),-.11,6.2,2.7);
+        d+=breeze(p,vec2(31.,480.),vec2(42.,91.),vec2(26.,575.),.09,6.3,1.4);
+        d+=breeze(p,vec2(564.,680.),vec2(45.,92.),vec2(590.,760.),-.10,5.8,3.1);
+      }else if(theme<3.5){
+        // Palm tips and bougainvillea move; the chair, parasol and table are still.
+        d+=breeze(p,vec2(91.,600.),vec2(104.,110.),vec2(39.,696.),.11,5.8,.3);
+        d+=breeze(p,vec2(530.,737.),vec2(83.,87.),vec2(579.,811.),-.12,6.6,2.1);
+        d+=breeze(p,vec2(424.,83.),vec2(146.,86.),vec2(579.,5.),.065,6.1,1.4);
+        d+=breeze(p,vec2(431.,169.),vec2(37.,78.),vec2(431.,88.),.14,5.2,2.4);
+        d*=smoothstep(9.,20.,min(p.x,600.-p.x));
+      }else{
+        d+=breeze(p,vec2(168.,81.),vec2(103.,105.),vec2(168.,0.),.09,5.8,.4);
+        d+=breeze(p,vec2(474.,111.),vec2(84.,100.),vec2(474.,0.),-.095,6.4,2.2);
+        d+=breeze(p,vec2(37.,296.),vec2(34.,230.),vec2(37.,0.),.038,6.8,1.5);
+        d+=breeze(p,vec2(562.,287.),vec2(31.,222.),vec2(562.,0.),-.038,6.1,3.7);
+        d*=smoothstep(0.,13.,min(p.x,600.-p.x));
       }
       vec2 source=clamp(p-d,vec2(.5),pageSize-vec2(.5));
       vec4 color=texture2D(artwork,vec2(source.x/pageSize.x,1.-source.y/pageSize.y));
       if(theme>1.5 && theme<2.5){
         // A restrained warm shimmer on the painted lanterns, no added particles.
-        float glow=exp(-pow(length((p-vec2(480.,68.))/vec2(23.,35.)),2.));
-        glow+=exp(-pow(length((p-vec2(334.,138.))/vec2(20.,30.)),2.));
-        glow+=exp(-pow(length((p-vec2(532.,177.))/vec2(22.,35.)),2.));
-        color.rgb+=vec3(.09,.06,.018)*glow*(.5+.5*sin(time*2.1));
+        float glow=exp(-pow(length((p-vec2(476.,84.))/vec2(23.,35.)),2.));
+        glow+=exp(-pow(length((p-vec2(332.,160.))/vec2(20.,30.)),2.));
+        glow+=exp(-pow(length((p-vec2(524.,195.))/vec2(22.,35.)),2.));
+        color.rgb+=vec3(.14,.095,.025)*glow*(.5+.5*sin(time*2.1));
       }
       gl_FragColor=color;
     }
@@ -98,7 +96,7 @@
       previous=now;
       for(const scene of scenes){
         if(!scene.visible || scene.paused || scene.lost) continue;
-        scene.time+=elapsed*1.45;
+        scene.time+=elapsed;
         scene.draw();
       }
     }
