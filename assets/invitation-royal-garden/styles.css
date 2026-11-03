@@ -99,3 +99,8 @@
 .motion-ready .event:not(.is-visible) .painting-layers{transition:none}
 @media(prefers-reduced-motion:reduce){.painting-layers{display:none!important}.has-layered-motion .still-art{visibility:visible!important}.foreground-element{animation:none!important}}
 @media print{.painting-layers{display:none!important}.has-layered-motion .still-art{visibility:visible!important}}
+
+/* First-page sprigs are rigid cutouts with fixed stem pivots, never a warped painting. */
+.paper svg.garland-elements{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.garland-sprig{transform-box:view-box;animation:anchored-sway var(--period) ease-in-out infinite;animation-play-state:paused}
+.foreground-active .garland-sprig{animation-play-state:running}

@@ -5,11 +5,15 @@
   const scenes = new Map();
   const settings = {
     // Coordinates are on the 600 × 1100 invitation. Each leaf bends from a fixed root.
-    welcome: {leaves: [
-      [289,14,277,82,28,4.9,3.5,0], [230,34,201,130,25,7.35,3.22,1.1],
-      [171,72,145,178,24,7.0,3.79,2.3], [108,116,80,203,26,6.3,3.31,3.2],
-      [367,42,399,139,26,7.0,3.89,1.8], [426,89,455,180,24,6.3,3.41,4.1],
-      [507,125,555,247,30,8.05,4.03,2.8]
+    // Whole sprigs rotate at their stem joints; their silhouettes never stretch.
+    welcome: {branches: [
+      {root:[49,156], angle:2.8, period:5.4, path:'M47 155L51 155L71 170L87 203L78 211L53 203L41 209L24 235L8 235L3 162Z'},
+      {root:[149,88], angle:3.2, period:5.8, path:'M147 87L160 87L177 103L173 157L120 158L120 124L137 110Z'},
+      {root:[206,72], angle:3.6, period:6.1, path:'M201 70L211 73L230 92L225 110L223 165L181 183L162 183L165 147L177 124L181 102L195 93Z'},
+      {root:[300,39], angle:3.0, period:5.6, path:'M296 35L304 35L308 58L319 69L331 101L329 109L253 109L257 64L285 45Z'},
+      {root:[403,101], angle:3.4, period:6.4, path:'M398 100L409 100L426 116L436 151L457 170L477 188L478 205L434 197L407 169L387 140L382 117Z'},
+      {root:[455,102], angle:3.0, period:5.3, path:'M451 100L460 100L465 112L479 129L478 157L449 155L437 130L437 115Z'},
+      {root:[541,157], angle:2.6, period:6.0, path:'M538 154L546 154L568 167L586 193L586 246L544 244L516 265L501 253L507 217L529 193L541 181Z'}
     ]},
     wedding: {leaves: [
       [34,223,208,39,29,7.0,3.79,0], [48,225,303,126,27,9.1,4.18,1.4],
@@ -53,6 +57,35 @@
     }
     sync();
   }, {rootMargin:'0px'});
+
+  function garland(image, branches) {
+    const ns='http://www.w3.org/2000/svg';
+    const node=(tag,attributes={})=>{
+      const element=document.createElementNS(ns,tag);
+      for(const [key,value] of Object.entries(attributes)) element.setAttribute(key,String(value));
+      return element;
+    };
+    const svg=node('svg',{viewBox:'0 0 600 1100',class:'garland-elements','aria-hidden':'true'});
+    const defs=node('defs');svg.append(defs);
+    const mask=node('mask',{id:'garland-fixed',maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:1100});
+    mask.append(node('rect',{width:600,height:1100,fill:'white'}));defs.append(mask);
+    const picture=()=>node('image',{href:image.src,width:600,height:1100,preserveAspectRatio:'none'});
+    const fixed=picture();fixed.setAttribute('mask','url(#garland-fixed)');svg.append(fixed);
+    branches.forEach((branch,index)=>{
+      // Cut only alpha artwork; paper and painted borders belong to a separate image.
+      mask.append(node('path',{d:branch.path,fill:'black'}));
+      const clip=node('clipPath',{id:`garland-sprig-${index}`,clipPathUnits:'userSpaceOnUse'});
+      clip.append(node('path',{d:branch.path}));defs.append(clip);
+      const group=node('g',{class:'garland-sprig'});
+      group.style.transformOrigin=`${branch.root[0]}px ${branch.root[1]}px`;
+      group.style.setProperty('--sway',`${branch.angle}deg`);
+      group.style.setProperty('--period',`${branch.period}s`);
+      group.style.animationDelay=`${index*-.73}s`;
+      const sprig=picture();sprig.setAttribute('clip-path',`url(#garland-sprig-${index})`);
+      group.append(sprig);svg.append(group);
+    });
+    return svg;
+  }
 
   function foliage(image, leaves, paper) {
     const canvas = document.createElement('canvas');
@@ -153,7 +186,9 @@
     layer.className='painting-layers';layer.setAttribute('aria-hidden','true');
     background.className='scene-background';background.alt='';layer.append(background);
     const scene={visible:false,active:false,time:0};
-    if (definition.leaves) {
+    if (definition.branches) {
+      layer.append(garland(foreground,definition.branches));
+    } else if (definition.leaves) {
       // Keep a stationary transparent fallback underneath, revealed only on context loss.
       foreground.alt='';foreground.className='stationary-foliage';layer.append(foreground);
       const animation=foliage(foreground,definition.leaves,paper);
