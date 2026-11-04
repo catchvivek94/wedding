@@ -178,8 +178,6 @@
 .motion-ready .event svg .reveal-copy{transform:none!important;will-change:opacity;transition-property:opacity;transition-duration:.45s}
 @media(max-width:700px),(pointer:coarse){
   html{scroll-behavior:auto}
-  .painting-layers{display:none!important}
-  .has-layered-motion .still-art{visibility:visible!important}
   .has-reference-scene .reference-scene,.has-reference-scene .reference-piece{display:none!important}
   .has-reference-scene .reference-fallback{visibility:visible!important}
   .motion-ready .event .reveal-copy{transform:none!important;will-change:auto!important;transition:opacity .4s ease .22s!important}

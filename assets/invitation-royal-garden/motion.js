@@ -1,8 +1,7 @@
 /* Animate alpha-only decorations. Background plates never enter the renderer. */
 (() => {
   'use strict';
-  // Keep original artwork intact on touch devices; avoid multiple large SVG masks and WebGL surfaces.
-  if(matchMedia('(max-width:700px), (pointer:coarse)').matches)return;
+  // Decorative motion runs on touch devices too; text transitions are handled separately.
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const scenes = new Map();
   const settings = {
