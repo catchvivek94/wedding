@@ -96,7 +96,31 @@
       select.value=values?.[day]||'';container.append(label,select);
     });
   }
+  const confirmation=document.getElementById('rsvp-confirmation');
+  let celebrationTimer;
+  function resetConfirmation(){
+    clearTimeout(celebrationTimer);rsvpDialog.setAttribute('aria-labelledby','rsvp-title');rsvpDialog.classList.remove('rsvp-celebrating');confirmation.hidden=true;form.hidden=false;
+    confirmation.querySelector('.rsvp-fireworks').replaceChildren();
+  }
+  function celebrate(){
+    resetConfirmation();form.hidden=true;confirmation.hidden=false;rsvpDialog.classList.add('rsvp-celebrating');
+    rsvpDialog.setAttribute('aria-labelledby','rsvp-confirmation-title');rsvpDialog.scrollTop=0;confirmation.focus();
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const fireworks=confirmation.querySelector('.rsvp-fireworks');
+    [[18,18],[80,27],[50,8],[24,58],[82,64]].forEach(([x,y],burst)=>{
+      for(let i=0;i<16;i++){
+        const spark=document.createElement('i'),angle=i*Math.PI/8,distance=42+(i%3)*13;
+        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.38}s;--spark:${['#c49b4f','#ba7891','#8d9b70'][i%3]}`;
+        fireworks.append(spark);
+      }
+    });
+    celebrationTimer=setTimeout(()=>fireworks.replaceChildren(),4000);
+  }
+  document.getElementById('rsvp-confirmation-done').addEventListener('click',()=>rsvpDialog.close());
+  document.getElementById('rsvp-confirmation-edit').addEventListener('click',()=>{renderForm();saveButton.focus();});
+  rsvpDialog.addEventListener('close',resetConfirmation);
   function renderForm(){
+    resetConfirmation();
     memberList.replaceChildren();saveStatus.textContent='';saveStatus.classList.remove('saved');
     document.getElementById('rsvp-household').textContent=profile.household;
     profile.guests.forEach((guest,index)=>{
@@ -139,7 +163,7 @@
     busy=true;saveButton.disabled=true;saveStatus.classList.remove('saved');saveStatus.textContent='Saving your response…';
     try{
       const data=await api('save',{method:'POST',body:{responses}});profile=data;
-      saveStatus.textContent='Thank you! Your RSVP has been saved. You can update it here anytime.';saveStatus.classList.add('saved');saveButton.textContent='Update our RSVP';
+      saveStatus.textContent='Thank you! Your RSVP has been saved. You can update it here anytime.';saveStatus.classList.add('saved');saveButton.textContent='Update our RSVP';celebrate();
     }catch(error){saveStatus.textContent=error.message;}
     finally{busy=false;saveButton.disabled=false;}
   });

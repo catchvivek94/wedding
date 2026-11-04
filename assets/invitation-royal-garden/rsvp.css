@@ -39,3 +39,17 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .rsvp-plus-one-details[hidden]{display:none}.rsvp-plus-one-hint{font-size:11px;line-height:1.4;color:#8b7358;margin:7px 0 15px}
 
 .rsvp-household-companion .rsvp-plus-one-toggle{border-top:0;margin-top:0;padding-top:8px}
+
+.rsvp-confirmation[hidden],#rsvp-form[hidden]{display:none}
+.rsvp-celebrating> .rsvp-eyebrow,.rsvp-celebrating>h2,.rsvp-celebrating>.rsvp-intro,.rsvp-celebrating>.rsvp-footnote{display:none}
+.rsvp-confirmation{position:relative;isolation:isolate;text-align:center;padding:22px 0 0;outline:none;animation:rsvp-bloom .65s ease-out}
+.rsvp-confirmation-seal{width:80px;height:80px;border:1px solid #c6a36a;border-radius:50%;display:grid;place-items:center;margin:0 auto 25px;background:radial-gradient(circle,#fffdf6,#f1e1c1);color:#a27643;font-size:48px;box-shadow:0 0 0 7px #c6a36a15}
+.rsvp-confirmation h3{font-size:30px;line-height:1.2;font-weight:normal;color:#705238;margin:16px 0}
+.rsvp-confirmation-note{font-size:21px;line-height:1.55;color:#7f6145;margin:16px 0}
+.rsvp-confirmation-signature{font-size:16px;font-style:italic;color:#9c7d54;margin:24px 0 34px}
+.rsvp-edit-response{border:0;background:none;color:#87683f;text-decoration:underline;text-underline-offset:4px;padding:16px;cursor:pointer;font:inherit;font-size:13px}
+.rsvp-fireworks{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;border-radius:18px}
+.rsvp-fireworks i{position:absolute;width:4px;height:7px;border-radius:50%;background:var(--spark);opacity:0;box-shadow:0 0 5px var(--spark);animation:rsvp-spark 1.45s var(--delay) ease-out 2}
+@keyframes rsvp-spark{0%{opacity:0;transform:translate(0,0) scale(.2)}12%{opacity:1}75%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+@keyframes rsvp-bloom{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.rsvp-confirmation{animation:none}.rsvp-fireworks{display:none}}
