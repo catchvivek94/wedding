@@ -3,3 +3,5 @@
 .att-login{width:min(440px,calc(100% - 28px));border:1px solid var(--line);border-radius:16px;padding:28px;background:var(--bg);color:var(--ink)}.att-login::backdrop{background:#2b211860}.att-login label{display:block;font-size:13px;margin:14px 0 6px}.att-login input{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;font:inherit;background:white}.att-login p{font-size:13px;color:var(--ink-soft)}#att-login-status{color:var(--maroon)}
 
 .att-team-heading{margin-top:28px}.att-team-heading+.att-stats{margin-top:12px}
+
+.att-companion{display:block;font-size:11px;font-weight:400;color:var(--ink-soft);margin-top:4px}

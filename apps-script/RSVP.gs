@@ -10,7 +10,7 @@ function setupRsvp() {
   props.setProperty('RSVP_SHEET_ID',id);
   if(!props.getProperty('RSVP_ADMIN_EMAILS'))throw new Error('Set RSVP_ADMIN_EMAILS in Script Properties before setup.');
   const sheet=SpreadsheetApp.openById(id);
-  ['Households','Guests','RSVPs'].forEach(name=>{if(!sheet.getSheetByName(name))throw new Error('Missing tab: '+name);});
+  ['Households','Guests','RSVPs','Companions'].forEach(name=>{if(!sheet.getSheetByName(name))throw new Error('Missing tab: '+name);});
   console.log('RSVP connection ready. Sheet: '+sheet.getName());
 }
 
@@ -28,7 +28,8 @@ function doPost(e) {
     if(action==='attendees'){
       admin_(input.adminToken);
       const data=data_();
-      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,side:g.side,response:data.responses[g.id]||null}));
+      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,side:g.side,response:data.responses[g.id]||null,isCompanion:false,invitedBy:''}));
+      data.companions.forEach(c=>{const host=data.guests.find(g=>g.id===c.hostId);rows.push({id:c.id,name:c.name,householdId:host.householdId,household:data.households[host.householdId].label,days:host.days,side:host.side,response:{attendance:c.attendance,updatedAt:c.updatedAt},isCompanion:true,invitedBy:host.name});});
       return output_({ok:true,guests:rows,householdCount:Object.keys(data.households).length,source:'Google Sheets',sheetUrl:'https://docs.google.com/spreadsheets/d/'+RSVP_SHEET_ID+'/edit',updatedAt:new Date().toISOString()});
     }
     throw new Error('Unknown request.');
@@ -43,7 +44,9 @@ function data_(){
   const guests=rows_(sheet,'Guests',7).filter(r=>r[0]&&households[String(r[2])]).map(r=>({id:String(r[0]),name:String(r[1]),householdId:String(r[2]),days:[...(r[3]===true||String(r[3]).toLowerCase()==='true'?['day1']:[]),...(r[4]===true||String(r[4]).toLowerCase()==='true'?['day2']:[])],side:['Team Vidhi','Team Vivek','Team Both'].includes(String(r[6]||''))?String(r[6]):'',aliases:String(r[5]||'').split(',').map(normal_).filter(Boolean)}));
   const valid=['attending','not_attending','undecided'];
   rows_(sheet,'RSVPs',4).forEach(r=>{if(r[0]&&(valid.includes(r[1])||valid.includes(r[2])))responses[String(r[0])]={attendance:{...(valid.includes(r[1])?{day1:r[1]}:{}),...(valid.includes(r[2])?{day2:r[2]}:{})},updatedAt:r[3] instanceof Date?r[3].toISOString():String(r[3]||'')};});
-  return {sheet,households,guests,responses};
+  const companionRows=sheet.getSheetByName('Companions')?rows_(sheet,'Companions',7):[];
+  const companions=companionRows.filter(r=>r[0]&&(r[5]===true||String(r[5]).toLowerCase()==='true')&&guests.some(g=>g.id===String(r[1]))).map(r=>({id:String(r[0]),hostId:String(r[1]),name:String(r[2]),attendance:{...(valid.includes(r[3])?{day1:r[3]}:{}),...(valid.includes(r[4])?{day2:r[4]}:{})},updatedAt:r[6] instanceof Date?r[6].toISOString():String(r[6]||'')}));
+  return {sheet,households,guests,responses,companions};
 }
 function search_(query){
   query=normal_(query);if(query.length<3)return {matches:[]};if(query.length>70)throw new Error('Please enter a shorter name.');
@@ -78,26 +81,72 @@ function session_(token){
 function profile_(session,provided){
   const data=provided||data_(),guest=data.guests.find(g=>g.id===session.guestId&&g.householdId===session.householdId);
   if(!guest||!data.households[session.householdId])throw new Error('This invitation is no longer available. Please contact the hosts.');
-  return {household:data.households[session.householdId].label,selectedGuest:guest.name,guests:data.guests.filter(g=>g.householdId===session.householdId).map(g=>({id:g.id,name:g.name,days:g.days,side:g.side,response:data.responses[g.id]||null}))};
+  return {household:data.households[session.householdId].label,selectedGuest:guest.name,guests:data.guests.filter(g=>g.householdId===session.householdId).map(g=>({id:g.id,name:g.name,days:g.days,side:g.side,response:data.responses[g.id]||null,companion:data.companions.find(c=>c.hostId===g.id)||null}))};
 }
+function writeRows_(tab,rows,columns){
+  const previous=tab.getLastRow()-1;
+  if(rows.length)tab.getRange(2,1,rows.length,columns).setValues(rows);
+  if(previous>rows.length)tab.getRange(rows.length+2,1,previous-rows.length,columns).clearContent();
+}
+function textCell_(value){return /^[=+@'-]/.test(value)?"'"+value:value;}
 function save_(input){
   const session=session_(input.token),lock=LockService.getScriptLock();lock.waitLock(20000);
   try{
     const data=data_(),profile=profile_(session,data),allowed=profile.guests;
     if(!Array.isArray(input.responses)||input.responses.length!==allowed.length)throw new Error('Please respond for every invited household member.');
-    const seen={},changes={};
+    const seen={},changes={},companionChanges={},updatedAt=new Date().toISOString();
     input.responses.forEach(row=>{
       const guest=row&&allowed.find(g=>g.id===row.guestId);if(!guest||seen[row.guestId])throw new Error('Only your invited household members can be included.');seen[row.guestId]=true;
-      if(!row.attendance||typeof row.attendance!=='object'||Object.keys(row.attendance).length!==guest.days.length||guest.days.some(day=>!['attending','not_attending','undecided'].includes(row.attendance[day]))||Object.keys(row.attendance).some(day=>!guest.days.includes(day)))throw new Error('Please select attendance for each invited day.');
-      changes[row.guestId]=[row.guestId,row.attendance.day1||'',row.attendance.day2||'',new Date().toISOString()];
+      const validAttendance=value=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===guest.days.length&&guest.days.every(day=>['attending','not_attending','undecided'].includes(value[day]))&&Object.keys(value).every(day=>guest.days.includes(day));
+      if(!validAttendance(row.attendance))throw new Error('Please select attendance for each invited day.');
+      changes[row.guestId]=[row.guestId,row.attendance.day1||'',row.attendance.day2||'',updatedAt];
+      // Older clients omit companion: preserve that guest's saved +1.
+      if(Object.prototype.hasOwnProperty.call(row,'companion')){
+        const companion=row.companion,id='p1-'+guest.id;
+        if(companion===null){companionChanges[guest.id]=null;}
+        else{
+          if(!companion||typeof companion!=='object'||Array.isArray(companion)||typeof companion.name!=='string')throw new Error('Please enter your +1’s full name.');
+          const name=companion.name.trim().replace(/\s+/g,' ');
+          if(!name||name.length>120||/[\u0000-\u001f\u007f]/.test(name))throw new Error('Please enter a valid +1 name, up to 120 characters.');
+          if(!validAttendance(companion.attendance))throw new Error('Please choose attendance for your +1 on each invited day.');
+          companionChanges[guest.id]={id,hostId:guest.id,name,attendance:companion.attendance,updatedAt};
+        }
+      }
     });
-    const tab=data.sheet.getSheetByName('RSVPs'),existing=rows_(data.sheet,'RSVPs',4),written={};
-    const rows=existing.map(row=>{const id=String(row[0]);if(changes[id]){if(written[id])throw new Error('Duplicate guest IDs in the RSVP Sheet. Please contact the hosts.');written[id]=true;return changes[id];}return row;});
+    // Resolve removals and edits first, then check the final guest list for duplicates.
+    const finalCompanions=data.companions.filter(c=>!Object.prototype.hasOwnProperty.call(companionChanges,c.hostId));
+    Object.keys(companionChanges).forEach(id=>{if(companionChanges[id])finalCompanions.push(companionChanges[id]);});
+    Object.keys(companionChanges).forEach(id=>{
+      const companion=companionChanges[id];if(!companion)return;
+      const name=normal_(companion.name);
+      if(data.guests.some(g=>normal_(g.name)===name)||finalCompanions.some(c=>c.hostId!==id&&normal_(c.name)===name))throw new Error('That name is already on the guest list. Please use their existing invitation or check with the hosts.');
+    });
+    const tab=data.sheet.getSheetByName('RSVPs'),before=rows_(data.sheet,'RSVPs',4),written={};
+    const rows=before.map(row=>{const id=String(row[0]);if(changes[id]){if(written[id])throw new Error('Duplicate guest IDs in the RSVP Sheet. Please contact the hosts.');written[id]=true;return changes[id];}return row;});
     Object.keys(changes).forEach(id=>{if(!written[id])rows.push(changes[id]);});
-    if(rows.length)tab.getRange(2,1,rows.length,4).setValues(rows);SpreadsheetApp.flush();
+    const companionTab=data.sheet.getSheetByName('Companions');
+    if(Object.keys(companionChanges).length&&!companionTab)throw new Error('The +1 guest list is not ready. Please contact the hosts.');
+    const companionBefore=companionTab?rows_(data.sheet,'Companions',7).map(row=>{row[2]=textCell_(String(row[2]||''));return row;}):[],companionWritten={};
+    const companionRows=companionBefore.filter(r=>r[0]).map(row=>{
+      const hostId=String(row[1]);if(!Object.prototype.hasOwnProperty.call(companionChanges,hostId))return row;
+      if(companionWritten[hostId])throw new Error('Duplicate +1 entries in the Sheet. Please contact the hosts.');
+      companionWritten[hostId]=true;const c=companionChanges[hostId];
+      return c?[c.id,c.hostId,textCell_(c.name),c.attendance.day1||'',c.attendance.day2||'',true,updatedAt]:[row[0],hostId,row[2],row[3],row[4],false,updatedAt];
+    });
+    Object.keys(companionChanges).forEach(hostId=>{const c=companionChanges[hostId];if(c&&!companionWritten[hostId])companionRows.push([c.id,c.hostId,textCell_(c.name),c.attendance.day1||'',c.attendance.day2||'',true,updatedAt]);});
+    try{
+      writeRows_(tab,rows,4);
+      if(Object.keys(companionChanges).length)writeRows_(companionTab,companionRows,7);
+      SpreadsheetApp.flush();
+    }catch(error){
+      // Best-effort restoration if one of the two Sheet writes fails.
+      try{writeRows_(tab,before,4);if(companionTab&&Object.keys(companionChanges).length)writeRows_(companionTab,companionBefore,7);SpreadsheetApp.flush();}catch(_){}
+      throw new Error('Your response could not be saved. Please try again.');
+    }
     return {saved:true,...profile_(session)};
   }finally{lock.releaseLock();}
 }
+
 function adminLogin_(username,password){
   username=String(username||'').trim().toLowerCase();
   const message='That username and password were not recognised.';

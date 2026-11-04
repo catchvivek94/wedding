@@ -12,7 +12,7 @@
   function filtered(){
     const query=search.value.trim().toLowerCase();
     return guests.filter(g=>{
-      if(query&&!`${g.name} ${g.household}`.toLowerCase().includes(query))return false;
+      if(query&&!`${g.name} ${g.household} ${g.invitedBy||''}`.toLowerCase().includes(query))return false;
       if(teamFilter.value!=='all'&&(g.side||'unassigned')!==teamFilter.value)return false;
       const values=g.days.map(d=>state(g,d));
       return filter.value==='all'||filter.value==='pending'&&values.includes('pending')||filter.value==='attending'&&values.includes('attending')||filter.value==='undecided'&&values.includes('undecided')||filter.value==='declined'&&values.length&&values.every(s=>s==='not_attending');
@@ -20,12 +20,12 @@
   }
   function render(){
     const stats=document.getElementById('att-stats');stats.replaceChildren();
-    [['Invited guests',guests.length],['Attending Day One',guests.filter(g=>state(g,'day1')==='attending').length],['Attending Day Two',guests.filter(g=>state(g,'day2')==='attending').length],['Awaiting response',guests.filter(g=>g.days.some(d=>state(g,d)==='pending')).length]].forEach(([label,value])=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',value,'v'));stats.append(card);});
+    [['Invited guests',guests.filter(g=>!g.isCompanion).length],['Named +1s',guests.filter(g=>g.isCompanion).length],['Total guests',guests.length],['Attending Day One',guests.filter(g=>state(g,'day1')==='attending').length],['Attending Day Two',guests.filter(g=>state(g,'day2')==='attending').length],['Awaiting response',guests.filter(g=>g.days.some(d=>state(g,d)==='pending')).length]].forEach(([label,value])=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',value,'v'));stats.append(card);});
     const teams=document.getElementById('att-teams');teams.replaceChildren();
     ['Team Vidhi','Team Vivek','Team Both','Not assigned'].forEach(label=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',guests.filter(g=>label==='Not assigned'?!g.side:g.side===label).length,'v'));teams.append(card);});
     const rows=document.getElementById('att-rows');rows.replaceChildren();const visible=filtered();
-    document.getElementById('att-count').textContent=`Showing ${visible.length} of ${guests.length} invited guests`;
-    visible.forEach(g=>{const tr=document.createElement('tr');tr.append(node('td',g.name),node('td',g.household),node('td',g.side||'Not assigned'));['day1','day2'].forEach(day=>{const td=document.createElement('td'),s=state(g,day);td.append(node('span',names[s],`att-badge ${s}`));tr.append(td);});tr.append(node('td',g.response?.updatedAt?new Date(g.response.updatedAt).toLocaleString():'—'));rows.append(tr);});
+    document.getElementById('att-count').textContent=`Showing ${visible.length} of ${guests.length} guests`;
+    visible.forEach(g=>{const tr=document.createElement('tr');const guestCell=node('td',g.name);if(g.isCompanion)guestCell.append(node('small',`+1 of ${g.invitedBy}`,'att-companion'));tr.append(guestCell,node('td',g.household),node('td',g.side||'Not assigned'));['day1','day2'].forEach(day=>{const td=document.createElement('td'),s=state(g,day);td.append(node('span',names[s],`att-badge ${s}`));tr.append(td);});tr.append(node('td',g.response?.updatedAt?new Date(g.response.updatedAt).toLocaleString():'—'));rows.append(tr);});
     if(!visible.length){const tr=document.createElement('tr'),td=node('td','No guests match this search.','att-empty');td.colSpan=6;tr.append(td);rows.append(tr);}
   }
   async function load(){
@@ -56,7 +56,7 @@
   refresh.addEventListener('click',load);search.addEventListener('input',render);filter.addEventListener('change',render);teamFilter.addEventListener('change',render);
   document.getElementById('att-export').addEventListener('click',()=>{
     const quote=v=>'"'+String(v??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"';
-    const rows=[['Guest','Household','Team','Day One','Day Two','Updated at'],...filtered().map(g=>[g.name,g.household,g.side||'Not assigned',names[state(g,'day1')],names[state(g,'day2')],g.response?.updatedAt||''])];
+    const rows=[['Guest','Invited by','Household','Team','Day One','Day Two','Updated at'],...filtered().map(g=>[g.name,g.invitedBy||'',g.household,g.side||'Not assigned',names[state(g,'day1')],names[state(g,'day2')],g.response?.updatedAt||''])];
     const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='wedding-attendees.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   load();

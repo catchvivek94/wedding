@@ -32,3 +32,8 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .guest-team-option:has(input:checked) .team-heart{color:#976344}.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 #guest-name-step[hidden]{display:none}
 @media(max-width:380px){.guest-team-picker{gap:6px}.rsvp-dialog .guest-team-option{padding:14px 4px;min-height:138px}.guest-team-option strong{font-size:13px}.guest-team-option small{font-size:10px}}
+
+.rsvp-dialog .rsvp-plus-one-toggle{display:flex;align-items:center;gap:10px;border-top:1px solid #d6c7aa;margin:18px 0 0;padding-top:16px;cursor:pointer;font-size:15px}
+.rsvp-dialog .rsvp-plus-one-toggle input{width:19px;height:19px;flex:0 0 auto;accent-color:#9d7847;padding:0;margin:0}
+.rsvp-plus-one-details{margin-top:15px;padding:1px 13px 14px;border:1px solid #dac9ad;border-radius:11px;background:#f7efdf}
+.rsvp-plus-one-details[hidden]{display:none}.rsvp-plus-one-hint{font-size:11px;line-height:1.4;color:#8b7358;margin:7px 0 15px}
