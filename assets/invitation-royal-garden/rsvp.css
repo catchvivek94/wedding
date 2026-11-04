@@ -48,11 +48,11 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .rsvp-confirmation-note{font-size:21px;line-height:1.55;color:#7f6145;margin:16px 0}
 .rsvp-confirmation-signature{font-size:16px;font-style:italic;color:#9c7d54;margin:24px 0 34px}
 .rsvp-edit-response{border:0;background:none;color:#87683f;text-decoration:underline;text-underline-offset:4px;padding:16px;cursor:pointer;font:inherit;font-size:13px}
-.rsvp-fireworks{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;border-radius:18px}
-.rsvp-fireworks i{position:absolute;width:4px;height:8px;border-radius:50%;background:var(--spark);opacity:0;box-shadow:0 0 5px var(--spark);animation:rsvp-spark 2.2s var(--delay) ease-out 3}
+.rsvp-fireworks{position:absolute;inset:0 0 auto;height:330px;z-index:0;overflow:hidden;pointer-events:none;border-radius:18px}
+.rsvp-fireworks i{position:absolute;width:4px;height:8px;border-radius:50%;background:var(--spark);opacity:0;box-shadow:0 0 5px var(--spark);animation:rsvp-spark 2.6s var(--delay) ease-out 3}
 @keyframes rsvp-spark{0%{opacity:0;transform:translate(0,0) scale(.2)}12%{opacity:1}75%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
 @keyframes rsvp-bloom{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.rsvp-confirmation{animation:none}.rsvp-fireworks{display:none}}
+@media(prefers-reduced-motion:reduce){.rsvp-confirmation{animation:none}.rsvp-fireworks i{animation:none;opacity:.45;transform:translate(calc(var(--dx)*.65),calc(var(--dy)*.65))}.rsvp-fireworks b{animation:none;opacity:.25;transform:scale(.8)}}
 
 .rsvp-confirmation>:not(.rsvp-fireworks){position:relative;z-index:1}
 .rsvp-calendar{margin:24px 0;padding:20px 0;border-top:1px solid #d6c7aa;border-bottom:1px solid #d6c7aa;text-align:left}
@@ -60,3 +60,8 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .rsvp-calendar-hint{font-size:12px;line-height:1.5;text-align:center;color:#876e52}
 #rsvp-calendar-links{display:grid;gap:8px}.rsvp-calendar a{display:block;text-align:center;padding:10px;border:1px solid #cbb58e;border-radius:10px;color:#79512c;text-decoration:none;font-size:13px;background:#fffaf0}
 .rsvp-calendar-download{margin-top:8px}#rsvp-email-form{margin-top:22px}#rsvp-email-status{min-height:0;margin-bottom:0}
+
+.rsvp-fireworks b{position:absolute;width:48px;height:48px;margin:-24px;border:1px solid #b4863860;border-radius:50%;opacity:0;animation:rsvp-firework-ring 2.6s var(--delay) ease-out 3}
+@keyframes rsvp-firework-ring{0%{opacity:0;transform:scale(.1)}12%{opacity:.65}100%{opacity:0;transform:scale(2.8)}}
+.rsvp-replay-celebration{display:block;margin:-16px auto 23px;border:0;background:none;font:inherit;font-size:12px;color:#947249;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+@media(prefers-reduced-motion:reduce){.rsvp-fireworks b{animation:none;opacity:.25;transform:scale(.8)}}

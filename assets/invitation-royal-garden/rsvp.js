@@ -115,17 +115,23 @@
   function celebrate(){
     resetConfirmation();form.hidden=true;confirmation.hidden=false;rsvpDialog.classList.add('rsvp-celebrating');
     rsvpDialog.setAttribute('aria-labelledby','rsvp-confirmation-title');confirmation.focus({preventScroll:true});rsvpDialog.scrollTop=0;
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    const fireworks=confirmation.querySelector('.rsvp-fireworks');
-    [[18,18],[80,27],[50,8],[24,58],[82,64]].forEach(([x,y],burst)=>{
-      for(let i=0;i<16;i++){
-        const spark=document.createElement('i'),angle=i*Math.PI/8,distance=42+(i%3)*13;
-        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.65}s;--spark:${['#c49b4f','#ba7891','#8d9b70'][i%3]}`;
+    startFireworks();
+  }
+  function startFireworks(){
+    clearTimeout(celebrationTimer);
+    const fireworks=confirmation.querySelector('.rsvp-fireworks');fireworks.replaceChildren();
+    [[17,62],[81,96],[49,30],[23,230],[79,254]].forEach(([x,y],burst)=>{
+      const ring=document.createElement('b');ring.style.cssText=`left:${x}%;top:${y}px;--delay:${burst*.7}s`;fireworks.append(ring);
+      for(let i=0;i<20;i++){
+        const spark=document.createElement('i'),angle=i*Math.PI/10,distance=52+(i%3)*17;
+        spark.style.cssText=`left:${x}%;top:${y}px;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.7}s;--spark:${['#b48638','#b66d88','#87955f'][i%3]}`;
         fireworks.append(spark);
       }
     });
-    celebrationTimer=setTimeout(()=>fireworks.replaceChildren(),4000);
+    celebrationTimer=setTimeout(()=>fireworks.replaceChildren(),11000);
   }
+  document.getElementById('rsvp-replay-celebration').addEventListener('click',startFireworks);
+
   document.getElementById('rsvp-confirmation-done').addEventListener('click',()=>rsvpDialog.close());
   document.getElementById('rsvp-confirmation-edit').addEventListener('click',()=>{renderForm();saveButton.focus();});
   rsvpDialog.addEventListener('close',resetConfirmation);
