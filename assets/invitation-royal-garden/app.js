@@ -6,21 +6,27 @@
   const dock=document.querySelector('.floating-dock');
   const opener=document.querySelector('#open-invitation');
   const menu=[...document.querySelectorAll('[data-event]')];
-  let opening=false, observer;
+  let opening=false, observer, copyObserver;
   content.inert=true;dock.inert=true;
   document.documentElement.classList.toggle('motion-ready',!preference.matches);
   function enter(page){page.classList.add('is-visible');}
   function observe(){
     observer?.disconnect();
+    copyObserver?.disconnect();
     document.documentElement.classList.toggle('motion-ready',!preference.matches);
     if(!('IntersectionObserver'in window)){pages.forEach(enter);return;}
     observer=new IntersectionObserver(entries=>{
       for(const e of entries){
-        // Reveal once: scrolling back never hides content or restarts its movement.
-        if(e.isIntersecting)enter(e.target);
+        e.target.classList.toggle('is-visible',e.isIntersecting);
       }
     },{threshold:0,rootMargin:'0px 0px -12% 0px'});
     pages.forEach(p=>observer.observe(p));
+    const copy=[...document.querySelectorAll('.reveal-copy')];
+    if(preference.matches){copy.forEach(el=>el.classList.add('in-view'));return;}
+    copyObserver=new IntersectionObserver(entries=>{
+      for(const entry of entries)entry.target.classList.toggle('in-view',entry.isIntersecting);
+    },{threshold:0,rootMargin:'-3% 0px -9% 0px'});
+    copy.forEach(el=>copyObserver.observe(el));
   }
   let scrollFrame=0;
   function indicate(id){
