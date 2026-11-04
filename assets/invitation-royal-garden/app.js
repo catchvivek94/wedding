@@ -87,10 +87,12 @@
       }
       d.regions.forEach(([x,y,width,height],i)=>{
         // A small local SVG gives each element its own viewport intersection box.
-        const piece=node('svg',{x,y,width,height,viewBox:`${x} ${y} ${width} ${height}`,class:'reference-piece reveal-copy'});
-        piece.style.width=`${width}px`;piece.style.height=`${height}px`;
+        const piece=document.createElement('div');piece.className='reference-piece reveal-copy';
+        Object.assign(piece.style,{position:'absolute',left:`${x/d.width*100}%`,top:`${y/d.height*100}%`,width:`${width/d.width*100}%`,height:`${height/d.height*100}%`});
+        const crop=node('svg',{viewBox:`${x} ${y} ${width} ${height}`,width,height});
+        crop.append(picture());piece.append(crop);
         piece.style.setProperty('--piece-delay',`${id==='wardrobe' ? (i<2?i*160:(i-2)%6*100) : (i<2?i*140:(i-2)%2*140)}ms`);
-        piece.append(picture());svg.append(piece);
+        link.append(piece);
       });
       link.append(svg);page.classList.add('has-reference-scene');
     });

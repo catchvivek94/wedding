@@ -138,3 +138,6 @@
 @media(prefers-reduced-motion:reduce){.has-reference-scene .reference-scene{display:none!important}.has-reference-scene .reference-fallback{visibility:visible!important}}
 
 .floating-dock button[data-event="wardrobe"] span{max-width:100%;font-size:10px;line-height:1.15;white-space:normal}
+
+.reference-page .reference-piece{z-index:2;overflow:hidden;pointer-events:none}
+.reference-page .reference-piece svg{position:static;width:100%;height:100%;display:block}
