@@ -137,7 +137,8 @@ const NAV = [
     ["attire.html", "🧵", "Attire tracker"]
   ]},
   { label: "Guests & Day", items: [
-    ["guests.html", "🎟", "Guests & RSVP"],
+    ["attendees.html", "🎟", "Attendees"],
+    ["guests.html", "", "Guest planning"],
     ["invites.html", "✉️", "Invites"],
     ["catering.html", "🍽", "Food & Drink"],
     ["budget.html", "💰", "Budget"]
