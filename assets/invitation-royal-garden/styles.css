@@ -141,3 +141,31 @@
 
 .reference-page .reference-piece{z-index:2;overflow:hidden;pointer-events:none}
 .reference-page .reference-piece svg{position:static;width:100%;height:100%;display:block}
+
+/* The wardrobe follows the same two days as the celebration timeline. */
+.wardrobe-page .paper{background:#fcf4ef;isolation:isolate}
+.wardrobe-backdrop{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.paper .wardrobe-backdrop>svg{width:100%;height:100%;position:absolute;inset:0}
+.paper .wardrobe-backdrop pattern svg{width:60px;height:60px}
+.wardrobe-layout{position:relative;padding:0 9% 9%;color:#651b10}
+.wardrobe-masthead{text-align:center;padding-top:12px}
+.wardrobe-cage{width:23%;margin:0 auto 10px}
+.paper .wardrobe-illustration{width:100%;height:auto;display:block;overflow:hidden}
+.wardrobe-masthead h2{font-weight:normal;text-transform:uppercase;font-size:clamp(18px,3.5vw,29px);line-height:1.2;margin:10px -5%}
+.wardrobe-flourish{font-size:27px;line-height:1;color:#986a47;margin:10px}
+.wardrobe-day{margin-top:22px}
+.wardrobe-day+.wardrobe-day{margin-top:36px}
+.wardrobe-day-heading{display:flex;align-items:center;justify-content:center;gap:13px;border-top:1px solid #b99a7270;border-bottom:1px solid #b99a7270;padding:12px 0;margin-bottom:20px}
+.wardrobe-day-heading h3{font-size:clamp(24px,4.6vw,34px);font-weight:normal;font-style:italic;margin:0}
+.wardrobe-day-heading p{font-size:clamp(11px,2.1vw,15px);letter-spacing:.6px;margin:0;border-left:1px solid #b99a7270;padding-left:13px}
+.wardrobe-outfits{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.wardrobe-card h4{font-size:clamp(18px,3.1vw,27px);font-weight:normal;font-style:italic;line-height:1.15;min-height:2.3em;display:flex;align-items:center;justify-content:center;margin:0 0 8px}
+.outfit-art{height:180px;display:flex;align-items:end;justify-content:center;margin:0 auto 10px}
+.paper .outfit-art svg{max-height:100%;width:100%;height:100%;object-fit:contain}
+.wardrobe-copy{font-size:clamp(12px,2.1vw,16px);line-height:1.35}
+.wardrobe-copy p{margin:9px 0}
+.wardrobe-copy .wardrobe-label{font-size:11px;letter-spacing:1.3px;margin:0 0 3px}
+.wardrobe-colours{text-transform:uppercase;min-height:2.7em;margin-top:0!important}
+.wardrobe-time{font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-top:1px solid #b99a7270;padding-top:10px}
+@media(max-width:520px){.wardrobe-outfits{gap:16px}.outfit-art{height:135px}.wardrobe-layout{padding-left:10%;padding-right:10%}.wardrobe-copy .wardrobe-label{font-size:9px}.wardrobe-time{font-size:10px}.wardrobe-day-heading{gap:9px}.wardrobe-day-heading p{padding-left:9px;letter-spacing:0}.wardrobe-day+.wardrobe-day{margin-top:28px}}
+@media print{.wardrobe-page{height:auto!important}.wardrobe-page .reveal-copy{opacity:1!important;transform:none!important}.wardrobe-day{break-inside:avoid}}
