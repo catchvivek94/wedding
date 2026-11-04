@@ -22,13 +22,13 @@ Keep IDs unique and stable. Use `attending`, `not_attending`, or `undecided` for
 
 Updating backend source requires a new deployment version of the existing Web app. Keep the same deployment URL. Do not delete the signing secret unless intentionally invalidating all guest sessions.
 
-## Host access
+## Attendees access
 
-`attendees.html` uses the management site's existing Supabase sign-in. The backend verifies the session with the configured Supabase project's `/auth/v1/user` endpoint and checks the email allowlist before returning the complete list. Guests' name-selection tokens do not grant host access. Adding a host requires updating the allowlist and deploying a new backend version.
+Attendees uses a simple host username and password. Store the allowed username in private `RSVP_ADMIN_EMAILS` (a JSON array), a random salt in `RSVP_ADMIN_PASSWORD_SALT`, and the salted SHA-256 password hash in `RSVP_ADMIN_PASSWORD_HASH`. Never put the password, salt, hash, or host username into the public source.
 
-Attendees refreshes every 15 seconds while visible, on focus, or on Refresh. Its CSV export includes the current filter. RSVP writes update existing guest rows and use a script lock to serialize writes.
+The login endpoint returns a signed, expiring host session token. Guest RSVP tokens do not grant Attendees access. The interface keeps the host token in session storage and clears it on sign-out. Authentication failures are limited to ten attempts per username per minute.
 
-The name gate intentionally checks membership rather than proving identity. A person who knows an invited name can select it, as agreed. Searches require three letters and return up to six matches.
+Attendees refreshes every 15 seconds while visible, on focus, or on Refresh. Its CSV export includes the current filter. RSVP writes update existing guest rows and use a script lock to serialize writes. The name gate checks invitation-list membership rather than proving identity, as agreed.
 
 ## Local preview
 

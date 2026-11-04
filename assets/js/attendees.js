@@ -3,8 +3,8 @@
   renderNav('attendees.html');
   const status=document.getElementById('att-status'),content=document.getElementById('att-content'),auth=document.getElementById('att-auth'),refresh=document.getElementById('att-refresh');
   const search=document.getElementById('att-search'),filter=document.getElementById('att-filter');
-  // Host authentication only: do not run the portal's collection sync here.
-  const client=window.supabase?.createClient(SUPABASE_URL,SUPABASE_ANON);
+  const sessionKey='wedding.attendees.session';
+  let adminToken=sessionStorage.getItem(sessionKey)||'';
   const names={attending:'Attending',not_attending:'Unable to attend',undecided:'Will confirm soon',pending:'Awaiting response',not_invited:'Not invited'};
   let guests=[],loading=false,lastToken='';
   const state=(g,day)=>!g.days.includes(day)?'not_invited':g.response?.attendance?.[day]||'pending';
@@ -28,26 +28,25 @@
   async function load(){
     if(loading)return;loading=true;refresh.disabled=true;
     try{
-      if(!client)throw new Error('Host sign-in could not load. Please reload the page.');
-      const accessToken=(await client.auth.getSession()).data?.session?.access_token||'';
+      const accessToken=adminToken;
       if(accessToken!==lastToken){guests=[];content.hidden=true;document.getElementById('att-rows').replaceChildren();lastToken=accessToken;}
       document.getElementById('att-signout').hidden=!accessToken;
       if(!accessToken){auth.hidden=false;content.hidden=true;guests=[];document.getElementById('att-rows').replaceChildren();document.getElementById('att-sheet').hidden=true;status.textContent='';document.getElementById('att-source').textContent='Private guest list';return;}
-      const data=await RsvpApi.call('attendees',{adminToken:accessToken,adminApiKey:SUPABASE_ANON});
+      const data=await RsvpApi.call('attendees',{adminToken:accessToken});
       guests=data.guests;auth.hidden=true;content.hidden=false;status.textContent='';
       document.getElementById('att-source').textContent=`${data.source} · ${data.householdCount} households`;
       document.getElementById('att-updated').textContent='Updated '+new Date().toLocaleTimeString();
       const sheet=document.getElementById('att-sheet');sheet.href=data.sheetUrl;sheet.hidden=false;render();
-    }catch(error){status.textContent=error.message+' Use Refresh to try again.';}
+    }catch(error){status.textContent=error.message+' Use Refresh to try again.';if(/sign in/i.test(error.message)){adminToken='';sessionStorage.removeItem(sessionKey);guests=[];content.hidden=true;auth.hidden=false;document.getElementById('att-rows').replaceChildren();document.getElementById('att-sheet').hidden=true;document.getElementById('att-signout').hidden=true;}}
     finally{loading=false;refresh.disabled=false;}
   }
   const login=document.getElementById('att-login'),loginStatus=document.getElementById('att-login-status');
   document.getElementById('att-signin').addEventListener('click',()=>{loginStatus.textContent='';login.showModal();});
   document.getElementById('att-login-close').addEventListener('click',()=>login.close());
-  document.getElementById('att-signout').addEventListener('click',async()=>{await client.auth.signOut();load();});
+  document.getElementById('att-signout').addEventListener('click',()=>{adminToken='';sessionStorage.removeItem(sessionKey);load();});
   document.getElementById('att-login-form').addEventListener('submit',async event=>{
     event.preventDefault();const button=document.getElementById('att-login-submit');button.disabled=true;loginStatus.textContent='Signing in…';
-    try{if(!client)throw new Error('Host sign-in could not load. Please reload the page.');const data=new FormData(event.target);const {error}=await client.auth.signInWithPassword({email:data.get('email'),password:data.get('password')});if(error)throw error;event.target.reset();login.close();load();}
+    try{const data=new FormData(event.target);const result=await RsvpApi.call('adminLogin',{username:data.get('email'),password:data.get('password')});adminToken=result.adminToken;sessionStorage.setItem(sessionKey,adminToken);event.target.reset();login.close();load();}
     catch(error){loginStatus.textContent=error.message;}
     finally{button.disabled=false;}
   });
@@ -57,6 +56,6 @@
     const rows=[['Guest','Household','Day One','Day Two','Updated at'],...filtered().map(g=>[g.name,g.household,names[state(g,'day1')],names[state(g,'day2')],g.response?.updatedAt||''])];
     const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='wedding-attendees.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
-  client?.auth.onAuthStateChange(()=>{setTimeout(load,0);});load();
+  load();
   addEventListener('focus',load);setInterval(()=>{if(!document.hidden)load();},15000);
 })();

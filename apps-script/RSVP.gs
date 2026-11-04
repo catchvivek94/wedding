@@ -1,7 +1,6 @@
 /** Separate Apps Script project for the private wedding RSVP Sheet. */
 const RSVP_SHEET_ID = PropertiesService.getScriptProperties().getProperty('RSVP_SHEET_ID');
 const RSVP_ADMIN_EMAILS = JSON.parse(PropertiesService.getScriptProperties().getProperty('RSVP_ADMIN_EMAILS') || '[]');
-const RSVP_AUTH_URL = 'https://rsysbvsamqbemxlhhwpx.supabase.co/auth/v1/user';
 
 function setupRsvp() {
   const props=PropertiesService.getScriptProperties();
@@ -21,12 +20,13 @@ function doPost(e) {
     if(!e.postData||e.postData.contents.length>20000)throw new Error('Invalid request.');
     const input=JSON.parse(e.postData.contents);
     const action=input.action;
+    if(action==='adminLogin')return output_({ok:true,...adminLogin_(input.username,input.password)});
     if(action==='search')return output_({ok:true,...search_(input.q)});
     if(action==='select')return output_({ok:true,...select_(input.guestId)});
     if(action==='profile')return output_({ok:true,...profile_(session_(input.token))});
     if(action==='save')return output_({ok:true,...save_(input)});
     if(action==='attendees'){
-      admin_(input.adminToken,input.adminApiKey);
+      admin_(input.adminToken);
       const data=data_();
       const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,response:data.responses[g.id]||null}));
       return output_({ok:true,guests:rows,householdCount:Object.keys(data.households).length,source:'Google Sheets',sheetUrl:'https://docs.google.com/spreadsheets/d/'+RSVP_SHEET_ID+'/edit',updatedAt:new Date().toISOString()});
@@ -86,10 +86,25 @@ function save_(input){
     return {saved:true,...profile_(session)};
   }finally{lock.releaseLock();}
 }
-function admin_(token,apiKey){
-  if(typeof token!=='string'||token.length>12000||typeof apiKey!=='string'||apiKey.length>1000)throw new Error('Please sign in to view attendees.');
-  const response=UrlFetchApp.fetch(RSVP_AUTH_URL,{headers:{Authorization:'Bearer '+token,apikey:apiKey},muteHttpExceptions:true});
-  if(response.getResponseCode()!==200)throw new Error('Please sign in to view attendees.');
-  const user=JSON.parse(response.getContentText());
-  if(!user.email||!user.email_confirmed_at||!RSVP_ADMIN_EMAILS.includes(user.email.toLowerCase()))throw new Error('This account is not allowed to view attendees.');
+function adminLogin_(username,password){
+  username=String(username||'').trim().toLowerCase();
+  const message='That username and password were not recognised.';
+  if(typeof password!=='string'||password.length>200||username.length>254)throw new Error(message);
+  const cache=CacheService.getScriptCache(),key='host-login-'+Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,username));
+  const failures=Number(cache.get(key)||0);
+  if(failures>=10)throw new Error('Please wait a minute before trying again.');
+  const props=PropertiesService.getScriptProperties(),salt=props.getProperty('RSVP_ADMIN_PASSWORD_SALT'),expected=props.getProperty('RSVP_ADMIN_PASSWORD_HASH');
+  if(!salt||!expected)throw new Error('Host login has not been configured yet.');
+  const actual=Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,salt+':'+password));
+  let difference=actual.length^expected.length;
+  for(let i=0;i<expected.length;i++)difference|=(actual.charCodeAt(i)||0)^expected.charCodeAt(i);
+  if(!RSVP_ADMIN_EMAILS.includes(username)||difference!==0){cache.put(key,String(failures+1),60);throw new Error(message);}
+  cache.remove(key);
+  const payload=Utilities.base64EncodeWebSafe(JSON.stringify({role:'admin',username,expires:Date.now()+12*3600*1000})).replace(/=+$/,'');
+  return {adminToken:payload+'.'+signature_(payload)};
+}
+function admin_(token){
+  let session;
+  try{session=session_(token);}catch(_){throw new Error('Please sign in to view attendees.');}
+  if(session.role!=='admin'||!RSVP_ADMIN_EMAILS.includes(session.username))throw new Error('Please sign in to view attendees.');
 }

@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Attendees · Vivek &amp; Vidhi</title>
 <link rel="stylesheet" href="assets/css/style.css?v=attendees-1">
-<link rel="stylesheet" href="assets/css/attendees.css?v=1">
+<link rel="stylesheet" href="assets/css/attendees.css?v=simple-login-1">
 </head><body>
 <main class="wrap">
 <div class="page-head"><div><p class="att-eyebrow">GUESTS &amp; RSVP</p><h1>Attendees</h1></div><div class="att-actions"><a class="btn" id="att-sheet" target="_blank" rel="noopener" hidden>Open Google Sheet</a><button class="btn primary" id="att-refresh" type="button">Refresh</button><button class="btn" id="att-signout" type="button" hidden>Sign out</button></div></div>
@@ -17,6 +17,6 @@
 <div class="att-table-wrap"><table class="att-table"><thead><tr><th scope="col">Guest</th><th scope="col">Household</th><th scope="col">Day One <small>26 January</small></th><th scope="col">Day Two <small>27 January</small></th><th scope="col">Last response</th></tr></thead><tbody id="att-rows"></tbody></table></div>
 </section></main>
 <footer>Vivek &amp; Vidhi · 26–27 January 2027</footer>
-<dialog id="att-login" class="att-login" aria-labelledby="att-login-title"><form id="att-login-form"><h2 id="att-login-title">Host sign-in</h2><p>Use your wedding management account.</p><label for="att-email">Email</label><input id="att-email" name="email" type="email" autocomplete="username" required><label for="att-password">Password</label><input id="att-password" name="password" type="password" autocomplete="current-password" required><p id="att-login-status" role="status"></p><div class="att-actions"><button type="button" class="btn" id="att-login-close">Cancel</button><button type="submit" class="btn primary" id="att-login-submit">Sign in</button></div></form></dialog>
-<script src="assets/js/config.js?v=b31d1207"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="assets/js/app.js?v=attendees-rsvp-1"></script><script src="assets/js/rsvp-api.js?v=20261103-rsvp-sheets-1"></script><script src="assets/js/attendees.js?v=1"></script>
+<dialog id="att-login" class="att-login" aria-labelledby="att-login-title"><form id="att-login-form"><h2 id="att-login-title">Host sign-in</h2><p>Enter your attendee-view username and password.</p><label for="att-email">Username</label><input id="att-email" name="email" type="email" autocomplete="username" required><label for="att-password">Password</label><input id="att-password" name="password" type="password" autocomplete="current-password" required><p id="att-login-status" role="status"></p><div class="att-actions"><button type="button" class="btn" id="att-login-close">Cancel</button><button type="submit" class="btn primary" id="att-login-submit">Sign in</button></div></form></dialog>
+<script src="assets/js/app.js?v=attendees-rsvp-1"></script><script src="assets/js/rsvp-api.js?v=20261103-rsvp-sheets-1"></script><script src="assets/js/attendees.js?v=simple-login-1"></script>
 </body></html>
