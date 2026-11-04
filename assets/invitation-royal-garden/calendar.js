@@ -3,6 +3,7 @@ const WEDDING_CALENDAR_VENUE = 'Ikshana Resort and Spa, Khandala';
 const WEDDING_CALENDAR_MAP = 'https://maps.app.goo.gl/1yEEkUati3wdLUSb9';
 function weddingCalendarDescription(day){return day.schedule+'\n'+WEDDING_CALENDAR_VENUE+'\nMap: '+WEDDING_CALENDAR_MAP+'\nInvitation: https://catchvivek94.github.io/wedding/invite/';}
 function weddingGoogleCalendar(day){return 'https://calendar.google.com/calendar/render?'+Object.entries({action:'TEMPLATE',text:day.title,dates:day.date+'/'+day.end,ctz:'Asia/Kolkata',details:weddingCalendarDescription(day),location:WEDDING_CALENDAR_VENUE}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');}
+function weddingCombinedCalendar(){return {title:'Vidhi & Vivek · Wedding Celebrations',date:WEDDING_CALENDAR_DAYS[0].date,end:WEDDING_CALENDAR_DAYS[1].end,schedule:WEDDING_CALENDAR_DAYS.map(day=>day.label+'\n'+day.schedule).join('\n\n')};}
 function weddingIcs(days){
  const escape=value=>value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');

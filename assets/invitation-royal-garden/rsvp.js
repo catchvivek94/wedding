@@ -99,7 +99,7 @@
   const confirmation=document.getElementById('rsvp-confirmation');
   let celebrationTimer;
   const calendarLinks=document.getElementById('rsvp-calendar-links');
-  WEDDING_CALENDAR_DAYS.forEach(day=>{const link=text('a',day.label+' · Google Calendar');link.href=weddingGoogleCalendar(day);link.target='_blank';link.rel='noopener noreferrer';calendarLinks.append(link);});
+  const calendarLink=text('a','Add both days to Google Calendar');calendarLink.href=weddingGoogleCalendar(weddingCombinedCalendar());calendarLink.target='_blank';calendarLink.rel='noopener noreferrer';calendarLinks.append(calendarLink);
   const ical=document.getElementById('rsvp-ical');ical.href=URL.createObjectURL(new Blob([weddingIcs(WEDDING_CALENDAR_DAYS)],{type:'text/calendar;charset=utf-8'}));ical.download='vidhi-vivek-wedding.ics';
   document.getElementById('rsvp-email-form').addEventListener('submit',async event=>{
     event.preventDefault();const button=document.getElementById('rsvp-email-send'),status=document.getElementById('rsvp-email-status');if(button.disabled)return;

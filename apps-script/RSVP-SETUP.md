@@ -52,3 +52,5 @@ The RSVP form shows one shared +1 section after all household members. It reuses
 After saving, guests can open Google Calendar day reminders, download an iCalendar attachment, or explicitly request the full schedule by email. Both days are all-day reminders with event times in IST in the description. `calendar.js` and the calendar constants/functions at the end of `RSVP.gs` must stay synchronized.
 
 Run `authorizeCalendarEmail` as the script owner and approve Google's send-email permission before deploying this version. MailApp sends the schedule, venue/map, Google Calendar links, and a two-day `.ics` attachment. This does not read the inbox or store guest email addresses. Email is sent only after a valid saved RSVP and an explicit guest request, with a one-minute household cooldown and a quota check.
+
+The Google Calendar button creates one all-day event covering 26–27 January with both schedules in its description. HTML emails display named hyperlinks and one Google Calendar button; the plain-text fallback retains usable URLs. The iCalendar attachment keeps separate day entries.
