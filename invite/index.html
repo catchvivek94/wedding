@@ -6,9 +6,9 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="preload" as="image" href="envelope-liner.png">
 <link rel="stylesheet" href="styles.css?v=20261103-wardrobe-days">
-<link rel="stylesheet" href="rsvp.css?v=20261103-rsvp-sheets-1">
+<link rel="stylesheet" href="rsvp.css?v=envelope-teams-1">
 <script src="../js/rsvp-api.js?v=20261103-rsvp-sheets-1" defer></script>
-<script src="rsvp.js?v=20261103-rsvp-sheets-1" defer></script>
+<script src="rsvp.js?v=envelope-teams-1" defer></script>
 <script src="app.js?v=20261103-rsvp-sheets-1" defer></script><script src="motion.js?v=20261103-hanging-decor" defer></script>
 </head><body>
 <section class="envelope-gate" aria-label="Your wedding invitation">
@@ -220,13 +220,19 @@
 <button type="button" class="rsvp-button" id="rsvp-button" hidden aria-haspopup="dialog">RSVP <span id="rsvp-guest-label"></span></button>
 <dialog class="rsvp-dialog" id="guest-name-dialog" aria-labelledby="guest-name-title">
 <button type="button" class="rsvp-close" data-close-rsvp-dialog aria-label="Close name search">×</button>
-<p class="rsvp-eyebrow">VIDHI &amp; VIVEK</p><h2 id="guest-name-title">An invitation just for you</h2>
-<p class="rsvp-intro">Tell us your name to find your invitation.</p>
-<form id="guest-name-form"><label for="guest-name">Your name</label>
+<p class="rsvp-eyebrow">VIDHI &amp; VIVEK</p><h2 id="guest-name-title">Whose team are you on?</h2>
+<p class="rsvp-intro">A little friendly rivalry before we celebrate.</p>
+<form id="guest-name-form">
+<fieldset class="guest-team-picker" aria-label="Choose your team"><legend class="visually-hidden">Whose team are you on?</legend>
+<label class="guest-team-option"><input type="radio" name="guest-team" value="Team Vidhi" required><span class="team-heart" aria-hidden="true">♡</span><strong>Team Vidhi</strong><small>The bride’s cheering squad</small></label>
+<label class="guest-team-option"><input type="radio" name="guest-team" value="Team Vivek" required><span class="team-heart" aria-hidden="true">♡</span><strong>Team Vivek</strong><small>The groom’s cheering squad</small></label>
+<label class="guest-team-option"><input type="radio" name="guest-team" value="Team Both" required><span class="team-heart" aria-hidden="true">♡</span><strong>Team Both</strong><small>Twice the love</small></label>
+</fieldset>
+<div id="guest-name-step" hidden><label for="guest-name">And your name?</label>
 <input id="guest-name" type="search" maxlength="70" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="guest-results" aria-expanded="false" aria-describedby="guest-search-status" placeholder="Start typing your name…">
 <p id="guest-search-status" class="rsvp-status" role="status" aria-live="polite">Type at least 3 letters to find your invitation.</p>
 <ul id="guest-results" class="guest-results" role="listbox" aria-label="Matching invited guests"></ul>
-<button id="guest-continue" class="rsvp-primary" type="submit" disabled>Open my invitation</button></form>
+<button id="guest-continue" class="rsvp-primary" type="submit" disabled>Open my invitation</button></div></form>
 </dialog>
 <dialog class="rsvp-dialog" id="rsvp-dialog" aria-labelledby="rsvp-title">
 <button type="button" class="rsvp-close" data-close-rsvp-dialog aria-label="Close RSVP">×</button>

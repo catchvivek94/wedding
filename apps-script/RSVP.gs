@@ -22,7 +22,7 @@ function doPost(e) {
     const action=input.action;
     if(action==='adminLogin')return output_({ok:true,...adminLogin_(input.username,input.password)});
     if(action==='search')return output_({ok:true,...search_(input.q)});
-    if(action==='select')return output_({ok:true,...select_(input.guestId)});
+    if(action==='select')return output_({ok:true,...select_(input.guestId,input.side)});
     if(action==='profile')return output_({ok:true,...profile_(session_(input.token))});
     if(action==='save')return output_({ok:true,...save_(input)});
     if(action==='attendees'){
@@ -51,12 +51,24 @@ function search_(query){
   return {matches:data.guests.filter(g=>[g.name,...g.aliases].some(name=>words.every(w=>normal_(name).includes(w)))).slice(0,6).map(g=>({id:g.id,name:g.name,household:data.households[g.householdId].label}))};
 }
 function signature_(value){const secret=PropertiesService.getScriptProperties().getProperty('RSVP_SECRET');if(!secret)throw new Error('Please run setupRsvp before accepting responses.');return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(value,secret)).replace(/=+$/,'');}
-function select_(id){
-  const data=data_(),guest=data.guests.find(g=>g.id===id);if(!guest)throw new Error('Please choose a name from the invitation list.');
-  const session={guestId:guest.id,householdId:guest.householdId,expires:Date.now()+12*3600*1000};
-  const payload=Utilities.base64EncodeWebSafe(JSON.stringify(session)).replace(/=+$/,'');
-  return {token:payload+'.'+signature_(payload),...profile_(session,data)};
+function select_(id,side){
+  if(side!==undefined&&!['Team Vidhi','Team Vivek','Team Both'].includes(side))throw new Error('Please choose one of the three teams.');
+  const lock=side!==undefined?LockService.getScriptLock():null;
+  if(lock)lock.waitLock(20000);
+  try{
+    const data=data_(),guest=data.guests.find(g=>g.id===id);if(!guest)throw new Error('Please choose a name from the invitation list.');
+    if(side!==undefined){
+      const tab=data.sheet.getSheetByName('Guests');
+      const matches=tab.getRange(2,1,tab.getLastRow()-1,1).getValues().map((r,index)=>({id:String(r[0]),row:index+2})).filter(r=>r.id===id);
+      if(matches.length!==1)throw new Error('Please contact the hosts to check your invitation.');
+      tab.getRange(matches[0].row,7,1,1).setValues([[side]]);SpreadsheetApp.flush();guest.side=side;
+    }
+    const session={guestId:guest.id,householdId:guest.householdId,expires:Date.now()+12*3600*1000};
+    const payload=Utilities.base64EncodeWebSafe(JSON.stringify(session)).replace(/=+$/,'');
+    return {token:payload+'.'+signature_(payload),...profile_(session,data)};
+  }finally{if(lock)lock.releaseLock();}
 }
+
 function session_(token){
   if(typeof token!=='string'||token.length>2000)throw new Error('Please select your name again.');
   const parts=token.split('.');if(parts.length!==2||signature_(parts[0])!==parts[1])throw new Error('Please select your name again.');
