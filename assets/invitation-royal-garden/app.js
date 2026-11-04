@@ -6,6 +6,7 @@
   const dock=document.querySelector('.floating-dock');
   const opener=document.querySelector('#open-invitation');
   const menu=[...document.querySelectorAll('[data-event]')];
+  prepareReferencePages();
   let opening=false, observer, copyObserver;
   content.inert=true;dock.inert=true;
   document.documentElement.classList.toggle('motion-ready',!preference.matches);
@@ -28,6 +29,73 @@
     },{threshold:0,rootMargin:'-3% 0px -9% 0px'});
     copy.forEach(el=>copyObserver.observe(el));
   }
+
+  function prepareReferencePages(){
+    const ns='http://www.w3.org/2000/svg';
+    const node=(tag,attrs={})=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
+    const definitions={
+      timeline:{width:887,height:1774,patch:[690,470,55,40],regions:[
+        [265,80,370,77],[240,190,410,70],
+        [120,280,330,190],[445,300,300,165],
+        [408,500,285,85],[120,567,155,180],[300,630,235,50],
+        [548,720,285,130],[278,755,235,70],
+        [90,855,225,155],[355,880,360,95],
+        [246,1025,410,77],[125,1136,225,72],[405,1120,135,115],
+        [248,1270,180,75],[475,1270,355,70],
+        [130,1395,115,45],[285,1380,130,95],
+        [170,1500,250,115],[460,1495,345,95]
+      ],route:'M570 298 C440 245 337 320 386 392 C410 425 576 446 540 516 C511 565 403 570 352 575 C240 590 267 688 320 704 C370 728 539 709 538 780 C543 869 300 822 320 904 C333 954 346 989 413 994 C504 1002 626 991 629 1060 C632 1141 495 1107 442 1114 C355 1121 342 1183 379 1216 C414 1247 466 1248 458 1298 C453 1375 275 1337 261 1418 C248 1500 406 1473 438 1522 C460 1553 443 1593 420 1608 C392 1625 335 1631 313 1646'},
+      wardrobe:{width:1064,height:1478,patch:[90,200,60,60],regions:[
+        [435,4,200,277],[220,285,630,120],
+        [130,410,345,60],[130,475,290,220],[110,695,380,190],
+        [580,410,385,60],[600,475,300,220],[570,695,420,200],
+        [108,918,370,65],[150,987,275,240],[100,1227,385,185],
+        [585,918,395,65],[630,987,285,240],[570,1227,420,185]
+      ]}
+    };
+    Object.entries(definitions).forEach(([id,d])=>{
+      const page=document.getElementById(id), link=page.querySelector('.paper>a'), source=link.querySelector('img');
+      source.classList.remove('reveal-copy');source.classList.add('reference-fallback');
+      const svg=node('svg',{viewBox:`0 0 ${d.width} ${d.height}`,class:'reference-scene','aria-hidden':'true'});
+      const defs=node('defs');svg.append(defs);
+      const pattern=node('pattern',{id:`${id}-paper`,width:d.patch[2],height:d.patch[3],patternUnits:'userSpaceOnUse'});
+      const sample=node('svg',{width:d.patch[2],height:d.patch[3],viewBox:d.patch.join(' '),preserveAspectRatio:'none'});
+      const picture=()=>node('image',{href:source.getAttribute('src'),width:d.width,height:d.height});
+      sample.style.width=`${d.patch[2]}px`;sample.style.height=`${d.patch[3]}px`;
+      sample.append(picture());pattern.append(sample);defs.append(pattern);
+      svg.append(node('rect',{width:d.width,height:d.height,fill:`url(#${id}-paper)`}));
+      const mask=node('mask',{id:`${id}-background`,maskUnits:'userSpaceOnUse',x:0,y:0,width:d.width,height:d.height});
+      mask.append(node('rect',{width:d.width,height:d.height,fill:'white'}));defs.append(mask);
+      d.regions.forEach(([x,y,width,height])=>{
+        mask.append(node('rect',{x,y,width,height,fill:'black'}));
+      });
+      if(d.route)mask.append(node('path',{d:d.route,fill:'none',stroke:'black','stroke-width':16}));
+      const background=picture();background.setAttribute('mask',`url(#${id}-background)`);svg.append(background);
+      if(d.route){
+        // Reveal the original painted dashes along their curved route, in scroll order.
+        const routeMask=node('mask',{id:'timeline-route',maskUnits:'userSpaceOnUse',x:0,y:0,width:d.width,height:d.height});
+        const trail=node('path',{d:d.route,fill:'none',stroke:'white','stroke-width':16,'stroke-linecap':'round',pathLength:1,class:'timeline-trace'});
+        routeMask.append(trail);defs.append(routeMask);
+        const route=picture();route.setAttribute('mask','url(#timeline-route)');svg.append(route);
+        const update=()=>{
+          const r=svg.getBoundingClientRect();
+          const progress=Math.max(0,Math.min(1,(innerHeight*.82-r.top)/r.height));
+          trail.style.strokeDashoffset=1-progress;
+        };
+        addEventListener('scroll',()=>{if(!page._routeFrame)page._routeFrame=requestAnimationFrame(()=>{page._routeFrame=0;update();});},{passive:true});
+        addEventListener('resize',update);document.addEventListener('invitation:opened',update);update();
+      }
+      d.regions.forEach(([x,y,width,height],i)=>{
+        // A small local SVG gives each element its own viewport intersection box.
+        const piece=node('svg',{x,y,width,height,viewBox:`${x} ${y} ${width} ${height}`,class:'reference-piece reveal-copy'});
+        piece.style.width=`${width}px`;piece.style.height=`${height}px`;
+        piece.style.setProperty('--piece-delay',`${id==='wardrobe' ? (i<2?i*160:(i-2)%6*100) : (i<2?i*140:(i-2)%2*140)}ms`);
+        piece.append(picture());svg.append(piece);
+      });
+      link.append(svg);page.classList.add('has-reference-scene');
+    });
+  }
+
   let scrollFrame=0;
   function indicate(id){
     const sectionId=({phere:'haldi',sangeet:'wedding'})[id]||id;

@@ -117,3 +117,24 @@
   .motion-ready .event.reference-page .reveal-copy{transform:translateY(28px) scale(.97);transform-origin:50% 50%}
   .motion-ready .event.reference-page .reveal-copy.in-view{transform:translateY(0) scale(1)}
 }
+
+/* Reference artwork is composed in-place: paper first, then individual details. */
+.reference-page .paper>a{position:relative;overflow:hidden}
+.reference-scene{display:none;width:100%;height:auto;position:absolute;inset:0;overflow:hidden}
+.has-reference-scene .reference-scene{display:block}
+.has-reference-scene .reference-fallback{visibility:hidden}
+.timeline-trace{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .75s ease-out}
+@media screen and (prefers-reduced-motion:no-preference){
+  .motion-ready .event.reference-page .reference-piece.reveal-copy{opacity:0;transform:none;transition:opacity .8s ease;transition-delay:0s;will-change:opacity}
+  .motion-ready .event.reference-page.is-visible .reference-piece.reveal-copy.in-view{opacity:1;transform:none;transition-delay:calc(550ms + var(--piece-delay,0ms))}
+  .motion-ready .reference-scene{opacity:0;transition:opacity .45s ease}
+  .motion-ready .is-visible .reference-scene{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){.timeline-trace{stroke-dashoffset:0!important;transition:none}.reference-piece{opacity:1!important}}
+@media print{.reference-scene{display:none!important}.has-reference-scene .reference-fallback{visibility:visible!important}}
+
+.paper svg.reference-scene{position:absolute;inset:0;width:100%;height:100%}
+.paper .reference-scene svg{position:static;z-index:auto}
+@media(prefers-reduced-motion:reduce){.has-reference-scene .reference-scene{display:none!important}.has-reference-scene .reference-fallback{visibility:visible!important}}
+
+.floating-dock button[data-event="wardrobe"] span{max-width:100%;font-size:10px;line-height:1.15;white-space:normal}
