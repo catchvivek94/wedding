@@ -50,7 +50,7 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .rsvp-edit-response{border:0;background:none;color:#87683f;text-decoration:underline;text-underline-offset:4px;padding:16px;cursor:pointer;font:inherit;font-size:13px}
 .rsvp-fireworks{position:absolute;inset:0 0 auto;height:330px;z-index:0;overflow:hidden;pointer-events:none;border-radius:18px}
 .rsvp-fireworks i{position:absolute;width:4px;height:8px;border-radius:50%;background:var(--spark);opacity:0;box-shadow:0 0 5px var(--spark);animation:rsvp-spark 2.6s var(--delay) ease-out 3}
-@keyframes rsvp-spark{0%{opacity:0;transform:translate(0,0) scale(.2)}12%{opacity:1}75%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+@keyframes rsvp-spark{0%{opacity:0;transform:translate(0,0) scale(.2)}12%{opacity:1;transform:translate(calc(var(--dx)*.1),calc(var(--dy)*.1)) scale(1)}75%{opacity:.8;transform:translate(calc(var(--dx)*.8),calc(var(--dy)*.8)) scale(.8)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
 @keyframes rsvp-bloom{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.rsvp-confirmation{animation:none}.rsvp-fireworks i{animation:none;opacity:.45;transform:translate(calc(var(--dx)*.65),calc(var(--dy)*.65))}.rsvp-fireworks b{animation:none;opacity:.25;transform:scale(.8)}}
 
@@ -65,3 +65,8 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 @keyframes rsvp-firework-ring{0%{opacity:0;transform:scale(.1)}12%{opacity:.65}100%{opacity:0;transform:scale(2.8)}}
 .rsvp-replay-celebration{display:block;margin:-16px auto 23px;border:0;background:none;font:inherit;font-size:12px;color:#947249;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
 @media(prefers-reduced-motion:reduce){.rsvp-fireworks b{animation:none;opacity:.25;transform:scale(.8)}}
+
+.rsvp-celebration-overlay{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;pointer-events:none;overflow:hidden;z-index:2147483647;color:inherit}
+.rsvp-celebration-overlay[hidden]{display:none}
+.rsvp-celebration-overlay::backdrop{background:transparent;pointer-events:none}
+.rsvp-celebration-overlay i{width:5px;height:10px;box-shadow:0 0 7px var(--spark)}

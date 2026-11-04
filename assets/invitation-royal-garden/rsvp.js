@@ -98,6 +98,9 @@
   }
   const confirmation=document.getElementById('rsvp-confirmation');
   let celebrationTimer;
+  const fireworks=document.createElement('div');fireworks.className='rsvp-fireworks rsvp-celebration-overlay';fireworks.setAttribute('aria-hidden','true');
+  const hasPopover=typeof fireworks.showPopover==='function';if(hasPopover)fireworks.setAttribute('popover','manual');else fireworks.hidden=true;
+  document.body.append(fireworks);
   const calendarLinks=document.getElementById('rsvp-calendar-links');
   const calendarLink=text('a','Add both days to Google Calendar');calendarLink.href=weddingGoogleCalendar(weddingCombinedCalendar());calendarLink.target='_blank';calendarLink.rel='noopener noreferrer';calendarLinks.append(calendarLink);
   const ical=document.getElementById('rsvp-ical');ical.href=URL.createObjectURL(new Blob([weddingIcs(WEDDING_CALENDAR_DAYS)],{type:'text/calendar;charset=utf-8'}));ical.download='vidhi-vivek-wedding.ics';
@@ -110,7 +113,7 @@
   });
   function resetConfirmation(){
     clearTimeout(celebrationTimer);rsvpDialog.setAttribute('aria-labelledby','rsvp-title');rsvpDialog.classList.remove('rsvp-celebrating');confirmation.hidden=true;form.hidden=false;
-    confirmation.querySelector('.rsvp-fireworks').replaceChildren();
+    fireworks.replaceChildren();if(hasPopover&&fireworks.matches(':popover-open'))fireworks.hidePopover();else if(!hasPopover)fireworks.hidden=true;
   }
   function celebrate(){
     resetConfirmation();form.hidden=true;confirmation.hidden=false;rsvpDialog.classList.add('rsvp-celebrating');
@@ -119,16 +122,17 @@
   }
   function startFireworks(){
     clearTimeout(celebrationTimer);
-    const fireworks=confirmation.querySelector('.rsvp-fireworks');fireworks.replaceChildren();
-    [[17,62],[81,96],[49,30],[23,230],[79,254]].forEach(([x,y],burst)=>{
-      const ring=document.createElement('b');ring.style.cssText=`left:${x}%;top:${y}px;--delay:${burst*.7}s`;fireworks.append(ring);
+    fireworks.replaceChildren();
+    if(hasPopover){if(!fireworks.matches(':popover-open'))fireworks.showPopover();}else{rsvpDialog.append(fireworks);fireworks.hidden=false;}
+    [[12,23],[88,30],[35,25],[65,35],[14,66],[86,72]].forEach(([x,y],burst)=>{
+      const ring=document.createElement('b');ring.style.cssText=`left:${x}%;top:${y}%;--delay:${burst*.7}s`;fireworks.append(ring);
       for(let i=0;i<20;i++){
-        const spark=document.createElement('i'),angle=i*Math.PI/10,distance=52+(i%3)*17;
-        spark.style.cssText=`left:${x}%;top:${y}px;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.7}s;--spark:${['#b48638','#b66d88','#87955f'][i%3]}`;
+        const spark=document.createElement('i'),angle=i*Math.PI/10,distance=66+(i%3)*20;
+        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.7}s;--spark:${['#d5a84d','#d18a9f','#a9b77e'][i%3]}`;
         fireworks.append(spark);
       }
     });
-    celebrationTimer=setTimeout(()=>fireworks.replaceChildren(),11000);
+    celebrationTimer=setTimeout(()=>{fireworks.replaceChildren();if(hasPopover&&fireworks.matches(':popover-open'))fireworks.hidePopover();else if(!hasPopover)fireworks.hidden=true;},12000);
   }
   document.getElementById('rsvp-replay-celebration').addEventListener('click',startFireworks);
 
