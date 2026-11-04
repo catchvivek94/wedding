@@ -24,8 +24,17 @@
       {origin:'70.2% 2%', angle:'2.2deg', period:'3.3s', clip:'polygon(62% 0,78% 0,78% 17.6%,75.5% 19.2%,62% 19.2%)'},
       {origin:'82.8% 2%', angle:'1.8deg', period:'3.7s', clip:'polygon(80% 0,97% 0,97% 26%,72% 26%,72% 19.2%,78% 17.6%,80% 17.6%)'}
     ]},
-    phere: {pendants: [{origin:'26% 0%', angle:'1.4deg', period:'4.1s', clip:'inset(0 50% 68% 0)', placement:'translate(8.6%, -8.5%) scale(.75)'}]},
-    sangeet: {pendants: [{origin:'55.2% 6.5%', angle:'3deg', period:'3.5s', clip:'inset(5% 39% 81% 49%)'}]}
+    phere: {background:'phere-background-v2.png', pendants: [
+      {origin:'26% 0%', angle:'1.4deg', period:'4.1s', clip:'inset(0 50% 68% 0)', placement:'translate(8.6%, -8.5%) scale(.75)'},
+      {src:'phere-garlands.png', origin:'5% 0%', angle:'.75deg', period:'6.2s', clip:'inset(0 90% 37% 0)'},
+      {src:'phere-garlands.png', origin:'11.6% 0%', angle:'1.2deg', period:'5.4s', clip:'inset(0 85% 65% 10%)'},
+      {src:'phere-garlands.png', origin:'88.3% 0%', angle:'1.1deg', period:'5.8s', clip:'inset(0 9% 63% 85%)'},
+      {src:'phere-garlands.png', origin:'95% 0%', angle:'.65deg', period:'6.9s', clip:'inset(0 0 36% 91%)'}
+    ]},
+    sangeet: {background:'sangeet-background-v2.png', pendants: [
+      {origin:'55.2% 6.5%', angle:'3deg', period:'3.5s', clip:'inset(5% 39% 81% 49%)'},
+      {src:'sangeet-right-lantern.png', origin:'87.4% 0%', angle:'2.2deg', period:'4.6s', clip:'inset(0 4% 76% 79%)'}
+    ]}
   };
   let frame = 0, previous = 0;
   function tick(now) {
@@ -177,9 +186,16 @@
     const definition=settings[page.id];
     if (!definition) return;
     const background=new Image(), foreground=new Image();
-    background.src=`${page.id}-background-layer.png`;
+    background.src=definition.background || `${page.id}-background-layer.png`;
     foreground.src=`${page.id}-foreground-layer.png`;
-    try { await Promise.all([background.decode(),foreground.decode()]); }
+    const extraImages=new Map();
+    for(const pendant of definition.pendants || []) {
+      if(pendant.src && !extraImages.has(pendant.src)) {
+        const image=new Image();image.src=pendant.src;extraImages.set(pendant.src,image);
+      }
+    }
+    // Reveal the replacement plate only when every separated decoration is ready.
+    try { await Promise.all([background,foreground,...extraImages.values()].map(image=>image.decode())); }
     catch { return; }
     const paper=page.querySelector('.paper');
     const layer=document.createElement('div');
@@ -202,7 +218,7 @@
       definition.pendants.forEach((pendant,index)=>{
         const placement=document.createElement('div');placement.className='foreground-placement';
         if(pendant.placement) placement.style.transform=pendant.placement;
-        const element=foreground.cloneNode();element.alt='';element.className='foreground-element';
+        const element=(pendant.src ? extraImages.get(pendant.src) : foreground).cloneNode();element.alt='';element.className='foreground-element';
         element.style.transformOrigin=pendant.origin;element.style.clipPath=pendant.clip;
         element.style.setProperty('--sway',pendant.angle);element.style.setProperty('--period',pendant.period);
         element.style.animationDelay=`${index*-2.1}s`;
