@@ -18,8 +18,8 @@
 .rsvp-button{position:fixed;z-index:19;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;translate:-50% 0;display:flex;align-items:center;gap:9px;border:1px solid #c8b795;border-radius:24px;background:#fcf7ed;color:#79512c;padding:9px 17px;box-shadow:0 4px 16px #4e423b20;font:inherit;font-size:13px;cursor:pointer}
 .rsvp-button[hidden]{display:none}.rsvp-button span{font-size:11px;border-left:1px solid #c8b795;padding-left:9px;color:#74654f}
 body:not(.invitation-open) .rsvp-button{visibility:hidden}
-.rsvp-member{border:1px solid #d6c7aa;border-radius:13px;margin:18px 0;padding:8px 15px 16px;min-width:0}
-.rsvp-member legend{font-size:19px;padding:0 7px}
+.rsvp-member,.rsvp-household-companion{border:1px solid #d6c7aa;border-radius:13px;margin:18px 0;padding:8px 15px 16px;min-width:0}
+.rsvp-member legend,.rsvp-household-companion legend{font-size:19px;padding:0 7px}
 .rsvp-footnote{text-align:center;font-size:11px;line-height:1.5;color:#85745e;margin:18px 0 0}
 @media(max-width:520px){.rsvp-dialog{padding:34px 20px 24px}.rsvp-dialog h2{font-size:27px}.rsvp-button{bottom:calc(86px + env(safe-area-inset-bottom))}}
 @media print{.rsvp-dialog,.rsvp-button{display:none!important}}
@@ -37,3 +37,5 @@ body:not(.invitation-open) .rsvp-button{visibility:hidden}
 .rsvp-dialog .rsvp-plus-one-toggle input{width:19px;height:19px;flex:0 0 auto;accent-color:#9d7847;padding:0;margin:0}
 .rsvp-plus-one-details{margin-top:15px;padding:1px 13px 14px;border:1px solid #dac9ad;border-radius:11px;background:#f7efdf}
 .rsvp-plus-one-details[hidden]{display:none}.rsvp-plus-one-hint{font-size:11px;line-height:1.4;color:#8b7358;margin:7px 0 15px}
+
+.rsvp-household-companion .rsvp-plus-one-toggle{border-top:0;margin-top:0;padding-top:8px}

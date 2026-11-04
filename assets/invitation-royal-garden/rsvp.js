@@ -103,6 +103,11 @@
       const fieldset=document.createElement('fieldset');fieldset.className='rsvp-member';fieldset.dataset.guestId=guest.id;
       fieldset.append(text('legend',guest.name));
       attendanceFields(fieldset,guest,guest.response?.attendance,`rsvp-${index}`,'data-guest-day');
+      memberList.append(fieldset);
+    });
+    const guest=profile.guests.find(g=>g.companion)||profile.guests[0];
+    if(guest){
+      const index='household',fieldset=document.createElement('fieldset');fieldset.className='rsvp-household-companion';fieldset.dataset.hostId=guest.id;fieldset.append(text('legend','A little more company'));
       const toggleLabel=document.createElement('label');toggleLabel.className='rsvp-plus-one-toggle';
       const toggle=document.createElement('input');toggle.type='checkbox';toggle.id=`rsvp-plus-one-${index}`;toggle.dataset.companionEnabled='';toggle.checked=!!guest.companion;
       toggleLabel.append(toggle,text('span','I’m bringing a +1'));fieldset.append(toggleLabel);
@@ -114,7 +119,7 @@
       const update=()=>{details.hidden=!toggle.checked;details.querySelectorAll('input,select').forEach(el=>el.disabled=!toggle.checked);};
       toggle.addEventListener('change',()=>{update();if(toggle.checked)name.focus();});
       update();fieldset.append(details);memberList.append(fieldset);
-    });
+    }
     saveButton.textContent=profile.guests.some(g=>g.response)?'Update our RSVP':'Send our RSVP';
   }
   rsvpButton.addEventListener('click',async()=>{
@@ -125,7 +130,12 @@
   });
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(busy||!form.reportValidity())return;
-    const responses=[...memberList.querySelectorAll('.rsvp-member')].map(fieldset=>({guestId:fieldset.dataset.guestId,attendance:Object.fromEntries([...fieldset.querySelectorAll('[data-guest-day]')].map(el=>[el.name,el.value])),companion:fieldset.querySelector('[data-companion-enabled]').checked?{name:fieldset.querySelector('[data-companion-name]').value.trim(),attendance:Object.fromEntries([...fieldset.querySelectorAll('[data-companion-day]')].map(el=>[el.name,el.value]))}:null}));
+    const companionSection=memberList.querySelector('.rsvp-household-companion');
+    const responses=[...memberList.querySelectorAll('.rsvp-member')].map(fieldset=>({guestId:fieldset.dataset.guestId,attendance:Object.fromEntries([...fieldset.querySelectorAll('[data-guest-day]')].map(el=>[el.name,el.value]))}));
+    if(companionSection){
+      const host=responses.find(row=>row.guestId===companionSection.dataset.hostId);
+      host.companion=companionSection.querySelector('[data-companion-enabled]').checked?{name:companionSection.querySelector('[data-companion-name]').value.trim(),attendance:Object.fromEntries([...companionSection.querySelectorAll('[data-companion-day]')].map(el=>[el.name,el.value]))}:null;
+    }
     busy=true;saveButton.disabled=true;saveStatus.classList.remove('saved');saveStatus.textContent='Saving your response…';
     try{
       const data=await api('save',{method:'POST',body:{responses}});profile=data;

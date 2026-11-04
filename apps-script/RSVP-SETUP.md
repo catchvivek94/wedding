@@ -44,3 +44,5 @@ Every invited guest may add one named companion, with separate attendance for ea
 Companions are not returned by invitation name search, cannot create further plus-ones, and cannot be assigned to another household through a submitted ID. The backend rejects a +1 whose normalized name is already in the original guest list or another active companion record. Existing clients that omit the companion field preserve existing companion records; the new interface sends null to remove a +1.
 
 Keep the Companions tab’s table range large enough for one companion per invited guest. The initial table reserves 200 companion rows.
+
+The RSVP form shows one shared +1 section after all household members. It reuses an existing companion’s inviter, or the first household member for a new companion, so editing does not create a new row when another family member opens the invitation.
