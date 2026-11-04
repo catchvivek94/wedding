@@ -28,7 +28,7 @@ function doPost(e) {
     if(action==='attendees'){
       admin_(input.adminToken);
       const data=data_();
-      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,response:data.responses[g.id]||null}));
+      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,side:g.side,response:data.responses[g.id]||null}));
       return output_({ok:true,guests:rows,householdCount:Object.keys(data.households).length,source:'Google Sheets',sheetUrl:'https://docs.google.com/spreadsheets/d/'+RSVP_SHEET_ID+'/edit',updatedAt:new Date().toISOString()});
     }
     throw new Error('Unknown request.');
@@ -40,7 +40,7 @@ function rows_(sheet,name,columns){const tab=sheet.getSheetByName(name);if(!tab)
 function data_(){
   const sheet=SpreadsheetApp.openById(RSVP_SHEET_ID),households={},responses={};
   rows_(sheet,'Households',3).forEach(r=>{if(r[0]&&(r[2]===true||String(r[2]).toLowerCase()==='true'))households[String(r[0])]={id:String(r[0]),label:String(r[1])};});
-  const guests=rows_(sheet,'Guests',6).filter(r=>r[0]&&households[String(r[2])]).map(r=>({id:String(r[0]),name:String(r[1]),householdId:String(r[2]),days:[...(r[3]===true||String(r[3]).toLowerCase()==='true'?['day1']:[]),...(r[4]===true||String(r[4]).toLowerCase()==='true'?['day2']:[])],aliases:String(r[5]||'').split(',').map(normal_).filter(Boolean)}));
+  const guests=rows_(sheet,'Guests',7).filter(r=>r[0]&&households[String(r[2])]).map(r=>({id:String(r[0]),name:String(r[1]),householdId:String(r[2]),days:[...(r[3]===true||String(r[3]).toLowerCase()==='true'?['day1']:[]),...(r[4]===true||String(r[4]).toLowerCase()==='true'?['day2']:[])],side:['Team Vidhi','Team Vivek','Team Both'].includes(String(r[6]||''))?String(r[6]):'',aliases:String(r[5]||'').split(',').map(normal_).filter(Boolean)}));
   const valid=['attending','not_attending','undecided'];
   rows_(sheet,'RSVPs',4).forEach(r=>{if(r[0]&&(valid.includes(r[1])||valid.includes(r[2])))responses[String(r[0])]={attendance:{...(valid.includes(r[1])?{day1:r[1]}:{}),...(valid.includes(r[2])?{day2:r[2]}:{})},updatedAt:r[3] instanceof Date?r[3].toISOString():String(r[3]||'')};});
   return {sheet,households,guests,responses};
@@ -66,7 +66,7 @@ function session_(token){
 function profile_(session,provided){
   const data=provided||data_(),guest=data.guests.find(g=>g.id===session.guestId&&g.householdId===session.householdId);
   if(!guest||!data.households[session.householdId])throw new Error('This invitation is no longer available. Please contact the hosts.');
-  return {household:data.households[session.householdId].label,selectedGuest:guest.name,guests:data.guests.filter(g=>g.householdId===session.householdId).map(g=>({id:g.id,name:g.name,days:g.days,response:data.responses[g.id]||null}))};
+  return {household:data.households[session.householdId].label,selectedGuest:guest.name,guests:data.guests.filter(g=>g.householdId===session.householdId).map(g=>({id:g.id,name:g.name,days:g.days,side:g.side,response:data.responses[g.id]||null}))};
 }
 function save_(input){
   const session=session_(input.token),lock=LockService.getScriptLock();lock.waitLock(20000);

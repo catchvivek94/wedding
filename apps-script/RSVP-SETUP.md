@@ -5,7 +5,7 @@ The private Google Sheet is the database for name search, household invitations,
 ## Sheet structure
 
 - **Households:** Household ID, Household name, Active (checkbox).
-- **Guests:** Guest ID, Full name, Household ID, Day One invited (checkbox), Day Two invited (checkbox), Search aliases (comma-separated).
+- **Guests:** Guest ID, Full name, Household ID, Day One invited (checkbox), Day Two invited (checkbox), Search aliases (comma-separated), Whose team are you on? (Team Vidhi, Team Vivek, Team Both).
 - **RSVPs:** Guest ID, Day One attendance, Day Two attendance, Updated at.
 
 Keep IDs unique and stable. Use `attending`, `not_attending`, or `undecided` for attendance; `Pending` or a blank means no response. Add new invitees to Guests and Households. RSVP rows are created or updated when guests respond.
