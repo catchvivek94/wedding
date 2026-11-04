@@ -24,10 +24,11 @@
   }
   let scrollFrame=0;
   function indicate(id){
-    const index=menu.findIndex(b=>b.dataset.event===id);
+    const sectionId=({phere:'haldi',sangeet:'wedding'})[id]||id;
+    const index=menu.findIndex(b=>b.dataset.event===sectionId);
     dock.style.setProperty('--active-event',Math.max(0,index));
     dock.classList.toggle('has-current',index>=0);
-    menu.forEach(b=>{if(b.dataset.event===id)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');});
+    menu.forEach(b=>{if(b.dataset.event===sectionId)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');});
   }
   function updateCurrent(){
     scrollFrame=0;
