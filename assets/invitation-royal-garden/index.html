@@ -5,9 +5,10 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="preload" as="image" href="envelope-liner.png">
 <link rel="stylesheet" href="styles.css?v=20261103-wardrobe-days">
-<link rel="stylesheet" href="rsvp.css?v=rsvp-celebration-1">
+<link rel="stylesheet" href="rsvp.css?v=calendar-email-1">
 <script src="../js/rsvp-api.js?v=20261103-rsvp-sheets-1" defer></script>
-<script src="rsvp.js?v=rsvp-celebration-1" defer></script>
+<script src="calendar.js?v=calendar-email-1" defer></script>
+<script src="rsvp.js?v=calendar-email-1" defer></script>
 <script src="app.js?v=20261103-rsvp-sheets-1" defer></script><script src="motion.js?v=20261103-hanging-decor" defer></script>
 </head><body>
 <section class="envelope-gate" aria-label="Your wedding invitation">
@@ -246,6 +247,8 @@
 <h3 id="rsvp-confirmation-title">Let the celebrations begin!</h3>
 <p class="rsvp-confirmation-note">We can't wait to see you.<br>Let's have loads of fun.</p>
 <p class="rsvp-confirmation-signature">With love, Vidhi &amp; Vivek</p>
+<div class="rsvp-calendar"><h4>Save the dates</h4><p class="rsvp-calendar-hint">26–27 January 2027 · Khandala<br>Day reminders include the full schedule in IST.</p><div id="rsvp-calendar-links"></div><a id="rsvp-ical" class="rsvp-calendar-download">Apple Calendar / iCal (.ics)</a>
+<form id="rsvp-email-form"><label for="rsvp-email">Email me the celebration details</label><input id="rsvp-email" type="email" autocomplete="email" maxlength="254" required placeholder="Your email address"><button type="submit" id="rsvp-email-send" class="rsvp-primary">Email me the details</button><p id="rsvp-email-status" class="rsvp-status" role="status" aria-live="polite"></p></form></div>
 <button type="button" id="rsvp-confirmation-done" class="rsvp-primary">Back to the invitation</button>
 <button type="button" id="rsvp-confirmation-edit" class="rsvp-edit-response">Edit our RSVP</button>
 </section>

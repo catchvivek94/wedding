@@ -24,6 +24,7 @@ function doPost(e) {
     if(action==='search')return output_({ok:true,...search_(input.q)});
     if(action==='select')return output_({ok:true,...select_(input.guestId,input.side)});
     if(action==='profile')return output_({ok:true,...profile_(session_(input.token))});
+    if(action==='emailCalendar')return output_({ok:true,...emailCalendar_(input)});
     if(action==='save')return output_({ok:true,...save_(input)});
     if(action==='attendees'){
       admin_(input.adminToken);
@@ -168,4 +169,36 @@ function admin_(token){
   let session;
   try{session=session_(token);}catch(_){throw new Error('Please sign in to view attendees.');}
   if(session.role!=='admin'||!RSVP_ADMIN_EMAILS.includes(session.username))throw new Error('Please sign in to view attendees.');
+}
+
+const WEDDING_CALENDAR_DAYS = [{"id": "day1", "title": "Vidhi & Vivek · Day One", "date": "20270126", "end": "20270127", "label": "26 January 2027", "schedule": "12 noon–3 PM IST · Carnival, Haldi & Mehendi\n6 PM IST · Phere & Varmala"}, {"id": "day2", "title": "Vidhi & Vivek · Day Two", "date": "20270127", "end": "20270128", "label": "27 January 2027", "schedule": "10 AM IST · Maharashtrian Wedding\n7 PM IST · Sangeet & Party"}];
+const WEDDING_CALENDAR_VENUE = 'Ikshana Resort and Spa, Khandala';
+const WEDDING_CALENDAR_MAP = 'https://maps.app.goo.gl/1yEEkUati3wdLUSb9';
+function weddingCalendarDescription(day){return day.schedule+'\n'+WEDDING_CALENDAR_VENUE+'\nMap: '+WEDDING_CALENDAR_MAP+'\nInvitation: https://catchvivek94.github.io/wedding/invite/';}
+function weddingGoogleCalendar(day){return 'https://calendar.google.com/calendar/render?'+Object.entries({action:'TEMPLATE',text:day.title,dates:day.date+'/'+day.end,ctz:'Asia/Kolkata',details:weddingCalendarDescription(day),location:WEDDING_CALENDAR_VENUE}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');}
+function weddingIcs(days){
+ const escape=value=>value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+ const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+ const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Vidhi and Vivek//Wedding//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+ days.forEach(day=>lines.push('BEGIN:VEVENT','UID:wedding-2027-'+day.id+'@catchvivek94.github.io','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+day.date,'DTEND;VALUE=DATE:'+day.end,'SUMMARY:'+escape(day.title),'LOCATION:'+escape(WEDDING_CALENDAR_VENUE),'DESCRIPTION:'+escape(weddingCalendarDescription(day)),'URL:https://catchvivek94.github.io/wedding/invite/','END:VEVENT'));
+ lines.push('END:VCALENDAR');
+ // Fold by UTF-8 octets for calendar clients (RFC 5545).
+ return lines.map(line=>{let result='',size=0;for(const ch of line){const bytes=unescape(encodeURIComponent(ch)).length;if(size+bytes>73){result+='\r\n ';size=1;}result+=ch;size+=bytes;}return result;}).join('\r\n')+'\r\n';
+}
+
+function authorizeCalendarEmail(){MailApp.getRemainingDailyQuota();}
+function emailCalendar_(input){
+ const session=session_(input.token),profile=profile_(session);
+ if(!profile.guests.some(g=>g.response))throw new Error('Please save your RSVP first.');
+ const email=String(input.email||'').trim();
+ if(email.length>254||!/^([^\s@<>]+)@([^\s@<>]+)\.([^\s@<>]+)$/.test(email))throw new Error('Please enter a valid email address.');
+ const lock=LockService.getScriptLock();lock.waitLock(20000);
+ try{
+  const props=PropertiesService.getScriptProperties(),key='CALENDAR_EMAIL_'+session.householdId,last=Number(props.getProperty(key)||0);
+  if(Date.now()-last<60000)throw new Error('Please wait a minute before sending another email.');
+  if(MailApp.getRemainingDailyQuota()<1)throw new Error('Email is unavailable for today. Please use the calendar buttons below.');
+  const body="We can't wait to see you. Let's have loads of fun!\n\n"+WEDDING_CALENDAR_DAYS.map(day=>day.label+'\n'+day.schedule+'\nGoogle Calendar: '+weddingGoogleCalendar(day)).join('\n\n')+'\n\nVenue: '+WEDDING_CALENDAR_VENUE+'\nMap: '+WEDDING_CALENDAR_MAP+'\n\nAll times are India Standard Time (IST). The attached calendar reserves both celebration days; event times are included in each entry.\n\nInvitation: https://catchvivek94.github.io/wedding/invite/\n\nWith love, Vidhi & Vivek';
+  MailApp.sendEmail({to:email,subject:'Vidhi & Vivek · Your wedding celebration details',body:body,name:'Vidhi & Vivek',attachments:[Utilities.newBlob(weddingIcs(WEDDING_CALENDAR_DAYS),'text/calendar','vidhi-vivek-wedding.ics')]});
+  props.setProperty(key,String(Date.now()));return {sent:true};
+ }finally{lock.releaseLock();}
 }

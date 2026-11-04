@@ -46,3 +46,9 @@ Companions are not returned by invitation name search, cannot create further plu
 Keep the Companions tab’s table range large enough for one companion per invited guest. The initial table reserves 200 companion rows.
 
 The RSVP form shows one shared +1 section after all household members. It reuses an existing companion’s inviter, or the first household member for a new companion, so editing does not create a new row when another family member opens the invitation.
+
+## Calendar details email
+
+After saving, guests can open Google Calendar day reminders, download an iCalendar attachment, or explicitly request the full schedule by email. Both days are all-day reminders with event times in IST in the description. `calendar.js` and the calendar constants/functions at the end of `RSVP.gs` must stay synchronized.
+
+Run `authorizeCalendarEmail` as the script owner and approve Google's send-email permission before deploying this version. MailApp sends the schedule, venue/map, Google Calendar links, and a two-day `.ics` attachment. This does not read the inbox or store guest email addresses. Email is sent only after a valid saved RSVP and an explicit guest request, with a one-minute household cooldown and a quota check.

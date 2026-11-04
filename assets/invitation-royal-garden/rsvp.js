@@ -98,19 +98,29 @@
   }
   const confirmation=document.getElementById('rsvp-confirmation');
   let celebrationTimer;
+  const calendarLinks=document.getElementById('rsvp-calendar-links');
+  WEDDING_CALENDAR_DAYS.forEach(day=>{const link=text('a',day.label+' · Google Calendar');link.href=weddingGoogleCalendar(day);link.target='_blank';link.rel='noopener noreferrer';calendarLinks.append(link);});
+  const ical=document.getElementById('rsvp-ical');ical.href=URL.createObjectURL(new Blob([weddingIcs(WEDDING_CALENDAR_DAYS)],{type:'text/calendar;charset=utf-8'}));ical.download='vidhi-vivek-wedding.ics';
+  document.getElementById('rsvp-email-form').addEventListener('submit',async event=>{
+    event.preventDefault();const button=document.getElementById('rsvp-email-send'),status=document.getElementById('rsvp-email-status');if(button.disabled)return;
+    button.disabled=true;status.textContent='Sending your celebration details…';
+    try{await api('emailCalendar',{method:'POST',body:{email:document.getElementById('rsvp-email').value.trim()}});status.textContent='Sent! Check your inbox for the schedule and calendar invitation.';}
+    catch(error){status.textContent=error.message;}
+    finally{button.disabled=false;}
+  });
   function resetConfirmation(){
     clearTimeout(celebrationTimer);rsvpDialog.setAttribute('aria-labelledby','rsvp-title');rsvpDialog.classList.remove('rsvp-celebrating');confirmation.hidden=true;form.hidden=false;
     confirmation.querySelector('.rsvp-fireworks').replaceChildren();
   }
   function celebrate(){
     resetConfirmation();form.hidden=true;confirmation.hidden=false;rsvpDialog.classList.add('rsvp-celebrating');
-    rsvpDialog.setAttribute('aria-labelledby','rsvp-confirmation-title');rsvpDialog.scrollTop=0;confirmation.focus();
+    rsvpDialog.setAttribute('aria-labelledby','rsvp-confirmation-title');confirmation.focus({preventScroll:true});rsvpDialog.scrollTop=0;
     if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     const fireworks=confirmation.querySelector('.rsvp-fireworks');
     [[18,18],[80,27],[50,8],[24,58],[82,64]].forEach(([x,y],burst)=>{
       for(let i=0;i<16;i++){
         const spark=document.createElement('i'),angle=i*Math.PI/8,distance=42+(i%3)*13;
-        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.38}s;--spark:${['#c49b4f','#ba7891','#8d9b70'][i%3]}`;
+        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.65}s;--spark:${['#c49b4f','#ba7891','#8d9b70'][i%3]}`;
         fireworks.append(spark);
       }
     });
