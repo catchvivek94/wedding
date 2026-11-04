@@ -5,3 +5,11 @@
 .att-team-heading{margin-top:28px}.att-team-heading+.att-stats{margin-top:12px}
 
 .att-companion{display:block;font-size:11px;font-weight:400;color:var(--ink-soft);margin-top:4px}
+
+.att-invitee{width:min(500px,calc(100% - 28px));max-height:calc(100svh - 32px);overflow:auto}
+.att-invitee select{display:block;width:100%;padding:12px;border:1px solid #cbbfa7;border-radius:9px;background:#fffdf7;color:inherit;font:inherit;font-size:16px}
+.att-invitee input{font-size:16px}.att-invitee .att-actions{margin-top:20px;justify-content:flex-end}.att-edit{font-size:12px;padding:7px 13px}
+
+.att-invitee textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #cbbfa7;border-radius:9px;background:#fffdf7;resize:vertical}
+.att-accommodation-cell{min-width:240px;max-width:320px}.att-note{display:block;width:100%;min-width:200px;max-width:300px;resize:vertical;border:1px solid #ddd1be;border-radius:8px;padding:8px;color:inherit;background:#fffdf9;font:inherit;font-size:13px;line-height:1.4}
+.att-note-save{margin-top:6px;font-size:11px;padding:5px 10px}.att-note-status{display:block;margin-top:4px;max-width:290px;white-space:normal;font-size:11px;color:#78644c}

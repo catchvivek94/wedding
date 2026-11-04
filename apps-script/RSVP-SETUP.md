@@ -5,9 +5,9 @@ The private Google Sheet is the database for name search, household invitations,
 ## Sheet structure
 
 - **Households:** Household ID, Household name, Active (checkbox).
-- **Guests:** Guest ID, Full name, Household ID, Day One invited (checkbox), Day Two invited (checkbox), Search aliases (comma-separated), Whose team are you on? (Team Vidhi, Team Vivek, Team Both).
+- **Guests:** Guest ID, Full name, Household ID, Day One invited (checkbox), Day Two invited (checkbox), Search aliases (comma-separated), Whose team are you on? (Team Vidhi, Team Vivek, Team Both), Extra Accommodation Needed.
 - **RSVPs:** Guest ID, Day One attendance, Day Two attendance, Updated at.
-- **Companions:** Companion ID, Invited by Guest ID, Full name, Day One attendance, Day Two attendance, Active, Updated at.
+- **Companions:** Companion ID, Invited by Guest ID, Full name, Day One attendance, Day Two attendance, Active, Updated at, Extra Accommodation Needed.
 
 Keep IDs unique and stable. Use `attending`, `not_attending`, or `undecided` for attendance; `Pending` or a blank means no response. Add new invitees to Guests and Households. RSVP rows are created or updated when guests respond.
 
@@ -54,3 +54,11 @@ After saving, guests can open Google Calendar day reminders, download an iCalend
 Run `authorizeCalendarEmail` as the script owner and approve Google's send-email permission before deploying this version. MailApp sends the schedule, venue/map, Google Calendar links, and a two-day `.ics` attachment. This does not read the inbox or store guest email addresses. Email is sent only after a valid saved RSVP and an explicit guest request, with a one-minute household cooldown and a quota check.
 
 The Google Calendar button creates one all-day event covering 26–27 January with both schedules in its description. HTML emails display named hyperlinks and one Google Calendar button; the plain-text fallback retains usable URLs. The iCalendar attachment keeps separate day entries.
+
+## Portal guest management
+
+Signed-in hosts can add invitees or edit their name, side, household, and optional accommodation note. Every portal-created or edited invitation includes both days. IDs are generated automatically and stay stable when edited. Existing RSVP rows are preserved. New guests can join an existing household or create one; duplicate names within a household are rejected. Retrying a creation request reuses the original request ID rather than creating another guest.
+
+Column H in Guests and Companions stores planner accommodation notes. The Attendees table allows inline note editing and saving; the same cells remain directly editable in Sheets. Notes are only returned through host-authenticated actions, never public search, guest profiles, or calendar emails. Notes are included in the host CSV export. Version checks prevent stale forms from overwriting newer Sheet changes.
+
+The Guests native table reserves rows through 1000 so new portal entries retain its checkbox and team-column structure. Blank template rows are excluded from counts. The app appends below the last populated identity row, not below blank checkbox rows.
