@@ -36,13 +36,11 @@
   }
   function render(){
     const stats=document.getElementById('att-stats');stats.replaceChildren();
-    [['Invited guests',guests.filter(g=>!g.isCompanion).length],['Named +1s',guests.filter(g=>g.isCompanion).length],['Total guests',guests.length],['Attending Day One',guests.filter(g=>state(g,'day1')==='attending').length],['Attending Day Two',guests.filter(g=>state(g,'day2')==='attending').length],['Awaiting response',guests.filter(g=>g.days.some(d=>state(g,d)==='pending')).length]].forEach(([label,value])=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',value,'v'));stats.append(card);});
-    const teams=document.getElementById('att-teams');teams.replaceChildren();
-    ['Team Vidhi','Team Vivek','Team Both','Not assigned'].forEach(label=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',guests.filter(g=>label==='Not assigned'?!g.side:g.side===label).length,'v'));teams.append(card);});
+    [['Total guests',guests.length],['Attending Day One',guests.filter(g=>state(g,'day1')==='attending').length],['Attending Day Two',guests.filter(g=>state(g,'day2')==='attending').length]].forEach(([label,value])=>{const card=document.createElement('div');card.className='stat';card.append(node('div',label,'k'),node('div',value,'v'));stats.append(card);});
     const rows=document.getElementById('att-rows');rows.replaceChildren();const visible=filtered();
     document.getElementById('att-count').textContent=`Showing ${visible.length} of ${guests.length} guests`;
-    visible.forEach(g=>{const tr=document.createElement('tr');const guestCell=node('td',g.name);if(g.isCompanion)guestCell.append(node('small',`+1 of ${g.invitedBy}`,'att-companion'));tr.append(guestCell,node('td',g.household),node('td',g.side||'Not assigned'));['day1','day2'].forEach(day=>{const td=document.createElement('td'),s=state(g,day);td.append(node('span',names[s],`att-badge ${s}`));tr.append(td);});const needs=document.createElement('td');needs.className='att-accommodation-cell';needs.append(accommodationEditor(g));tr.append(needs);tr.append(node('td',g.response?.updatedAt?new Date(g.response.updatedAt).toLocaleString():'—'));const manage=document.createElement('td');if(!g.isCompanion){const edit=node('button','Edit','btn att-edit');edit.type='button';edit.setAttribute('aria-label',`Edit ${g.name}`);edit.addEventListener('click',()=>openInvitee(g));manage.append(edit);}else manage.append(node('small','Via RSVP','muted'));tr.append(manage);rows.append(tr);});
-    if(!visible.length){const tr=document.createElement('tr'),td=node('td','No guests match this search.','att-empty');td.colSpan=8;tr.append(td);rows.append(tr);}
+    visible.forEach(g=>{const tr=document.createElement('tr');const guestCell=node('td',g.name);if(g.isCompanion)guestCell.append(node('small',`+1 of ${g.invitedBy}`,'att-companion'));tr.append(guestCell,node('td',g.side||'Not assigned'));['day1','day2'].forEach(day=>{const td=document.createElement('td'),s=state(g,day);td.append(node('span',names[s],`att-badge ${s}`));tr.append(td);});const manage=document.createElement('td');manage.className='att-manage';const rsvp=node('button','Edit RSVP','btn att-edit');rsvp.type='button';rsvp.setAttribute('aria-label',`Edit RSVP for ${g.name}`);rsvp.addEventListener('click',()=>openRsvp(g));manage.append(rsvp);if(!g.isCompanion){const edit=node('button','Edit guest','btn att-edit');edit.type='button';edit.setAttribute('aria-label',`Edit ${g.name}`);edit.addEventListener('click',()=>openInvitee(g));manage.append(edit);}tr.append(manage);const needs=document.createElement('td');needs.className='att-accommodation-cell';needs.append(accommodationEditor(g));tr.append(needs);rows.append(tr);});
+    if(!visible.length){const tr=document.createElement('tr'),td=node('td','No guests match this search.','att-empty');td.colSpan=6;tr.append(td);rows.append(tr);}
   }
   async function load(){
     if(document.activeElement?.matches('.att-note')||[...noteDrafts.values()].some(d=>d.saving))return;
@@ -55,8 +53,7 @@
       const data=await RsvpApi.call('attendees',{adminToken:accessToken});
       if(version!==dataVersion)return;
       guests=data.guests;households=data.households||[];document.getElementById('att-add').hidden=false;auth.hidden=true;content.hidden=false;status.textContent='';
-      document.getElementById('att-source').textContent=`${data.source} · ${data.householdCount} households`;
-      document.getElementById('att-updated').textContent='Updated '+new Date().toLocaleTimeString();
+      document.getElementById('att-source').textContent=data.source;
       const sheet=document.getElementById('att-sheet');sheet.href=data.sheetUrl;sheet.hidden=false;if(!document.activeElement?.matches('.att-note')&&![...noteDrafts.values()].some(d=>d.saving))render();
     }catch(error){status.textContent=error.message+' Use Refresh to try again.';if(/sign in/i.test(error.message)){adminToken='';sessionStorage.removeItem(sessionKey);guests=[];content.hidden=true;auth.hidden=false;document.getElementById('att-rows').replaceChildren();document.getElementById('att-sheet').hidden=true;document.getElementById('att-signout').hidden=true;}}
     finally{loading=false;refresh.disabled=false;if(queuedLoad){queuedLoad=false;load();}}
@@ -84,6 +81,20 @@
     }catch(error){inviteeStatus.textContent=error.message;}
     finally{savingInvitee=false;button.disabled=false;cancel.disabled=false;}
   });
+  const rsvpDialog=document.getElementById('att-rsvp'),rsvpStatus=document.getElementById('att-rsvp-status');let rsvpGuest=null,savingRsvp=false;
+  function openRsvp(guest){
+    rsvpGuest=guest;rsvpStatus.textContent='';document.getElementById('att-rsvp-guest').textContent=guest.name;
+    ['day1','day2'].forEach(day=>document.getElementById('att-rsvp-'+day).value=guest.response?.attendance?.[day]||'pending');rsvpDialog.showModal();
+  }
+  document.getElementById('att-rsvp-close').addEventListener('click',()=>{if(!savingRsvp)rsvpDialog.close();});
+  rsvpDialog.addEventListener('cancel',event=>{if(savingRsvp)event.preventDefault();});
+  document.getElementById('att-rsvp-form').addEventListener('submit',async event=>{
+    event.preventDefault();if(savingRsvp||!event.target.reportValidity())return;
+    const save=document.getElementById('att-rsvp-save'),cancel=document.getElementById('att-rsvp-close');savingRsvp=true;save.disabled=true;cancel.disabled=true;rsvpStatus.textContent='Saving RSVP…';
+    try{await RsvpApi.call('saveHostRsvp',{adminToken,guestId:rsvpGuest.id,rsvpVersion:rsvpGuest.rsvpVersion,attendance:Object.fromEntries(new FormData(event.target))});dataVersion++;rsvpDialog.close();status.textContent=`RSVP saved for ${rsvpGuest.name}. Refreshing the list…`;await load();}
+    catch(error){rsvpStatus.textContent=error.message;}
+    finally{savingRsvp=false;save.disabled=false;cancel.disabled=false;}
+  });
   const login=document.getElementById('att-login'),loginStatus=document.getElementById('att-login-status');
   document.getElementById('att-signin').addEventListener('click',()=>{loginStatus.textContent='';login.showModal();});
   document.getElementById('att-login-close').addEventListener('click',()=>login.close());
@@ -97,7 +108,7 @@
   refresh.addEventListener('click',load);search.addEventListener('input',render);filter.addEventListener('change',render);teamFilter.addEventListener('change',render);
   document.getElementById('att-export').addEventListener('click',()=>{
     const quote=v=>'"'+String(v??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"';
-    const rows=[['Guest','Invited by','Household','Team','Day One','Day Two','Extra Accommodation Needed','Updated at'],...filtered().map(g=>[g.name,g.invitedBy||'',g.household,g.side||'Not assigned',names[state(g,'day1')],names[state(g,'day2')],g.accommodation||'',g.response?.updatedAt||''])];
+    const rows=[['Guest','Invited by','Team','Day One','Day Two','Extra Accommodation Needed'],...filtered().map(g=>[g.name,g.invitedBy||'',g.side||'Not assigned',names[state(g,'day1')],names[state(g,'day2')],g.accommodation||''])];
     const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(quote).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='wedding-attendees.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   load();

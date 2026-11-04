@@ -26,13 +26,15 @@ function doPost(e) {
     if(action==='profile')return output_({ok:true,...profile_(session_(input.token))});
     if(action==='emailCalendar')return output_({ok:true,...emailCalendar_(input)});
     if(action==='save')return output_({ok:true,...save_(input)});
+    if(action==='saveHostRsvp')return output_({ok:true,...saveHostRsvp_(input)});
     if(action==='saveAccommodation')return output_({ok:true,...saveAccommodation_(input)});
     if(action==='saveInvitee')return output_({ok:true,...saveInvitee_(input)});
     if(action==='attendees'){
       admin_(input.adminToken);
       const data=data_();
-      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,side:g.side,response:data.responses[g.id]||null,isCompanion:false,invitedBy:'',editVersion:inviteeVersion_(g),accommodation:g.accommodation,accommodationVersion:accommodationVersion_(g.id,g.accommodation)}));
-      data.companions.forEach(c=>{const host=data.guests.find(g=>g.id===c.hostId);rows.push({id:c.id,name:c.name,householdId:host.householdId,household:data.households[host.householdId].label,days:host.days,side:host.side,response:{attendance:c.attendance,updatedAt:c.updatedAt},isCompanion:true,invitedBy:host.name,accommodation:data.companionNotes[c.id]||'',accommodationVersion:accommodationVersion_(c.id,data.companionNotes[c.id]||'')});});
+      const rows=data.guests.map(g=>({id:g.id,name:g.name,householdId:g.householdId,household:data.households[g.householdId].label,days:g.days,side:g.side,response:data.responses[g.id]||null,isCompanion:false,invitedBy:'',editVersion:inviteeVersion_(g),rsvpVersion:rsvpVersion_(g.id,data.responses[g.id]),accommodation:g.accommodation,accommodationVersion:accommodationVersion_(g.id,g.accommodation)}));
+      data.companions.forEach(c=>{const host=data.guests.find(g=>g.id===c.hostId);rows.push({id:c.id,name:c.name,householdId:host.householdId,household:data.households[host.householdId].label,days:host.days,side:host.side,response:{attendance:c.attendance,updatedAt:c.updatedAt},isCompanion:true,invitedBy:host.name,rsvpVersion:rsvpVersion_(c.id,{attendance:c.attendance,updatedAt:c.updatedAt}),accommodation:data.companionNotes[c.id]||'',accommodationVersion:accommodationVersion_(c.id,data.companionNotes[c.id]||'')});});
+      rows.sort((a,b)=>a.household.localeCompare(b.household,'en',{sensitivity:'base'})||a.householdId.localeCompare(b.householdId)||a.name.localeCompare(b.name,'en',{sensitivity:'base'})||a.id.localeCompare(b.id));
       return output_({ok:true,guests:rows,households:Object.values(data.households),householdCount:Object.keys(data.households).length,source:'Google Sheets',sheetUrl:'https://docs.google.com/spreadsheets/d/'+RSVP_SHEET_ID+'/edit',updatedAt:new Date().toISOString()});
     }
     throw new Error('Unknown request.');
@@ -283,5 +285,31 @@ function saveAccommodation_(input){
     tab.getRange(matches[0].row,8,1,1).setValues([[textCell_(note)]]);SpreadsheetApp.flush();
     if(guest)guest.accommodation=note;
     return {saved:true,accommodation:note,accommodationVersion:accommodationVersion_(input.guestId,note),...(guest?{editVersion:inviteeVersion_(guest)}:{})};
+  }finally{lock.releaseLock();}
+}
+
+function rsvpVersion_(id,response){return signature_(JSON.stringify([id,response?.attendance?.day1||'pending',response?.attendance?.day2||'pending',response?.updatedAt||'']));}
+function saveHostRsvp_(input){
+  admin_(input.adminToken);
+  const values=input.attendance,valid=['attending','not_attending','undecided','pending'];
+  if(!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length!==2||!['day1','day2'].every(day=>valid.includes(values[day])))throw new Error('Choose an RSVP response for both days.');
+  const lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{
+    const data=data_(),guest=data.guests.find(g=>g.id===input.guestId),companion=data.companions.find(c=>c.id===input.guestId);
+    if(!guest&&!companion)throw new Error('This guest is no longer on the active list. Please refresh.');
+    const current=guest?data.responses[guest.id]:{attendance:companion.attendance,updatedAt:companion.updatedAt};
+    if(input.rsvpVersion!==rsvpVersion_(input.guestId,current))throw new Error('This RSVP changed. Close this form, refresh, and open it again.');
+    const updatedAt=new Date().toISOString(),attendance=['day1','day2'].map(day=>values[day]==='pending'?'':values[day]);
+    const tab=data.sheet.getSheetByName(guest?'RSVPs':'Companions'),rows=rows_(data.sheet,guest?'RSVPs':'Companions',guest?4:8),matches=rows.map((r,i)=>({id:String(r[0]),row:i+2})).filter(r=>r.id===input.guestId);
+    if(matches.length>1||(!guest&&matches.length!==1))throw new Error('Please check this guest’s ID in the Sheet.');
+    if(guest){
+      const row=matches[0]?.row||tab.getLastRow()+1;
+      tab.getRange(row,1,1,4).setValues([[guest.id,...attendance,updatedAt]]);SpreadsheetApp.flush();
+    }else{
+      const row=matches[0].row,before=rows[row-2];
+      try{tab.getRange(row,4,1,2).setValues([attendance]);tab.getRange(row,7,1,1).setValues([[updatedAt]]);SpreadsheetApp.flush();}
+      catch(error){try{tab.getRange(row,4,1,2).setValues([[before[3],before[4]]]);tab.getRange(row,7,1,1).setValues([[before[6]]]);SpreadsheetApp.flush();}catch(_){}throw new Error('The RSVP could not be saved. Please try again.');}
+    }
+    return {saved:true};
   }finally{lock.releaseLock();}
 }

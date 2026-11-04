@@ -62,3 +62,7 @@ Signed-in hosts can add invitees or edit their name, side, household, and option
 Column H in Guests and Companions stores planner accommodation notes. The Attendees table allows inline note editing and saving; the same cells remain directly editable in Sheets. Notes are only returned through host-authenticated actions, never public search, guest profiles, or calendar emails. Notes are included in the host CSV export. Version checks prevent stale forms from overwriting newer Sheet changes.
 
 The Guests native table reserves rows through 1000 so new portal entries retain its checkbox and team-column structure. Blank template rows are excluded from counts. The app appends below the last populated identity row, not below blank checkbox rows.
+
+Hosts can edit individual guests’ and companions’ RSVP responses from the portal. Each day supports attending, declined, undecided, or awaiting response. Only the selected person’s attendance is written; guest details, other household responses, and planner notes are preserved. RSVP version checks reject stale edits after another guest or host has responded. Response timestamps remain internal for version checks but are omitted from the portal table and CSV. Accommodation is the last table/export column.
+
+The table hides household and response timestamps. The backend sorts by household, then guest name, keeping families together. Three compact KPIs show total guests and attending counts for each day. Response/team filters remain on the left, search on the right.

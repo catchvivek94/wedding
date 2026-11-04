@@ -13,3 +13,14 @@
 .att-invitee textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #cbbfa7;border-radius:9px;background:#fffdf7;resize:vertical}
 .att-accommodation-cell{min-width:240px;max-width:320px}.att-note{display:block;width:100%;min-width:200px;max-width:300px;resize:vertical;border:1px solid #ddd1be;border-radius:8px;padding:8px;color:inherit;background:#fffdf9;font:inherit;font-size:13px;line-height:1.4}
 .att-note-save{margin-top:6px;font-size:11px;padding:5px 10px}.att-note-status{display:block;margin-top:4px;max-width:290px;white-space:normal;font-size:11px;color:#78644c}
+
+#att-rsvp select{display:block;width:100%;padding:12px;border:1px solid #cbbfa7;border-radius:9px;background:#fffdf7;color:inherit;font:inherit;font-size:16px}
+#att-rsvp .att-actions{margin-top:20px;justify-content:flex-end}.att-manage{min-width:140px}.att-manage .btn{display:block;white-space:nowrap;margin:4px 0}
+
+/* One compact KPI row, with filters left and search right above the table. */
+.att-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+.att-stats .stat{padding:13px 17px;border-radius:11px;box-shadow:none;min-height:76px}
+.att-stats .stat .k{font-size:10px;letter-spacing:1px;margin-bottom:4px}.att-stats .stat .v{font-size:27px;line-height:1.1}
+.att-source{margin:12px 0}.att-filters{display:grid;grid-template-columns:minmax(140px,180px) minmax(120px,150px) minmax(200px,1fr) auto;gap:12px;margin:20px 0 10px}
+.att-filters>div:first-child{min-width:0;flex:initial}.att-filters .att-search-wrap{width:100%;max-width:380px;justify-self:end}.att-filters label{font-size:10px}
+@media(max-width:700px){.att-filters{grid-template-columns:1fr 1fr}.att-filters>div{width:auto;min-width:0}.att-filters .att-search-wrap{grid-column:1/-1;max-width:none}.att-filters>#att-export{justify-self:start}.att-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.att-stats .stat{padding:10px 9px;min-height:68px}.att-stats .stat .k{font-size:9px;letter-spacing:.25px;line-height:1.4}.att-stats .stat .v{font-size:23px}}
