@@ -10,7 +10,7 @@
   let opening=false, observer, copyObserver;
   content.inert=true;dock.inert=true;
   document.documentElement.classList.toggle('motion-ready',!preference.matches);
-  function enter(page){page.classList.add('is-visible');}
+  function enter(page){page.classList.add('is-visible','has-entered');}
   function observe(){
     observer?.disconnect();
     copyObserver?.disconnect();
@@ -18,19 +18,20 @@
     if(!('IntersectionObserver'in window)){pages.forEach(enter);return;}
     observer=new IntersectionObserver(entries=>{
       for(const e of entries){
-        e.target.classList.toggle('is-visible',e.isIntersecting);
+        if(e.isIntersecting)enter(e.target);else e.target.classList.remove('is-visible');
       }
     },{threshold:0,rootMargin:'0px 0px -12% 0px'});
     pages.forEach(p=>observer.observe(p));
     const copy=[...document.querySelectorAll('.reveal-copy')];
     if(preference.matches){copy.forEach(el=>el.classList.add('in-view'));return;}
     copyObserver=new IntersectionObserver(entries=>{
-      for(const entry of entries)entry.target.classList.toggle('in-view',entry.isIntersecting);
+      for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('in-view');copyObserver.unobserve(entry.target);}
     },{threshold:0,rootMargin:'-3% 0px -9% 0px'});
     copy.forEach(el=>copyObserver.observe(el));
   }
 
   function prepareReferencePages(){
+    if(matchMedia('(max-width:700px), (pointer:coarse)').matches)return;
     const ns='http://www.w3.org/2000/svg';
     const node=(tag,attrs={})=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
     const definitions={
@@ -130,7 +131,7 @@
       requestAnimationFrame(()=>button.classList.add('tap-feedback'));
     }
     // Let the viewport observer introduce each page naturally during the scroll.
-    page.scrollIntoView({behavior:preference.matches?'instant':'smooth',block:'start'});
+    page.scrollIntoView({behavior:preference.matches||matchMedia('(max-width:700px), (pointer:coarse)').matches?'instant':'smooth',block:'start'});
   }));
   menu.forEach(button=>button.addEventListener('animationend',()=>button.classList.remove('tap-feedback')));
   addEventListener('resize',updateCurrent);

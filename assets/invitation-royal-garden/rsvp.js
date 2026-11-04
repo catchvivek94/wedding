@@ -124,11 +124,12 @@
     clearTimeout(celebrationTimer);
     fireworks.replaceChildren();
     if(hasPopover){if(!fireworks.matches(':popover-open'))fireworks.showPopover();}else{rsvpDialog.append(fireworks);fireworks.hidden=false;}
-    [[12,23],[88,30],[35,25],[65,35],[14,66],[86,72]].forEach(([x,y],burst)=>{
-      const ring=document.createElement('b');ring.style.cssText=`left:${x}%;top:${y}%;--delay:${burst*.7}s`;fireworks.append(ring);
-      for(let i=0;i<20;i++){
-        const spark=document.createElement('i'),angle=i*Math.PI/10,distance=66+(i%3)*20;
-        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--delay:${burst*.7}s;--spark:${['#d5a84d','#d18a9f','#a9b77e'][i%3]}`;
+    [[22,24,0],[77,19,1.2],[49,32,2.4],[27,20,5],[73,28,6.2]].forEach(([x,y,delay],burst)=>{
+      const rocket=document.createElement('span');rocket.className='rsvp-rocket';rocket.style.cssText=`left:${x}%;top:${y}%;--rise:${100-y}dvh;--launch-x:${burst%2?28:-28}px;--delay:${delay}s`;fireworks.append(rocket);
+      const ring=document.createElement('b');ring.style.cssText=`left:${x}%;top:${y}%;--delay:${delay+1.1}s`;fireworks.append(ring);
+      for(let i=0;i<32;i++){
+        const spark=document.createElement('i'),angle=i*Math.PI/16,distance=72+(i%2)*18;
+        spark.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*distance}px;--dy:${Math.sin(angle)*distance}px;--angle:${i*11.25+90}deg;--delay:${delay+1.1}s;--spark:${i%5===0?'#d49a9f':'#dbb35d'}`;
         fireworks.append(spark);
       }
     });

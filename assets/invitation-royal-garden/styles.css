@@ -169,3 +169,24 @@
 .wardrobe-time{font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-top:1px solid #b99a7270;padding-top:10px}
 @media(max-width:520px){.wardrobe-outfits{gap:16px}.outfit-art{height:135px}.wardrobe-layout{padding-left:10%;padding-right:10%}.wardrobe-copy .wardrobe-label{font-size:9px}.wardrobe-time{font-size:10px}.wardrobe-day-heading{gap:9px}.wardrobe-day-heading p{padding-left:9px;letter-spacing:0}.wardrobe-day+.wardrobe-day{margin-top:28px}}
 @media print{.wardrobe-page{height:auto!important}.wardrobe-page .reveal-copy{opacity:1!important;transform:none!important}.wardrobe-day{break-inside:avoid}}
+
+/* Copy enters once and stays readable when browser chrome changes the viewport. */
+.motion-ready .event.has-entered .reveal-copy.in-view{opacity:1;transform:none;will-change:auto}
+.motion-ready .event.has-entered .painting-layers,.motion-ready .event.has-entered .living-art,.motion-ready .event.has-entered image.still-art,.motion-ready .event.has-entered .reference-scene{opacity:1}
+.motion-ready .event.has-entered.reference-page .reference-piece.reveal-copy.in-view{opacity:1;transform:none}
+/* SVG text must stay anchored to its original coordinates, never slide per line. */
+.motion-ready .event svg .reveal-copy{transform:none!important;will-change:opacity;transition-property:opacity;transition-duration:.45s}
+@media(max-width:700px),(pointer:coarse){
+  html{scroll-behavior:auto}
+  .painting-layers{display:none!important}
+  .has-layered-motion .still-art{visibility:visible!important}
+  .has-reference-scene .reference-scene,.has-reference-scene .reference-piece{display:none!important}
+  .has-reference-scene .reference-fallback{visibility:visible!important}
+  .motion-ready .event .reveal-copy{transform:none!important;will-change:auto!important;transition:opacity .4s ease .22s!important}
+  .motion-ready .event.has-entered .reveal-copy{opacity:1!important;transform:none!important}
+  .motion-ready .event.has-entered .reference-fallback{opacity:1!important}
+  .floating-dock{backdrop-filter:none;-webkit-backdrop-filter:none;background:#fbfaf0}
+  .floating-dock button:hover .event-symbol{transform:none}
+}
+/* Preserve each outfit crop's aspect ratio so neighboring printed labels never leak in. */
+.paper .outfit-art svg{width:100%;height:auto;max-height:100%}
