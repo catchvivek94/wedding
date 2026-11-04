@@ -6,7 +6,10 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="preload" as="image" href="envelope-liner.png">
 <link rel="stylesheet" href="styles.css?v=20261103-wardrobe-days">
-<script src="app.js?v=20261103-wardrobe-days" defer></script><script src="motion.js?v=20261103-hanging-decor" defer></script>
+<link rel="stylesheet" href="rsvp.css?v=20261103-rsvp-sheets-1">
+<script src="../js/rsvp-api.js?v=20261103-rsvp-sheets-1" defer></script>
+<script src="rsvp.js?v=20261103-rsvp-sheets-1" defer></script>
+<script src="app.js?v=20261103-rsvp-sheets-1" defer></script><script src="motion.js?v=20261103-hanging-decor" defer></script>
 </head><body>
 <section class="envelope-gate" aria-label="Your wedding invitation">
   <div class="envelope-intro"><p>A CELEBRATION OF LOVE</p><h1>Vidhi <i>&amp;</i> Vivek</h1><p>26 — 27 JANUARY 2027 · KHANDALA</p></div>
@@ -213,4 +216,24 @@
 <button type="button" data-event="wardrobe" aria-label="Wardrobe Guide"><svg class="event-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 4 4 4-4 6 5-4 4-2-2v10H8V11l-2 2-4-4Z"/></svg><span>Wardrobe Guide</span></button>
 </nav>
 <noscript><style>.floating-dock{display:none}</style></noscript>
+
+<button type="button" class="rsvp-button" id="rsvp-button" hidden aria-haspopup="dialog">RSVP <span id="rsvp-guest-label"></span></button>
+<dialog class="rsvp-dialog" id="guest-name-dialog" aria-labelledby="guest-name-title">
+<button type="button" class="rsvp-close" data-close-rsvp-dialog aria-label="Close name search">×</button>
+<p class="rsvp-eyebrow">VIDHI &amp; VIVEK</p><h2 id="guest-name-title">An invitation just for you</h2>
+<p class="rsvp-intro">Tell us your name to find your invitation.</p>
+<form id="guest-name-form"><label for="guest-name">Your name</label>
+<input id="guest-name" type="search" maxlength="70" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="guest-results" aria-expanded="false" aria-describedby="guest-search-status" placeholder="Start typing your name…">
+<p id="guest-search-status" class="rsvp-status" role="status" aria-live="polite">Type at least 3 letters to find your invitation.</p>
+<ul id="guest-results" class="guest-results" role="listbox" aria-label="Matching invited guests"></ul>
+<button id="guest-continue" class="rsvp-primary" type="submit" disabled>Open my invitation</button></form>
+</dialog>
+<dialog class="rsvp-dialog" id="rsvp-dialog" aria-labelledby="rsvp-title">
+<button type="button" class="rsvp-close" data-close-rsvp-dialog aria-label="Close RSVP">×</button>
+<p class="rsvp-eyebrow">WE CAN’T WAIT TO CELEBRATE</p><h2 id="rsvp-title">Will you join us?</h2>
+<p class="rsvp-intro" id="rsvp-household"></p><form id="rsvp-form"><div id="rsvp-members"></div>
+<p id="rsvp-save-status" class="rsvp-status" role="status" aria-live="polite"></p>
+<button type="submit" id="rsvp-save" class="rsvp-primary">Send our RSVP</button></form>
+<p class="rsvp-footnote">You can return to update your response.</p></dialog>
+
 </body></html>

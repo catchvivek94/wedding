@@ -106,7 +106,7 @@
     indicate(active.id);
   }
   addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(updateCurrent);},{passive:true});
-  opener.addEventListener('click',()=>{
+  document.addEventListener('invitation:guest-selected',()=>{
     if(opening)return;
     opening=true;opener.setAttribute('aria-expanded','true');
     gate.classList.add('opening');
