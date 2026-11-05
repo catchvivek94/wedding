@@ -176,7 +176,7 @@ function admin_(token){
   if(session.role!=='admin'||!RSVP_ADMIN_EMAILS.includes(session.username))throw new Error('Please sign in to view attendees.');
 }
 
-const WEDDING_CALENDAR_DAYS = [{"id": "day1", "title": "Vidhi & Vivek · Day One", "date": "20270126", "end": "20270127", "label": "26 January 2027", "schedule": "12 noon–3 PM IST · Carnival, Haldi & Mehendi\n6 PM IST · Phere & Varmala"}, {"id": "day2", "title": "Vidhi & Vivek · Day Two", "date": "20270127", "end": "20270128", "label": "27 January 2027", "schedule": "10 AM IST · Maharashtrian Wedding\n7 PM IST · Sangeet & Party"}];
+const WEDDING_CALENDAR_DAYS = [{"id": "day1", "title": "Vidhi & Vivek · Day One", "date": "20270126", "end": "20270127", "label": "26 January 2027", "schedule": "11:30 AM–2:00 PM IST · Haldi Carnival & Welcome Lunch · Poolside Area\nHigh Tea\n4:30 PM IST · Baraat\n5:45 PM IST · Varmala · Amphitheater\n6:30 PM IST · Wedding Rituals · Amphitheater, followed by dinner"}, {"id": "day2", "title": "Vidhi & Vivek · Day Two", "date": "20270127", "end": "20270128", "label": "27 January 2027", "schedule": "11:00 AM IST onwards · Pre-Akshat Rituals\n12:00 PM IST · Akshat Ceremony, followed by lunch at the restaurant\nHigh Tea\n7:00 PM IST onwards · Sangeet & Cocktail Night, followed by dinner"}];
 const WEDDING_CALENDAR_VENUE = 'Ikshana Resort and Spa, Khandala';
 const WEDDING_CALENDAR_MAP = 'https://maps.app.goo.gl/1yEEkUati3wdLUSb9';
 function weddingCalendarDescription(day){return day.schedule+'\n'+WEDDING_CALENDAR_VENUE+'\nMap: '+WEDDING_CALENDAR_MAP+'\nInvitation: https://catchvivek94.github.io/wedding/invite/';}
@@ -214,11 +214,16 @@ function emailCalendar_(input){
 
 function weddingEmailDay_(day,index){
  const events=index===0?[
- ['12 noon–3 PM IST','Carnival, Haldi & Mehendi','Fuchsia & tangerine · Light, festive Indian wear'],
- ['6 PM IST','Phere & Varmala','Royal Indian pastels · Ladies, please avoid white and ivory']
+ ['11:30 AM–2:00 PM IST','Haldi Carnival & Welcome Lunch','Poolside Area · Please arrive dressed and ready for Haldi. Check-in will take place alongside the festivities.'],
+ ['','High Tea',''],
+ ['4:30 PM IST','Baraat',''],
+ ['5:45 PM IST','Varmala','Amphitheater'],
+ ['6:30 PM IST','Wedding Rituals','Amphitheater · Followed by dinner']
  ]:[
- ['10 AM IST','Maharashtrian Wedding','Traditional Indian or Maharashtrian attire'],
- ['7 PM IST','Sangeet & Party','Indo-Western in rich, dark shades']
+ ['11:00 AM IST onwards','Pre-Akshat Rituals',''],
+ ['12:00 PM IST','Akshat Ceremony','Followed by lunch at the restaurant'],
+ ['','High Tea',''],
+ ['7:00 PM IST onwards','Sangeet & Cocktail Night','Followed by dinner']
  ];
  return '<tr><td style="padding:26px 0"><p style="font-size:10px;letter-spacing:2px;color:#947249;margin:0 0 7px">'+(index===0?'DAY ONE · A SPLASH OF SUNSHINE':'DAY TWO · OUR FOREVERS BEGIN')+'</p><h3 style="font-size:23px;font-weight:normal;margin:0 0 17px;color:#675638">'+day.label+'</h3>'+events.map(event=>'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;border-left:2px solid #c4a26b"><tr><td style="padding:4px 0 4px 16px"><p style="font-size:12px;color:#9a7544;margin:0 0 2px">'+event[0]+'</p><p style="font-size:18px;margin:0 0 5px">'+event[1]+'</p><p style="font-size:12px;color:#85745e;margin:0;line-height:1.5">'+event[2]+'</p></td></tr></table>').join('')+'</td></tr>';
 }
