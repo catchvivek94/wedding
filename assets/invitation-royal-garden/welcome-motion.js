@@ -6,7 +6,7 @@
   const paper = page.querySelector('.paper');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const background = new Image(), leaves = new Image();
-  background.src = 'welcome-clean-blue-v8.jpg';
+  background.src = 'welcome-blue-sky-v7.jpg';
   leaves.src = 'welcome-template-canopy-v5.png';
   try { await Promise.all([background.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
