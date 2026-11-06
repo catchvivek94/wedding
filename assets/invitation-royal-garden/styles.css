@@ -231,3 +231,6 @@
  .envelope-intro h1{margin:6px 0;font-size:36px}
  .envelope-trigger{width:min(300px,65vw)}
 }
+
+/* A plain wardrobe background; no ornamental border. */
+.wardrobe-page .wardrobe-backdrop{display:none}
