@@ -185,7 +185,7 @@
 
   async function prepare(page) {
     const definition=settings[page.id];
-    if (!definition) return;
+    if (!definition || page.id === 'welcome') return;
     const background=new Image(), foreground=new Image();
     background.src=definition.background || `${page.id}-background-layer.png`;
     foreground.src=`${page.id}-foreground-layer.png`;
