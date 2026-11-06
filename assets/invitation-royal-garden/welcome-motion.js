@@ -5,29 +5,35 @@
   if (!page || !Element.prototype.animate) return;
   const paper = page.querySelector('.paper');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const background = new Image(), leaves = new Image();
+  const background = new Image(), topPlate = new Image(), leaves = new Image();
   background.src = 'welcome-arch-roses-v3.jpg';
-  leaves.src = 'welcome-arch-leaves.png';
-  try { await Promise.all([background.decode(), leaves.decode()]); }
+  topPlate.src = 'welcome-canopy-top-v4.jpg';
+  leaves.src = 'welcome-hanging-canopy-v4.png';
+  try { await Promise.all([background.decode(), topPlate.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
   const layer = document.createElement('div');
   layer.className = 'painting-layers welcome-decoration-layers';
   layer.setAttribute('aria-hidden', 'true');
   background.className = 'scene-background'; background.alt = '';
   layer.append(background);
+  // Only replace the top. The existing lower artwork remains the exact same image.
+  topPlate.alt = '';
+  topPlate.className = 'scene-background';
+  topPlate.style.cssText = 'mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 47%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 47%)';
+  layer.append(topPlate);
   const animations = new Set();
   let visible = false;
   const active = () => visible && !document.hidden && !reduced.matches && document.body.classList.contains('invitation-open');
   const random = (low, high) => low + Math.random() * (high - low);
   const sync = () => animations.forEach(animation => active() ? animation.play() : animation.pause());
   // Clip and move only transparent foliage, anchored to the curve of the arch.
-  [[0, 20, '12% 18%'], [20, 38, '30% 7%'], [38, 58, '49% 2%'], [58, 77, '68% 7%'], [77, 100, '87% 18%']].forEach(([left, right, origin]) => {
+  [[0,12.5,'6.25% 0%'],[12.5,25,'18.75% 0%'],[25,37.5,'31.25% 0%'],[37.5,50,'43.75% 0%'],[50,62.5,'56.25% 0%'],[62.5,75,'68.75% 0%'],[75,87.5,'81.25% 0%'],[87.5,100,'93.75% 0%']].forEach(([left, right, origin]) => {
     const branch = document.createElement('div');
     branch.style.cssText = `position:absolute;inset:0;clip-path:inset(0 ${100-right}% 0 ${left}%);transform-origin:${origin};pointer-events:none`;
     const image = leaves.cloneNode(); image.alt = '';
-    image.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.68;filter:saturate(.55)';
+    image.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.85;filter:saturate(.8)';
     branch.append(image); layer.append(branch);
-    const angle = random(1.5, 2.4);
+    const angle = random(1.6, 2.8);
     const animation = branch.animate([{transform:`rotate(${-angle}deg)`},{transform:`rotate(${angle}deg)`}], {duration:random(3400,5200),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
     animation.currentTime = random(0, 3500); animation.pause(); animations.add(animation);
   });
