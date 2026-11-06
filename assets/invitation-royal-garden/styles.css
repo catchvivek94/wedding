@@ -196,3 +196,38 @@
 .wardrobe-copy{font-size:clamp(16px,2.5vw,20px);line-height:1.45}
 .wardrobe-copy .wardrobe-label,.wardrobe-time{font-size:13px}
 @media(max-width:520px){.wardrobe-outfits{grid-template-columns:1fr}.wardrobe-card h4{min-height:0}.outfit-art{height:185px}.wardrobe-day-heading{flex-wrap:wrap}.wardrobe-day-heading p{font-size:14px}}
+
+/* Responsive wardrobe cards: content determines height; artwork keeps its crop ratio. */
+.wardrobe-layout{padding:12px clamp(24px,7vw,56px) 40px}
+.wardrobe-masthead h2{margin:12px 0;font-size:clamp(24px,4.4vw,32px);line-height:1.25;overflow-wrap:normal}
+.wardrobe-cage{width:clamp(70px,22%,120px)}
+.wardrobe-outfits{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+.wardrobe-card{min-width:0;width:100%;max-width:440px;margin-inline:auto}
+.wardrobe-card h4{min-height:0;height:auto;font-size:clamp(23px,3.8vw,29px);line-height:1.25;margin:0 0 12px;overflow-wrap:break-word}
+.outfit-art{height:auto;min-height:0;width:min(100%,280px);display:grid;place-items:center;margin:0 auto 16px}
+.paper .outfit-art svg{display:block;width:100%;height:auto;max-height:none;overflow:hidden}
+.wardrobe-copy{font-size:clamp(16px,2.5vw,18px);line-height:1.5;overflow-wrap:break-word}
+.wardrobe-copy .wardrobe-label,.wardrobe-time{font-size:13px}
+.wardrobe-colours{min-height:0;line-height:1.4}
+.wardrobe-day-heading{flex-wrap:wrap;gap:8px 14px}
+.wardrobe-day-heading h3{font-size:clamp(28px,5vw,36px)}
+.wardrobe-day-heading p{font-size:15px;line-height:1.4;max-width:100%}
+@media(max-width:600px){
+ .wardrobe-outfits{grid-template-columns:minmax(0,1fr);gap:32px}
+ .wardrobe-day+.wardrobe-day{margin-top:36px}
+ .wardrobe-copy{max-width:36ch;margin-inline:auto}
+ .wardrobe-layout{padding-bottom:32px}
+}
+@media(max-width:360px){
+ .wardrobe-day-heading{flex-direction:column}
+ .wardrobe-day-heading p{border-left:0;padding-left:0}
+ .floating-dock{width:calc(100% - 16px);--dock-pad:4px}
+ .floating-dock button{min-width:0;font-size:11px;padding-inline:1px;min-height:52px}
+ .floating-dock button span{max-width:100%;white-space:normal;line-height:1.15}
+ .floating-dock button[data-event="wardrobe"] span{font-size:11px}
+}
+@media(max-height:550px) and (orientation:landscape){
+ .js .envelope-gate{gap:14px;justify-content:flex-start;overflow-y:auto;padding:12px}
+ .envelope-intro h1{margin:6px 0;font-size:36px}
+ .envelope-trigger{width:min(300px,65vw)}
+}
