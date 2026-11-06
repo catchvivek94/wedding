@@ -5,22 +5,16 @@
   if (!page || !Element.prototype.animate) return;
   const paper = page.querySelector('.paper');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const background = new Image(), topPlate = new Image(), leaves = new Image();
-  background.src = 'welcome-arch-roses-v3.jpg';
-  topPlate.src = 'welcome-blended-pillars-v6.jpg';
+  const background = new Image(), leaves = new Image();
+  background.src = 'welcome-blue-sky-v7.jpg';
   leaves.src = 'welcome-template-canopy-v5.png';
-  try { await Promise.all([background.decode(), topPlate.decode(), leaves.decode()]); }
+  try { await Promise.all([background.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
   const layer = document.createElement('div');
   layer.className = 'painting-layers welcome-decoration-layers';
   layer.setAttribute('aria-hidden', 'true');
   background.className = 'scene-background'; background.alt = '';
   layer.append(background);
-  // Only replace the top. The existing lower artwork remains the exact same image.
-  topPlate.alt = '';
-  topPlate.className = 'scene-background';
-  topPlate.style.cssText = 'mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 47%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 47%)';
-  layer.append(topPlate);
   const animations = new Set();
   let visible = false;
   const active = () => visible && !document.hidden && !reduced.matches && document.body.classList.contains('invitation-open');
