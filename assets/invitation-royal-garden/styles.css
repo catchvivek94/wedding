@@ -234,3 +234,19 @@
 
 /* A plain wardrobe background; no ornamental border. */
 .wardrobe-page .wardrobe-backdrop{display:none}
+
+/* First page: only the separate petals move. */
+#welcome .still-art,#welcome .reveal-copy{opacity:1!important;transform:none!important;transition:none!important;animation:none!important}
+.welcome-petals{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;contain:paint}
+.welcome-petal{position:absolute;top:-3%;width:var(--size);height:calc(var(--size)*1.35);border-radius:80% 20% 65% 35%;background:linear-gradient(135deg,#edb4bc,#bd7084);opacity:0;animation:welcome-petal-fall linear infinite;animation-play-state:paused}
+.welcome-petal:nth-child(3n){background:linear-gradient(135deg,#f3cec9,#d2929d)}
+.welcome-petals.is-falling .welcome-petal{animation-play-state:running}
+@keyframes welcome-petal-fall{
+  0%{top:-3%;transform:translateX(0) rotate(-25deg);opacity:0}
+  12%{opacity:.6}
+  48%{transform:translateX(calc(var(--drift)*-.35)) rotate(calc(var(--spin)*.4));opacity:.55}
+  85%{opacity:.5}
+  100%{top:103%;transform:translateX(var(--drift)) rotate(var(--spin));opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.welcome-petals{display:none}}
+@media print{.welcome-petals{display:none}}
