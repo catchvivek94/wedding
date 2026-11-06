@@ -6,7 +6,7 @@
   const paper = page.querySelector('.paper');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const background = new Image(), leaves = new Image();
-  background.src = 'welcome-arch-still.jpg';
+  background.src = 'welcome-arch-subtle-v2.jpg';
   leaves.src = 'welcome-arch-leaves.png';
   try { await Promise.all([background.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
@@ -21,14 +21,14 @@
   const random = (low, high) => low + Math.random() * (high - low);
   const sync = () => animations.forEach(animation => active() ? animation.play() : animation.pause());
   // Clip and move only transparent foliage, anchored to the curve of the arch.
-  [[0, 34, '22% 10%'], [34, 66, '50% 2%'], [66, 100, '80% 10%']].forEach(([left, right, origin]) => {
+  [[0, 20, '12% 18%'], [20, 38, '30% 7%'], [38, 58, '49% 2%'], [58, 77, '68% 7%'], [77, 100, '87% 18%']].forEach(([left, right, origin]) => {
     const branch = document.createElement('div');
     branch.style.cssText = `position:absolute;inset:0;clip-path:inset(0 ${100-right}% 0 ${left}%);transform-origin:${origin};pointer-events:none`;
     const image = leaves.cloneNode(); image.alt = '';
-    image.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill';
+    image.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.68;filter:saturate(.55)';
     branch.append(image); layer.append(branch);
-    const angle = random(.35, .7);
-    const animation = branch.animate([{transform:`rotate(${-angle}deg)`},{transform:`rotate(${angle}deg)`}], {duration:random(4800,7500),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+    const angle = random(1.5, 2.4);
+    const animation = branch.animate([{transform:`rotate(${-angle}deg)`},{transform:`rotate(${angle}deg)`}], {duration:random(3400,5200),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
     animation.currentTime = random(0, 3500); animation.pause(); animations.add(animation);
   });
   // Each petal has its own randomized trajectory, size, spin, speed and next start time.
