@@ -4,13 +4,6 @@
   const nameDialog=document.getElementById('guest-name-dialog');
   const rsvpDialog=document.getElementById('rsvp-dialog');
   const input=document.getElementById('guest-name');
-  const teamInputs=[...document.querySelectorAll('input[name="guest-team"]')];
-  const nameStep=document.getElementById('guest-name-step');
-  let selectedTeam='';
-  teamInputs.forEach(radio=>radio.addEventListener('change',()=>{
-    selectedTeam=radio.value;const firstChoice=nameStep.hidden;nameStep.hidden=false;
-    selectButton.disabled=!selected||busy;if(firstChoice)input.focus();
-  }));
   const results=document.getElementById('guest-results');
   const searchStatus=document.getElementById('guest-search-status');
   const selectButton=document.getElementById('guest-continue');
@@ -31,7 +24,7 @@
   function clearResults(){results.replaceChildren();options.length=0;active=-1;input.removeAttribute('aria-activedescendant');input.setAttribute('aria-expanded','false');}
   function selectGuest(guest){
     selected=guest;input.value=guest.name;clearResults();
-    selectButton.disabled=!selectedTeam;searchStatus.textContent=`Invitation found for ${guest.name}.`;
+    selectButton.disabled=busy;searchStatus.textContent=`Invitation found for ${guest.name}.`;
   }
   function renderResults(matches){
     clearResults();input.setAttribute('aria-expanded',String(matches.length>0));
@@ -70,16 +63,16 @@
   });
   document.getElementById('open-invitation').addEventListener('click',()=>{
     if(busy)return;
-    input.value='';selected=null;selectedTeam='';teamInputs.forEach(radio=>radio.checked=false);nameStep.hidden=true;selectButton.disabled=true;clearResults();
+    input.value='';selected=null;selectButton.disabled=true;clearResults();
     searchStatus.textContent='Type at least 3 letters to find your invitation.';
-    nameDialog.showModal();teamInputs[0].focus();
+    nameDialog.showModal();input.focus();
   });
   nameDialog.addEventListener('close',()=>{controller?.abort();clearTimeout(timer);++requestNumber;});
   document.getElementById('guest-name-form').addEventListener('submit',async event=>{
-    event.preventDefault();if(!selected||!selectedTeam||busy)return;
+    event.preventDefault();if(!selected||busy)return;
     busy=true;selectButton.disabled=true;selectButton.textContent='Finding your invitation…';
     try{
-      const data=await api('select',{method:'POST',body:{guestId:selected.id,side:selectedTeam}});
+      const data=await api('select',{method:'POST',body:{guestId:selected.id}});
       token=data.token;profile=data;nameDialog.close();
       rsvpButton.hidden=false;
       document.getElementById('rsvp-guest-label').textContent=data.selectedGuest.split(' ')[0];

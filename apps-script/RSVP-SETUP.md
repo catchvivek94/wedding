@@ -35,7 +35,7 @@ Attendees refreshes every 15 seconds while visible, on focus, or on Refresh. Its
 
 The local server under `rsvp-local` proxies the same production API over HTTPS. Local and published RSVP interfaces therefore write the same private Sheet after the endpoint is configured. Avoid test submissions once the real guest list is loaded.
 
-Guests choose Team Vidhi, Team Vivek, or Team Both when tapping the envelope seal, then select their invited name. The team is saved to column G for that selected guest only; it does not silently reassign the rest of their household. Existing clients that omit the team preserve the current Sheet value.
+Guests tap the envelope seal and select their invited name directly. The invitation does not ask guests to choose a team. Name selection omits the team field and preserves the current Sheet value in column G.
 
 ## Plus-ones
 
