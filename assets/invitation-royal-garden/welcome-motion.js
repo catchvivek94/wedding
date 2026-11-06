@@ -6,7 +6,7 @@
   const paper = page.querySelector('.paper');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const background = new Image(), leaves = new Image();
-  background.src = 'welcome-arch-subtle-v2.jpg';
+  background.src = 'welcome-arch-roses-v3.jpg';
   leaves.src = 'welcome-arch-leaves.png';
   try { await Promise.all([background.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
