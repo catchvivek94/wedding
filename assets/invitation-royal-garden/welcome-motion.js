@@ -7,8 +7,8 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const background = new Image(), topPlate = new Image(), leaves = new Image();
   background.src = 'welcome-arch-roses-v3.jpg';
-  topPlate.src = 'welcome-canopy-top-v4.jpg';
-  leaves.src = 'welcome-hanging-canopy-v4.png';
+  topPlate.src = 'welcome-blended-pillars-v6.jpg';
+  leaves.src = 'welcome-template-canopy-v5.png';
   try { await Promise.all([background.decode(), topPlate.decode(), leaves.decode()]); }
   catch { return; } // Keep the complete stationary illustration if an asset cannot load.
   const layer = document.createElement('div');
@@ -26,17 +26,17 @@
   const active = () => visible && !document.hidden && !reduced.matches && document.body.classList.contains('invitation-open');
   const random = (low, high) => low + Math.random() * (high - low);
   const sync = () => animations.forEach(animation => active() ? animation.play() : animation.pause());
-  // Clip and move only transparent foliage, anchored to the curve of the arch.
-  [[0,12.5,'6.25% 0%'],[12.5,25,'18.75% 0%'],[25,37.5,'31.25% 0%'],[37.5,50,'43.75% 0%'],[50,62.5,'56.25% 0%'],[62.5,75,'68.75% 0%'],[75,87.5,'81.25% 0%'],[87.5,100,'93.75% 0%']].forEach(([left, right, origin]) => {
-    const branch = document.createElement('div');
-    branch.style.cssText = `position:absolute;inset:0;clip-path:inset(0 ${100-right}% 0 ${left}%);transform-origin:${origin};pointer-events:none`;
-    const image = leaves.cloneNode(); image.alt = '';
-    image.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.85;filter:saturate(.8)';
-    branch.append(image); layer.append(branch);
-    const angle = random(1.6, 2.8);
-    const animation = branch.animate([{transform:`rotate(${-angle}deg)`},{transform:`rotate(${angle}deg)`}], {duration:random(3400,5200),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
-    animation.currentTime = random(0, 3500); animation.pause(); animations.add(animation);
-  });
+  // Move one complete alpha canopy; never slice flowers or leaves through their stems.
+  const canopy = document.createElement('div');
+  canopy.style.cssText = 'position:absolute;inset:0;transform-origin:50% 0%;pointer-events:none';
+  leaves.alt = '';
+  leaves.style.cssText = 'position:absolute;inset:0;width:100%;height:75%;object-fit:fill;opacity:.85;filter:saturate(.8)';
+  canopy.append(leaves); layer.append(canopy);
+  const sway = canopy.animate([
+    {transform:'rotate(-1.2deg) translateX(-1px)'},
+    {transform:'rotate(1.2deg) translateX(1px)'}
+  ], {duration:5200,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+  sway.pause(); animations.add(sway);
   // Each petal has its own randomized trajectory, size, spin, speed and next start time.
   const ns = 'http://www.w3.org/2000/svg';
   for (let i=0; i<12; i++) {
